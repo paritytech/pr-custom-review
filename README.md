@@ -78,3 +78,6 @@ jobs:
         env:
           CUSTOM_REVIEW_REQUIRED: ${{ steps.condition_check.outputs.CUSTOM_REVIEW_REQUIRED }
 ```
+
+### Diagram
+![Diagram](./img/pr-custom-review-diagram.png)
