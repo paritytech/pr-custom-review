@@ -1,0 +1,17 @@
+name: 'PR Custom Review'
+description: 'An action to perform the required checks for complex pull request approval cases'
+author: 'sergejparity'
+branding:
+  icon: 'check-square'
+  color: 'green'
+inputs:
+  config-file:
+    required: false
+    description: 'Path to the config file'
+    default: './.github/custom_approvers_config.yml'
+  token:
+    required: true
+    description: 'Repository token'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
