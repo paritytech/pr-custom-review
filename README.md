@@ -73,11 +73,11 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }} # Default GITHUB_TOKEN
           config-file: './.github/custom_approvers_config.yml' #OPTIONAL if not specified default './.github/custom_approvers_config.yml' path will be used
         env:
           CUSTOM_REVIEW_REQUIRED: ${{ steps.condition_check.outputs.CUSTOM_REVIEW_REQUIRED }
 ```
 
-### Diagram
+### Flow Chart
 ![Diagram](./img/pr-custom-review-diagram.png)
