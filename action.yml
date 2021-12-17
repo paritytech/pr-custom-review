@@ -1,5 +1,5 @@
 name: 'PR Custom Review'
-description: 'An action to perform the required checks for complex pull request approval cases'
+description: 'An action to enforce complex pull request approval cases'
 author: 'sergejparity'
 branding:
   icon: 'check-square'

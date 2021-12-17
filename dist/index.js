@@ -41,11 +41,9 @@ const github = __importStar(__nccwpck_require__(5438));
 const fs = __importStar(__nccwpck_require__(5747));
 const YAML = __importStar(__nccwpck_require__(3552));
 function checkCondition(check_type, condition, pr_diff_body, pr_files_list) {
+    console.log(`###### BEGIN checkCondition ######`); //DEBUG
     var condition_match = false;
-    // TODO implement file lists evaluation
-    console.log("Enter checkCondition func"); //DEBUG
     console.log(`condition: ${condition}`); //DEBUG
-    console.log(`check_cond: ${pr_diff_body.data.match(condition)}`); //DEBUG
     if (check_type == 'pr_diff') {
         if (pr_diff_body.data.match(condition)) {
             console.log(`Condition ${condition} matched`); //DEBUG
@@ -55,16 +53,19 @@ function checkCondition(check_type, condition, pr_diff_body, pr_files_list) {
     if (check_type == 'pr_files') {
         for (const item of pr_files_list) {
             if (item.match(condition)) {
+                console.log(`Condition ${condition} matched`); //DEBUG
                 condition_match = true;
             }
         }
     }
+    console.log(`###### END checkCondition ######`); //DEBUG
     return condition_match;
 }
 exports.checkCondition = checkCondition;
 function combineUsersTeams(client, context, org, pr_owner, users, teams) {
     return __awaiter(this, void 0, void 0, function* () {
         const full_approvers_list = new Set();
+        console.log(`###### BEGIN combineUsersTeams ######`); //DEBUG
         console.log(`Users inside combine func: ${users} - `); //DEBUG
         if (users) {
             for (const user of users) {
@@ -76,20 +77,19 @@ function combineUsersTeams(client, context, org, pr_owner, users, teams) {
         }
         console.log(`Teams inside combine func: ${teams}  - org: ${org}`); //DEBUG
         if (teams) {
-            console.log(`Get inside if`); //DEBUG
             for (const team of teams) {
-                console.log(team); //DEBUG
+                console.log(`Team: ${team}`); //DEBUG
                 const team_users_list = yield client.rest.teams.listMembersInOrg(Object.assign(Object.assign({}, context.repo), { org: org, team_slug: team }));
-                console.log(`Team users list: ${team_users_list.data}`); //DEBUG
                 for (const member of team_users_list.data) {
+                    console.log(`team_member: ${member.login}`); //DEBUG
                     if (pr_owner != member.login) {
-                        console.log(`team_member: ${member.login}`); //DEBUG
                         full_approvers_list.add(member.login);
                     }
                 }
             }
         }
-        console.log(`Resulting full_approvers_list: ${full_approvers_list}`); //DEBUG
+        console.log(`Resulting full_approvers_list: ${Array.from(full_approvers_list)}`); //DEBUG
+        console.log(`###### END combineUsersTeams ######`); //DEBUG
         return Array.from(full_approvers_list);
     });
 }
@@ -97,10 +97,10 @@ exports.combineUsersTeams = combineUsersTeams;
 function assignReviewers(client, reviewer_users, reviewer_teams, pr_number) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log(`entering assignReviewers`); //DEBUG
-            console.log(`users length: ${reviewer_users.length} - ${reviewer_users}`); //DEBUG
+            console.log(`###### BEGIN assignReviewers ######`); //DEBUG
+            console.log(`users: ${reviewer_users.length} - ${reviewer_users}`); //DEBUG
             // You're safe to use default GITHUB_TOKEN until you request review only from users not teams
-            // It teams review is needed, then PAT token required
+            // If teams review is needed, then PAT token required with permission to read org
             if (reviewer_users) {
                 yield client.rest.pulls.requestReviewers({
                     owner: github.context.repo.owner,
@@ -110,7 +110,7 @@ function assignReviewers(client, reviewer_users, reviewer_teams, pr_number) {
                 });
                 core.info(`Requested review from users: ${reviewer_users}.`);
             }
-            console.log(`teams length: ${reviewer_teams.length} - ${reviewer_teams}`); //DEBUG
+            console.log(`teams: ${reviewer_teams.length} - ${reviewer_teams}`); //DEBUG
             if (reviewer_teams) {
                 yield client.rest.pulls.requestReviewers({
                     owner: github.context.repo.owner,
@@ -120,18 +120,19 @@ function assignReviewers(client, reviewer_users, reviewer_teams, pr_number) {
                 });
                 core.info(`Requested review from teams: ${reviewer_teams}.`);
             }
-            console.log(`exiting assignReviewers`); //DEBUG
         }
         catch (error) {
             core.setFailed(error.message);
             console.log("error: ", error);
         }
+        console.log(`###### END assignReviewers ######`); //DEBUG
     });
 }
 exports.assignReviewers = assignReviewers;
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(`###### BEGIN PR-CUSTOM-CHECK ACTION ######`);
         try {
             const final_approval_groups = [];
             const context = github.context;
@@ -141,72 +142,57 @@ function run() {
                 return;
             }
             const payload = context.payload;
-            const token = core.getInput('token');
-            const octokit = github.getOctokit(token);
-            const repo = payload.repository.url;
+            const octokit = github.getOctokit(core.getInput('token'));
             const pr_number = payload.pull_request.number;
-            const pr_diff_url = payload.pull_request.diff_url;
             const pr_owner = payload.pull_request.user.login;
             const sha = payload.pull_request.head.sha;
-            const workflow_name = `${process.env.GITHUB_WORKFLOW}`;
+            const workflow_name = process.env.GITHUB_WORKFLOW;
             const workflow_url = `${process.env['GITHUB_SERVER_URL']}/${process.env['GITHUB_REPOSITORY']}/actions/runs/${process.env['GITHUB_RUN_ID']}`;
             const organization = (_a = process.env.GITHUB_REPOSITORY) === null || _a === void 0 ? void 0 : _a.split("/")[0];
-            const pr_diff_body = yield octokit.request(pr_diff_url);
+            const pr_diff_body = yield octokit.request(payload.pull_request.diff_url);
             const pr_files = yield octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/files', {
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
                 pull_number: pr_number
             });
-            // TODO retrieve pr files list
+            // Retrieve PR's changes files
             const pr_files_list = new Set();
             for (var i = 0; i < pr_files.data.length; i++) {
                 var obj = pr_files.data[i];
-                console.log(obj.filename); //DEBUG
                 pr_files_list.add(obj.filename);
             }
+            console.log(`###### PR FILES LIST ######\n ${Array.from(pr_files_list).join('\n')}\n######`);
             var CUSTOM_REVIEW_REQUIRED = false;
             const pr_status_messages = [];
             const pr_review_status_messages = [];
-            // condition to search files with changes to locked lines
+            // Built in condition to search files with changes to locked lines
             const search_locked_lines_regexp = /🔒.*(\n^[\+|\-].*)|^[\+|\-].*🔒/gm;
-            const search_res = pr_diff_body.data.match(search_locked_lines_regexp); //DEBUG
-            console.log(`Search result: ${search_res}`); //DEBUG
             if (pr_diff_body.data.match(search_locked_lines_regexp)) {
-                console.log(`if condition for locks triggered`); //DEBUG
+                console.log(`###### TOUCHED LOCKS FOUND ######`); //DEBUG
                 console.log(pr_diff_body.data.match(search_locked_lines_regexp)); //DEBUG
                 CUSTOM_REVIEW_REQUIRED = true;
                 var approvers = [];
-                yield combineUsersTeams(octokit, context, organization, pr_owner, [], ['s737team']).then(value => {
-                    console.log(`value: ${value}`);
+                yield combineUsersTeams(octokit, context, organization, pr_owner, [], ['test-codeowners-team']).then(value => {
                     approvers = value;
                 });
-                console.log(`Approvers: ${approvers}`);
-                final_approval_groups.push({ name: 'LOCKS TOUCHED', min_approvals: 2, users: [], teams: ['s737team'], approvers: approvers });
+                final_approval_groups.push({ name: 'LOCKS TOUCHED', min_approvals: 2, users: [], teams: ['test-codeowners-team'], approvers: approvers });
                 console.log(final_approval_groups); //DEBUG
                 pr_status_messages.push(`LOCKS TOUCHED review required`);
             }
             // Read values from config file if it exists
+            console.log(`###### CONFIG FILE EVALUATION ######`); //DEBUG
             var config_file_contents = "";
             if (fs.existsSync(core.getInput('config-file'))) {
                 const config_file = fs.readFileSync(core.getInput('config-file'), 'utf8');
                 config_file_contents = YAML.parse(config_file);
                 for (const approval_group of config_file_contents.approval_groups) {
-                    console.log(approval_group.name); //DEBUG
-                    console.log(approval_group.condition); //DEBUG
-                    console.log(approval_group.check_type); //DEBUG
-                    console.log(approval_group.min_approvals); //DEBUG
-                    console.log(approval_group.users); //DEBUG
-                    console.log(approval_group.teams); //DEBUG
+                    console.log(`approval_group: ${approval_group.name}`); //DEBUG
                     const condition = new RegExp(approval_group.condition, "gm");
-                    console.log(`cond_from_yml: ${condition}`); //DEBUG
                     if (checkCondition(approval_group.check_type, condition, pr_diff_body, pr_files_list)) {
                         CUSTOM_REVIEW_REQUIRED = true;
                         // Combine users and team members in `approvers` list, excluding pr_owner
-                        console.log("Combine users and team members in `approvers` list, excluding pr_owner"); //DEBUG
-                        // const full_approvers_list: Set<string> = new Set()
                         var approvers = [];
                         yield combineUsersTeams(octokit, context, organization, pr_owner, approval_group.users, approval_group.teams).then(value => {
-                            console.log(`value: ${value}`);
                             approvers = value;
                         });
                         final_approval_groups.push({
@@ -216,8 +202,9 @@ function run() {
                             teams: approval_group.teams,
                             approvers: approvers
                         });
-                        console.log(final_approval_groups); //DEBUG
-                        pr_status_messages.push(`${approval_group.name} review required`);
+                        console.log(`###### APPROVAL GROUPS ######`); //DEBUG
+                        console.log(final_approval_groups);
+                        pr_status_messages.push(`${approval_group.name} ${approval_group.min_approvals} review(s) required`);
                     }
                 }
             }
@@ -226,7 +213,7 @@ function run() {
             }
             // No breaking changes - no cry. Set status OK and exit.
             if (!CUSTOM_REVIEW_REQUIRED) {
-                console.log(`Special approval of this PR is not required.`); //DEBUG
+                console.log(`###### Special approval of this PR is not required. ######`); //DEBUG
                 octokit.rest.repos.createCommitStatus(Object.assign(Object.assign({}, context.repo), { sha, state: 'success', context: workflow_name, target_url: workflow_url, description: "Special approval of this PR is not required." }));
                 return;
             }
@@ -249,42 +236,44 @@ function run() {
             }
             console.log(`users set: ${Array.from(reviewer_users_set)}`); //DEBUG
             console.log(`teams set: ${Array.from(reviewer_teams_set)}`); //DEBUG
+            // if event pull_request, will request reviews and set check status 'failure'
             if (context.eventName == 'pull_request') {
-                console.log(`I'm going to request someones approval!!!`); //DEBUG
+                console.log(`###### It's a PULL REQUEST event! I'm going to request needed approvals!!! ######`); //DEBUG
                 assignReviewers(octokit, Array.from(reviewer_users_set), Array.from(reviewer_teams_set), pr_number);
                 console.log(`STATUS MESSAGES: ${pr_status_messages.join()}`); //DEBUG
                 octokit.rest.repos.createCommitStatus(Object.assign(Object.assign({}, context.repo), { sha, state: 'failure', context: workflow_name, target_url: workflow_url, description: pr_status_messages.join('\n') }));
             }
             else {
-                console.log(`I don't care about requesting approvals! Will just check who already approved`);
+                console.log(`###### It's a PULL REQUEST REVIEW event! I don't care about requesting approvals! Will just check who already approved`);
                 //retrieve approvals
-                const reviews = yield octokit.rest.pulls.listReviews(Object.assign(Object.assign({}, context.repo), { pull_number: payload.pull_request.number }));
+                console.log(`###### GETTING PR REVIEWS ######`); //DEBUG
+                const reviews = yield octokit.rest.pulls.listReviews(Object.assign(Object.assign({}, context.repo), { pull_number: pr_number }));
                 const approved_users = new Set();
                 for (const review of reviews.data) {
                     if (review.state === `APPROVED`) {
                         approved_users.add(review.user.login);
-                        console.log(`Approved: ${review.user.login} --- ${review.state}`); //DEBUG
+                        console.log(`${review.state} - ${review.user.login}`); //DEBUG
                     }
                     else {
                         approved_users.delete(review.user.login);
-                        console.log(`Other state: ${review.user.login} --- ${review.state}`); //DEBUG
+                        console.log(`${review.state} - ${review.user.login}`); //DEBUG
                     }
                 }
                 console.log(`Approved users: ${Array.from(approved_users)}`); //DEBUG
                 // check approvals
+                console.log(`###### CHECKING APPROVALS ######`); //DEBUG
                 const has_all_needed_approvals = new Set();
                 for (const group of final_approval_groups) {
-                    console.log(`Approval check - min ${group.min_approvals} of ${group.approvers} --- has approvals of ${Array.from(approved_users)}`); //DEBUG
                     const group_approvers = new Set(group.approvers);
                     const has_approvals = new Set([...group_approvers].filter(x => approved_users.has(x)));
-                    console.log(`has_approvals ${has_approvals} - ${has_approvals.size}`); //DEBUG
+                    console.log(`Need min ${group.min_approvals} approvals from ${group.approvers} --- has ${has_approvals.size} - ${Array.from(has_approvals)}`); //DEBUG
                     if (has_approvals.size >= group.min_approvals) {
                         has_all_needed_approvals.add('true');
-                        pr_review_status_messages.push(`${group.name} has enough (${has_approvals.size}) approvals`);
+                        pr_review_status_messages.push(`${group.name} (${has_approvals.size}/${group.min_approvals})- OK!`);
                     }
                     else {
                         has_all_needed_approvals.add('false');
-                        pr_review_status_messages.push(`${group.name} min ${group.min_approvals} reviewers should approve this PR (currently: ${has_approvals.size})`);
+                        pr_review_status_messages.push(`${group.name} (${has_approvals.size}/${group.min_approvals})`);
                     }
                 }
                 // The workflow url can be obtained by combining several environment varialbes, as described below:
