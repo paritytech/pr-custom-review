@@ -8,7 +8,7 @@ inputs:
   config-file:
     required: false
     description: 'Path to the config file'
-    default: './.github/pr-custom-review.yml'
+    default: './.github/pr-custom-review-config.yml'
   token:
     required: true
     description: 'Repository token'

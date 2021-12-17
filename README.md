@@ -23,7 +23,7 @@ Review policy described in [action config](#Action-config) can be enforced by se
 
 Action has one built-in condition check which evaluates whether PR changes any line of code containing 🔒 emoji sign or line below it.
 
-Additional condition checks can be configured via the `pr-custom-review.yml` file placed in the `.github` subdirectory. Default config file can be overriden in workflow step [`with`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) section. [`config_file`](#Action-config) is optional and if it is missing than only built-in check will be performed.
+Additional condition checks can be configured via the `pr-custom-review-config.yml` file placed in the `.github` subdirectory. Default config file can be overriden in workflow step [`with`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) section. [`config_file`](#Action-config) is optional and if it is missing than only built-in check will be performed.
 
 Config file format:
 
@@ -70,7 +70,7 @@ jobs:
         uses: paritytech/pr-custom-review@master  # This action
         with:
           token: ${{ secrets.GITHUB_TOKEN }}            # If it is needed to request reviews from teams, than token with permission to read organization is needed. Default one created by GitHub action will fail.
-          config-file: './.github/pr-custom-review.yml' #OPTIONAL: can be specified to override default config_file
+          config-file: './.github/pr-custom-review-config.yml' #OPTIONAL: can be specified to override default config_file
 ```
 
 ### GitHub repository configuration
