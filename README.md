@@ -55,7 +55,7 @@ on:                                               # Events which triggers action
       - opened
       - reopened
       - synchronize
-      - review_request_removed                    # in addition to default events (opened, reopened, synchronize)
+      - review_request_removed                    # In addition to default events (opened, reopened, synchronize)
   pull_request_review:
 
 jobs:
