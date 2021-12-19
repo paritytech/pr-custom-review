@@ -44,7 +44,7 @@ approval_groups:
 ### Workflow config
 
 ```yaml
-name: PR Custom Review Status                     # used to create status check name
+name: PR Custom Review Status                     # Used to create status check name
 
 on:                                               # Events which triggers action
   pull_request:
