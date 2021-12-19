@@ -70,7 +70,7 @@ jobs:
         uses: paritytech/pr-custom-review@master  # This action, please stick to the release, not master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}            # If it is needed to request reviews from teams, then token with permission to read organization is needed. Default one created by GitHub action will fail.
-          config-file: './.github/pr-custom-review-config.yml' #OPTIONAL: can be specified to override default config_file
+          config-file: './.github/pr-custom-review-config.yml' # OPTIONAL: can be specified to override default config_file
 ```
 
 ### GitHub repository configuration
