@@ -32,7 +32,7 @@ approval_groups:
   - name: CHECK NAME     # Used to create message in status check. Keep it short as description of status check has limit of 140 chars
     condition: /^.*$/    # RegExp used to detect changes. Do not specify modifiers after closing slash. "gm" modifiers will be added
     check_type: pr_diff  # Check type. Currently supported `pr_diff` and `pr_files`
-    min_approvals: 2     # minimum required approvals
+    min_approvals: 2     # Minimum required approvals
     users:               # GitHub users list to request review from
       - user1
       - user2
