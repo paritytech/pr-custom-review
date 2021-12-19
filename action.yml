@@ -1,5 +1,5 @@
 name: 'PR Custom Review'
-description: 'An action to perform the required checks for complex pull request approval cases'
+description: 'An action to enforce complex pull request approval cases'
 author: 'sergejparity'
 branding:
   icon: 'check-square'
@@ -8,7 +8,7 @@ inputs:
   config-file:
     required: false
     description: 'Path to the config file'
-    default: './.github/custom_approvers_config.yml'
+    default: './.github/pr-custom-review-config.yml'
   token:
     required: true
     description: 'Repository token'
