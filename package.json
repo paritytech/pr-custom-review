@@ -2,6 +2,16 @@
   "name": "typescript-action",
   "version": "0.0.0",
   "description": "GitHub Action for complex pull request approval cases",
+  "author": "Parity <admin@parity.io> (https://parity.io)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paritytech/pr-custom-review.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "actions",
+    "node"
+  ],
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -12,16 +22,6 @@
     "package": "ncc build --source-map --license licenses.txt",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/paritytech/pr-custom-review.git"
-  },
-  "keywords": [
-    "actions",
-    "node"
-  ],
-  "author": "Parity <admin@parity.io> (https://parity.io)",
-  "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.4.0",
     "@actions/github": "^5.0.0",
