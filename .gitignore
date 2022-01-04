@@ -3,6 +3,8 @@ node_modules
 
 build
 
+dist
+
 # Rest pulled from https://github.com/github/gitignore/blob/master/Node.gitignore
 # Logs
 logs
