@@ -20,7 +20,7 @@
     "actions",
     "node"
   ],
-  "author": "Sergejs Kostjucenko - Parity Technologies",
+  "author": "Parity <admin@parity.io> (https://parity.io)",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.4.0",
