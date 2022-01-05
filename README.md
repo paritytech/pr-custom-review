@@ -2,7 +2,24 @@
 
 This is a GitHub Action created for complex pull request approval scenarios which are not currently supported by GitHub's [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules). It might extend or even completely replace the [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging) setting.
 
-## How it works
+# TOC
+
+- [How it works](#how-it-works)
+  - [High level flow chart](#high-level-flow-chart)
+- [Configuration](#configuration)
+  - [Action configuration](#action-configuration)
+    - [Rules syntax](#rules-syntax)
+  - [Workflow configuration](#workflow-configuration)
+  - [GitHub repository configuration](#github-repository-configuration)
+- [Development](#development)
+  - [Build](#build)
+    - [Build steps](#build-steps)
+  - [Trial](#trial)
+    - [Trial steps](#trial-steps)
+  - [Release](#release)
+    - [Release steps](#release-steps)
+
+## How it works <a name="how-it-works"></a>
 
 Upon receiving [pull_request](https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#pull_request) and [pull_request_review](https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#pull_request_review) events (to be enabled via [workflow configuration](#workflow-configuration)), this action evaluates all rules described in the [configuration file](#action-configuration). Currently two types of rules are supported:
 
