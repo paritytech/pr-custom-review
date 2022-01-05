@@ -109,3 +109,77 @@ Although the action will work even without any additional [repository settings](
 [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
 
 ![Branch Protection Settings](./img/github-branch-protection.png)
+
+## Development
+
+### Build
+
+Build revolves around compiling the code and packaging it with
+[ncc](https://github.com/vercel/ncc). Since the build output consists of plain
+.js files, which can be executed directly by Node.js, it _could_ be ran
+directly without packaging first; we regardless prefer to use `ncc` because it
+bundles all the code (_including the dependencies' code_) into a single file
+ahead-of-time, meaning the workflow can promptly run the action without having
+to download dependencies first.
+
+#### Build steps <a name="build-steps"></a>
+
+1. Install the dependencies
+
+`npm install`
+
+2. Build
+
+`npm run build`
+
+3. Package
+
+`npm run package`
+
+See the next sections for [trying it out](#trial) or [releasing](#release).
+
+### Trial
+
+A GitHub workflow will always clone the HEAD of
+`${organization}/${repo}@${ref}` **when the action executes**, as exemplified
+by the following line:
+
+`uses: paritytech/pr-custom-review@branch`
+
+Therefore any changes pushed to the branch will automatically be applied the
+next time the action is ran.
+
+#### Trial steps <a name="trial-steps"></a>
+
+1. [Build](#build) the changes and push them to some branch
+2. Change the workflow's step from `paritytech/pr-custom-review@branch` to your
+  branch:
+
+```diff
+-uses: paritytech/pr-custom-review@branch
++uses: user/fork@branch
+```
+
+3. Re-run the action and note the changes were automatically applied
+
+### Release
+
+A GitHub workflow will always clone the HEAD of
+`${organization}/${repo}@${tag}` **when the action executes**, as exemplified
+by the following line:
+
+`uses: paritytech/pr-custom-review@tag`
+
+That behavior makes it viable to release by committing build artifacts directly
+to a tag and then using the new tag in the repositories where this action is
+installed.
+
+#### Release steps <a name="release-steps"></a>
+
+1. [Build](#build) the changes and push them to some tag
+2. Use the new tag in your workflows:
+
+```diff
+-uses: paritytech/pr-custom-review@1
++uses: paritytech/pr-custom-review@2
+```
