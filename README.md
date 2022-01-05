@@ -35,13 +35,13 @@ This action has one built-in check which reacts to changes in lines of code cont
 
 ## Configuration
 
-### Action configuration  <a name="action-configuration"></a>
+### Action configuration <a name="action-configuration"></a>
 
 Configuration is done through a `pr-custom-review-config.yml` file placed in the `.github` directory. The default location can be overridden through [`step.with`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) as demonstrated in [Workflow configuration](#workflow-configuration).
 
 The configuration file is **optional** and if it is missing then only built-in check will be performed.
 
-#### Rules syntax
+#### Rules syntax <a name="rules-syntax"></a>
 
 ```yaml
 approval_groups:
