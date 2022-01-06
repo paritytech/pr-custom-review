@@ -231,6 +231,7 @@ async function run(): Promise<void> {
       )
       if (validation_result.error) {
         console.error("Configuration file is invalid", validation_result.error)
+        core.setFailed(validation_result.error)
         process.exit(1)
       }
       const config_file_contents = validation_result.value
