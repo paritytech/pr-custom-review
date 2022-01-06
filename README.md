@@ -2,7 +2,24 @@
 
 This is a GitHub Action created for complex pull request approval scenarios which are not currently supported by GitHub's [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules). It might extend or even completely replace the [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging) setting.
 
-## How it works
+# TOC
+
+- [How it works](#how-it-works)
+  - [High level flow chart](#high-level-flow-chart)
+- [Configuration](#configuration)
+  - [Action configuration](#action-configuration)
+    - [Rules syntax](#rules-syntax)
+  - [Workflow configuration](#workflow-configuration)
+  - [GitHub repository configuration](#github-repository-configuration)
+- [Development](#development)
+  - [Build](#build)
+    - [Build steps](#build-steps)
+  - [Trial](#trial)
+    - [Trial steps](#trial-steps)
+  - [Release](#release)
+    - [Release steps](#release-steps)
+
+## How it works <a name="how-it-works"></a>
 
 Upon receiving [pull_request](https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#pull_request) and [pull_request_review](https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#pull_request_review) events (to be enabled via [workflow configuration](#workflow-configuration)), this action evaluates all rules described in the [configuration file](#action-configuration). Currently two types of rules are supported:
 
@@ -18,13 +35,13 @@ This action has one built-in check which reacts to changes in lines of code cont
 
 ## Configuration
 
-### Action configuration  <a name="action-configuration"></a>
+### Action configuration <a name="action-configuration"></a>
 
 Configuration is done through a `pr-custom-review-config.yml` file placed in the `.github` directory. The default location can be overridden through [`step.with`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) as demonstrated in [Workflow configuration](#workflow-configuration).
 
 The configuration file is **optional** and if it is missing then only built-in check will be performed.
 
-#### Rules syntax
+#### Rules syntax <a name="rules-syntax"></a>
 
 ```yaml
 approval_groups:
@@ -92,3 +109,77 @@ Although the action will work even without any additional [repository settings](
 [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
 
 ![Branch Protection Settings](./img/github-branch-protection.png)
+
+## Development
+
+### Build
+
+Build revolves around compiling the code and packaging it with
+[ncc](https://github.com/vercel/ncc). Since the build output consists of plain
+.js files, which can be executed directly by Node.js, it _could_ be ran
+directly without packaging first; we regardless prefer to use `ncc` because it
+bundles all the code (_including the dependencies' code_) into a single file
+ahead-of-time, meaning the workflow can promptly run the action without having
+to download dependencies first.
+
+#### Build steps <a name="build-steps"></a>
+
+1. Install the dependencies
+
+`npm install`
+
+2. Build
+
+`npm run build`
+
+3. Package
+
+`npm run package`
+
+See the next sections for [trying it out](#trial) or [releasing](#release).
+
+### Trial
+
+A GitHub workflow will always clone the HEAD of
+`${organization}/${repo}@${ref}` **when the action executes**, as exemplified
+by the following line:
+
+`uses: paritytech/pr-custom-review@branch`
+
+Therefore any changes pushed to the branch will automatically be applied the
+next time the action is ran.
+
+#### Trial steps <a name="trial-steps"></a>
+
+1. [Build](#build) the changes and push them to some branch
+2. Change the workflow's step from `paritytech/pr-custom-review@branch` to your
+  branch:
+
+```diff
+-uses: paritytech/pr-custom-review@branch
++uses: user/fork@branch
+```
+
+3. Re-run the action and note the changes were automatically applied
+
+### Release
+
+A GitHub workflow will always clone the HEAD of
+`${organization}/${repo}@${tag}` **when the action executes**, as exemplified
+by the following line:
+
+`uses: paritytech/pr-custom-review@tag`
+
+That behavior makes it viable to release by committing build artifacts directly
+to a tag and then using the new tag in the repositories where this action is
+installed.
+
+#### Release steps <a name="release-steps"></a>
+
+1. [Build](#build) the changes and push them to some tag
+2. Use the new tag in your workflows:
+
+```diff
+-uses: paritytech/pr-custom-review@1
++uses: paritytech/pr-custom-review@2
+```
