@@ -94,5 +94,10 @@ module.exports = {
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/restrict-plus-operands": "error",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unsafe-argument": "error",
+    "@typescript-eslint/no-unsafe-assignment": "error",
+    "@typescript-eslint/no-unsafe-argument": "error",
+    "@typescript-eslint/no-unsafe-member-access": "error",
+    "@typescript-eslint/no-unsafe-return": "error"
   },
 }
