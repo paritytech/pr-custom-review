@@ -3,12 +3,38 @@ import * as github from "@actions/github"
 import { Context } from "@actions/github/lib/context"
 import * as Webhooks from "@octokit/webhooks-types"
 import * as fs from "fs"
+import Joi from "joi"
 import * as YAML from "yaml"
+
+type Octokit = ReturnType<typeof github.getOctokit>
+
+type ApprovalGroup = {
+  name: string
+  condition: string
+  check_type: "pr_diff" | "pr_files"
+  min_approvals: number
+  users: Array<string> | undefined
+  teams: Array<string> | undefined
+}
+const approvalGroupSchema = Joi.object<ApprovalGroup>().keys({
+  name: Joi.string().required(),
+  condition: Joi.string().required(),
+  check_type: Joi.string().valid("pr_diff", "pr_files").required(),
+  min_approvals: Joi.number().required(),
+  users: Joi.array().items(Joi.string()),
+  teams: Joi.array().items(Joi.string()),
+})
+type RulesConfiguration = {
+  approval_groups: ApprovalGroup[]
+}
+const rulesConfigurationSchema = Joi.object<RulesConfiguration>().keys({
+  approval_groups: Joi.array().items(approvalGroupSchema).required(),
+})
 
 export function checkCondition(
   check_type: string,
   condition: RegExp,
-  pr_diff_body: any,
+  pr_diff_body: { data: string },
   pr_files_list: Set<string>,
 ): boolean {
   console.log(`###### BEGIN checkCondition ######`) //DEBUG
@@ -33,7 +59,7 @@ export function checkCondition(
 }
 
 export async function combineUsersTeams(
-  client: any,
+  client: Octokit,
   context: Context,
   org: string,
   pr_owner: string,
@@ -73,7 +99,7 @@ export async function combineUsersTeams(
 }
 
 export async function assignReviewers(
-  client: any,
+  client: Octokit,
   reviewer_users: string[],
   reviewer_teams: string[],
   pr_number: number,
@@ -103,7 +129,7 @@ export async function assignReviewers(
       core.info(`Requested review from teams: ${reviewer_teams}.`)
     }
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error instanceof Error ? error : String(error))
     console.log("error: ", error)
   }
   console.log(`###### END assignReviewers ######`) //DEBUG
@@ -144,7 +170,9 @@ async function run(): Promise<void> {
     const workflow_name = process.env.GITHUB_WORKFLOW
     const workflow_url = `${process.env["GITHUB_SERVER_URL"]}/${process.env["GITHUB_REPOSITORY"]}/actions/runs/${process.env["GITHUB_RUN_ID"]}`
     const organization = process.env.GITHUB_REPOSITORY?.split("/")[0]!
-    const pr_diff_body = await octokit.request(payload.pull_request.diff_url)
+    const pr_diff_body: { data: string } = await octokit.request(
+      payload.pull_request.diff_url,
+    )
     const pr_files = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
       {
@@ -196,10 +224,16 @@ async function run(): Promise<void> {
 
     // Read values from config file if it exists
     console.log(`###### CONFIG FILE EVALUATION ######`) //DEBUG
-    var config_file_contents: any = ""
     if (fs.existsSync(core.getInput("config-file"))) {
       const config_file = fs.readFileSync(core.getInput("config-file"), "utf8")
-      config_file_contents = YAML.parse(config_file)
+      const validation_result = rulesConfigurationSchema.validate(
+        YAML.parse(config_file),
+      )
+      if (validation_result.error) {
+        console.error("Configuration file is invalid", validation_result.error)
+        process.exit(1)
+      }
+      const config_file_contents = validation_result.value
 
       for (const approval_group of config_file_contents.approval_groups) {
         console.log(`approval_group: ${approval_group.name}`) //DEBUG
@@ -220,8 +254,8 @@ async function run(): Promise<void> {
             context,
             organization,
             pr_owner,
-            approval_group.users,
-            approval_group.teams,
+            approval_group.users ?? [],
+            approval_group.teams ?? [],
           )
           final_approval_groups.push({
             name: approval_group.name,
@@ -366,7 +400,7 @@ async function run(): Promise<void> {
       }
     }
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error instanceof Error ? error : String(error))
     console.log("error: ", error)
   }
 }
