@@ -1,6 +1,6 @@
 name: 'PR Custom Review'
 description: 'An action to enforce complex pull request approval cases'
-author: 'sergejparity'
+author: 'paritytech'
 branding:
   icon: 'check-square'
   color: 'green'
