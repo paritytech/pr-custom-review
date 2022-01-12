@@ -72,16 +72,16 @@ approval_groups:
 name: PR Custom Review Status    # The PR status will be created with this name.
 
 on:                              # The events which will trigger the action.
-  pull_request:
-    branches:
+  pull_request:                  # A "pull_request" event of selected types will trigger the action.
+    branches:                    # Action will be triggered if a PR is made to following branches.
       - main
       - master
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - review_request_removed
-  pull_request_review:
+    types:                       # Types of "pull_request" event which will trigger the action.
+      - opened                   # Default event - PR is created.
+      - reopened                 # Default event - closed PR is reopened.
+      - synchronize              # Default event - PR is changed.
+      - review_request_removed   # Requested reviewer removed from PR. Action will re-request its review if it's required.
+  pull_request_review:           # PR review received. Action will check whether PR meets required review rules.
 
 jobs:
   build:
