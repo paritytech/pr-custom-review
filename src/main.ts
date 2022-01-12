@@ -8,7 +8,7 @@ import * as YAML from "yaml"
 
 type Octokit = ReturnType<typeof github.getOctokit>
 
-type ApprovalGroup = {
+type ApprovalRule = {
   name: string
   condition: string
   check_type: "pr_diff" | "pr_files"
@@ -16,7 +16,7 @@ type ApprovalGroup = {
   users: Array<string> | undefined
   teams: Array<string> | undefined
 }
-const approvalGroupSchema = Joi.object<ApprovalGroup>().keys({
+const approvalRuleSchema = Joi.object<ApprovalRule>().keys({
   name: Joi.string().required(),
   condition: Joi.string().required(),
   check_type: Joi.string().valid("pr_diff", "pr_files").required(),
@@ -25,10 +25,10 @@ const approvalGroupSchema = Joi.object<ApprovalGroup>().keys({
   teams: Joi.array().items(Joi.string()),
 })
 type RulesConfiguration = {
-  approval_groups: ApprovalGroup[]
+  approval_rules: ApprovalRule[]
 }
 const rulesConfigurationSchema = Joi.object<RulesConfiguration>().keys({
-  approval_groups: Joi.array().items(approvalGroupSchema).required(),
+  approval_rules: Joi.array().items(approvalRuleSchema).required(),
 })
 
 export function checkCondition(
@@ -138,14 +138,14 @@ export async function assignReviewers(
 async function run(): Promise<void> {
   console.log(`###### BEGIN PR-CUSTOM-CHECK ACTION ######`)
   try {
-    type ApprovalGroup = {
+    type ApprovalRule = {
       name: string
       min_approvals: number
       users?: string[]
       teams?: string[]
       approvers: string[]
     }
-    const final_approval_groups: ApprovalGroup[] = []
+    const final_approval_rules: ApprovalRule[] = []
 
     const context = github.context
 
@@ -211,14 +211,14 @@ async function run(): Promise<void> {
         [],
         ["pr-custom-review-team"],
       )
-      final_approval_groups.push({
+      final_approval_rules.push({
         name: "LOCKS TOUCHED",
         min_approvals: 2,
         users: [],
         teams: ["pr-custom-review-team"],
         approvers: approvers,
       })
-      console.log(final_approval_groups) //DEBUG
+      console.log(final_approval_rules) //DEBUG
       pr_status_messages.push(`LOCKS TOUCHED review required`)
     }
 
@@ -236,13 +236,13 @@ async function run(): Promise<void> {
       }
       const config_file_contents = validation_result.value
 
-      for (const approval_group of config_file_contents.approval_groups) {
-        console.log(`approval_group: ${approval_group.name}`) //DEBUG
-        const condition: RegExp = new RegExp(approval_group.condition, "gm")
+      for (const approval_rule of config_file_contents.approval_rules) {
+        console.log(`approval_rule: ${approval_rule.name}`) //DEBUG
+        const condition: RegExp = new RegExp(approval_rule.condition, "gm")
 
         if (
           checkCondition(
-            approval_group.check_type,
+            approval_rule.check_type,
             condition,
             pr_diff_body,
             pr_files_list,
@@ -255,26 +255,26 @@ async function run(): Promise<void> {
             context,
             organization,
             pr_owner,
-            approval_group.users ?? [],
-            approval_group.teams ?? [],
+            approval_rule.users ?? [],
+            approval_rule.teams ?? [],
           )
-          final_approval_groups.push({
-            name: approval_group.name,
-            min_approvals: approval_group.min_approvals,
-            users: approval_group.users,
-            teams: approval_group.teams,
+          final_approval_rules.push({
+            name: approval_rule.name,
+            min_approvals: approval_rule.min_approvals,
+            users: approval_rule.users,
+            teams: approval_rule.teams,
             approvers: allApprovers,
           })
-          console.log(`###### APPROVAL GROUPS ######`) //DEBUG
-          console.log(final_approval_groups)
+          console.log(`###### APPROVAL RULES ######`) //DEBUG
+          console.log(final_approval_rules)
           pr_status_messages.push(
-            `${approval_group.name} ${approval_group.min_approvals} review(s) required`,
+            `${approval_rule.name} ${approval_rule.min_approvals} review(s) required`,
           )
         }
       }
     } else {
       console.log(
-        `No config file provided. Continue with built in approval group`,
+        `No config file provided. Continue with built in approval rule`,
       )
     }
 
@@ -296,7 +296,7 @@ async function run(): Promise<void> {
     const reviewer_users_set: Set<string> = new Set()
     const reviewer_teams_set: Set<string> = new Set()
 
-    for (const reviewers of final_approval_groups) {
+    for (const reviewers of final_approval_rules) {
       if (reviewers.users) {
         for (var user of reviewers.users) {
           if (user !== pr_owner) {
@@ -360,25 +360,25 @@ async function run(): Promise<void> {
       console.log(`###### CHECKING APPROVALS ######`) //DEBUG
       const has_all_needed_approvals: Set<string> = new Set()
 
-      for (const group of final_approval_groups) {
-        const group_approvers = new Set(group.approvers)
+      for (const rule of final_approval_rules) {
+        const rule_approvers = new Set(rule.approvers)
         const has_approvals = new Set(
-          [...group_approvers].filter((x) => approved_users.has(x)),
+          [...rule_approvers].filter((x) => approved_users.has(x)),
         )
         console.log(
-          `Need min ${group.min_approvals} approvals from ${
-            group.approvers
+          `Need min ${rule.min_approvals} approvals from ${
+            rule.approvers
           } --- has ${has_approvals.size} - ${Array.from(has_approvals)}`,
         ) //DEBUG
-        if (has_approvals.size >= group.min_approvals) {
+        if (has_approvals.size >= rule.min_approvals) {
           has_all_needed_approvals.add("true")
           pr_review_status_messages.push(
-            `${group.name} (${has_approvals.size}/${group.min_approvals})- OK!`,
+            `${rule.name} (${has_approvals.size}/${rule.min_approvals})- OK!`,
           )
         } else {
           has_all_needed_approvals.add("false")
           pr_review_status_messages.push(
-            `${group.name} (${has_approvals.size}/${group.min_approvals})`,
+            `${rule.name} (${has_approvals.size}/${rule.min_approvals})`,
           )
         }
       }

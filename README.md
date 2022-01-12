@@ -44,7 +44,7 @@ The configuration file is **optional** and if it is missing then only built-in c
 #### Rules syntax <a name="rules-syntax"></a>
 
 ```yaml
-approval_groups:
+approval_rules:
   - name: CHECK NAME     # Used for the status check description. Keep it short
                          # as GitHub imposes a limit of 140 chars.
     condition: /^.*$/    # Javascript Regular Expression used to match the rule.
