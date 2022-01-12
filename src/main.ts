@@ -34,14 +34,14 @@ const rulesConfigurationSchema = Joi.object<RulesConfiguration>().keys({
 export function checkCondition(
   check_type: string,
   condition: RegExp,
-  pr_diff_body: { data: string },
+  pr_diff_body: string,
   pr_files_list: Set<string>,
 ): boolean {
   console.log(`###### BEGIN checkCondition ######`) //DEBUG
   var condition_match: boolean = false
   console.log(`condition: ${condition}`) //DEBUG
   if (check_type === "pr_diff") {
-    if (pr_diff_body.data.match(condition) !== null) {
+    if (pr_diff_body.match(condition) !== null) {
       console.log(`Condition ${condition} matched`) //DEBUG
       condition_match = true
     }
@@ -170,9 +170,16 @@ async function run(): Promise<void> {
     const workflow_name = process.env.GITHUB_WORKFLOW
     const workflow_url = `${process.env["GITHUB_SERVER_URL"]}/${process.env["GITHUB_REPOSITORY"]}/actions/runs/${process.env["GITHUB_RUN_ID"]}`
     const organization = process.env.GITHUB_REPOSITORY?.split("/")[0]!
-    const pr_diff_body: { data: string } = await octokit.request(
-      payload.pull_request.diff_url,
+    const pr_diff_body_request = await octokit.request(
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+      {
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        pull_number: pr_number,
+        mediaType: { format: "diff" },
+      },
     )
+    const pr_diff_body: string = pr_diff_body_request.data.toString()
     const pr_files = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
       {
@@ -199,9 +206,9 @@ async function run(): Promise<void> {
 
     // Built in condition to search files with changes to locked lines
     const search_locked_lines_regexp: RegExp = /🔒.*(\n^[+|-].*)|^[+|-].*🔒/gm
-    if (pr_diff_body.data.match(search_locked_lines_regexp) !== null) {
+    if (pr_diff_body.match(search_locked_lines_regexp) !== null) {
       console.log(`###### TOUCHED LOCKS FOUND ######`) //DEBUG
-      console.log(pr_diff_body.data.match(search_locked_lines_regexp)) //DEBUG
+      console.log(pr_diff_body.match(search_locked_lines_regexp)) //DEBUG
       CUSTOM_REVIEW_REQUIRED = true
       var approvers: string[] = await combineUsersTeams(
         octokit,
