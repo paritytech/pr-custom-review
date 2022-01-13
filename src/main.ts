@@ -160,7 +160,9 @@ const runChecks = async function (
         case "changed_files": {
           changedFilesLoop: for (const file of changedFiles) {
             if (condition.test(file)) {
-              log(`Matched ${rule.condition} on the file ${file}`)
+              log(
+                `Matched expression "${rule.condition}" for the file name ${file}`,
+              )
               matched = true
               break changedFilesLoop
             }
@@ -169,7 +171,7 @@ const runChecks = async function (
         }
         case "diff": {
           if (condition.test(diff)) {
-            log(`Matched ${rule.condition} on diff`)
+            log(`Matched expression "${rule.condition}" on diff`)
             matched = true
           }
           break
@@ -310,13 +312,11 @@ const runChecks = async function (
           teams.add(team)
         }
       }
-      log("reviewers", users)
-      log("team_reviewers", teams)
       await octokit.request(
         "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
         {
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
+          owner: pr.base.repo.owner.login,
+          repo: pr.base.repo.name,
           pull_number: pr.number,
           reviewers: Array.from(users),
           team_reviewers: Array.from(teams),
