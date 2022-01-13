@@ -77,17 +77,9 @@ const combineUsers = async function (
   return users
 }
 
-type Env = {
-  GITHUB_SERVER_URL: string
-  GITHUB_WORKFLOW: string
-  GITHUB_RUN_ID: string
-  GITHUB_REPOSITORY: string
-}
-
 const runChecks = async function (
   pr: PR,
   octokit: Octokit,
-  env: Env,
   log: typeof console.log,
   context: Context,
 ): Promise<"failure" | "success"> {
@@ -359,26 +351,6 @@ const runChecks = async function (
 }
 
 const main = function () {
-  const env: {
-    GITHUB_SERVER_URL: string
-    GITHUB_WORKFLOW: string
-    GITHUB_RUN_ID: string
-    GITHUB_REPOSITORY: string
-  } = {
-    GITHUB_SERVER_URL: "",
-    GITHUB_WORKFLOW: "",
-    GITHUB_REPOSITORY: "",
-    GITHUB_RUN_ID: "",
-  }
-  for (const varName in env) {
-    const value = process.env[varName]
-    if (value === undefined) {
-      core.setFailed(`Missing environment variable $${varName}`)
-      return
-    }
-    env[varName as keyof typeof env] = value
-  }
-
   const context = github.context
   if (
     context.eventName !== "pull_request" &&
@@ -395,33 +367,72 @@ const main = function () {
   const pr = context.payload.pull_request as PR
   const octokit = github.getOctokit(core.getInput("token"))
 
-  const exit = async function (state: "success" | "failure") {
-    const infoURL = `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`
+  const finish = async function (state: "success" | "failure") {
+    // Fallback URL in case we are not able to detect the current job
+    let detailsUrl = `${context.serverUrl}/${pr.base.repo.name}/runs/${context.runId}`
+
+    if (state === "failure") {
+      // Fetch the jobs so that we'll be able to detect this step and provide a
+      // more accurate logging location
+      const jobsResponse = await octokit.rest.actions.listJobsForWorkflowRun({
+        owner: pr.base.repo.owner.login,
+        repo: pr.base.repo.name,
+        run_id: context.runId,
+      })
+      if (jobsResponse.status === 200) {
+        const {
+          data: { jobs },
+        } = jobsResponse
+        for (const job of jobs) {
+          if (job.name === process.env.GITHUB_JOB) {
+            let stepNumber: number | undefined = undefined
+            const actionRepositoryMatch = (
+              process.env.GITHUB_ACTION_REPOSITORY ?? ""
+            ).match(/[^/]*$/)
+            if (actionRepositoryMatch !== null) {
+              const thisActionStep = job.steps.find(function ({ name }) {
+                return name === actionRepositoryMatch[0]
+              })
+              stepNumber = thisActionStep?.number
+            }
+            detailsUrl = `${job.html_url}${
+              stepNumber ? `#step:${stepNumber}:1` : ""
+            }`
+            break
+          }
+        }
+      } else {
+        log(
+          `ERROR: Failed to fetch jobs for workflow run ${context.runId} (code ${jobsResponse.status})`,
+        )
+      }
+    }
+
     await octokit.rest.repos.createCommitStatus({
       owner: pr.base.repo.owner.login,
       repo: pr.base.repo.name,
       sha: pr.head.sha,
       state,
-      context: env.GITHUB_WORKFLOW,
-      target_url: `${infoURL}?check_suite_focus=true`,
-      ...(state === "success"
-        ? {}
-        : { description: "Please check Details for more information" }),
+      context: context.workflow,
+      target_url: detailsUrl,
+      description: "Please check Details for more information",
     })
+
     log(`Final state: ${state}`)
+
     // We always exit with 0 so that there are no lingering failure statuses in
     // the pipeline for the action. The custom status created above will be the
     // one to inform the outcome of this action.
     process.exit(0)
   }
 
-  runChecks(pr, octokit, env, log, context)
+  runChecks(pr, octokit, log, context)
     .then(function (state) {
-      exit(state)
+      finish(state)
     })
     .catch(function (error) {
       log(error)
-      exit("failure")
+      finish("failure")
     })
 }
 
