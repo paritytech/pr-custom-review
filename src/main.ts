@@ -243,12 +243,12 @@ const runChecks = async function (
         })
       }
     }
+    log("latestReviews", latestReviews)
 
     const problems: string[] = []
 
     type Team = string | null
     const usersToAskForReview: Map<string, Team> = new Map()
-
     let highestMinApprovalsRule: MatchedRule | null = null
     for (const rule of matchedRules) {
       if (rule.users.size !== 0) {
@@ -301,8 +301,8 @@ const runChecks = async function (
       }
     }
 
-    log("usersToAskForReview", usersToAskForReview)
     if (usersToAskForReview.size !== 0) {
+      log("usersToAskForReview", usersToAskForReview)
       const teams: Set<string> = new Set()
       const users: Set<string> = new Set()
       for (const [user, team] of usersToAskForReview) {
