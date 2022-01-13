@@ -19,7 +19,7 @@ type Rule = {
   users: Array<string> | undefined
   teams: Array<string> | undefined
 }
-const approvalGroupSchema = Joi.object<Rule>().keys({
+const ruleSchema = Joi.object<Rule>().keys({
   name: Joi.string().required(),
   condition: Joi.string().required(),
   check_type: Joi.string().valid("diff", "changed_files").required(),
@@ -31,7 +31,7 @@ type Configuration = {
   rules: Rule[]
 }
 const configurationSchema = Joi.object<Configuration>().keys({
-  rules: Joi.array().items(approvalGroupSchema).required(),
+  rules: Joi.array().items(ruleSchema).required(),
 })
 
 type RuleUser = { team: string | null }
