@@ -77,48 +77,28 @@ const combineUsers = async function (
   return users
 }
 
-const main = async function () {
-  const env: {
-    GITHUB_SERVER_URL: string
-    GITHUB_WORKFLOW: string
-    GITHUB_RUN_ID: string
-    GITHUB_REPOSITORY: string
-  } = {
-    GITHUB_SERVER_URL: "",
-    GITHUB_WORKFLOW: "",
-    GITHUB_REPOSITORY: "",
-    GITHUB_RUN_ID: "",
-  }
-  for (const varName in env) {
-    const value = process.env[varName]
-    if (value === undefined) {
-      core.setFailed(`Missing environment variable $${varName}`)
-      return
-    }
-    env[varName as keyof typeof env] = value
-  }
+type Env = {
+  GITHUB_SERVER_URL: string
+  GITHUB_WORKFLOW: string
+  GITHUB_RUN_ID: string
+  GITHUB_REPOSITORY: string
+}
 
-  const context = github.context
-  if (
-    context.eventName !== "pull_request" &&
-    context.eventName !== "pull_request_review"
-  ) {
-    core.setFailed(
-      `Invalid event: ${context.eventName}. This action should be triggered on pull_request and pull_request_review`,
-    )
-    return
-  }
-
-  const pr = context.payload.pull_request as PR
-  const octokit = github.getOctokit(core.getInput("token"))
-
+const runChecks = async function (
+  pr: PR,
+  octokit: Octokit,
+  env: Env,
+  log: typeof console.log,
+  context: Context,
+): Promise<"failure" | "success"> {
   const diffResponse: { data: string; status: number } = await octokit.request(
     pr.diff_url,
   )
   if (diffResponse.status !== 200) {
-    core.setFailed(
+    log(
       `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
     )
+    return "failure"
   }
   const { data: diff } = diffResponse
 
@@ -131,14 +111,14 @@ const main = async function () {
     },
   )
   if (changedFilesResponse.status !== 200) {
-    core.setFailed(
+    log(
       `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
     )
-    return
+    return "failure"
   }
   const { data: changedFilesData } = changedFilesResponse
   const changedFiles = new Set(changedFilesData.map(({ filename }) => filename))
-  console.log("Changed files", changedFiles)
+  log("Changed files", changedFiles)
 
   type MatchedRule = {
     name: string
@@ -150,7 +130,7 @@ const main = async function () {
   // Built in condition to search files with changes to locked lines
   const lockExpression = /🔒.*(\n^[+|-])|^[+|-].*🔒/gm
   if (lockExpression.test(diff)) {
-    console.log("Diff has changes to 🔒 lines or lines following 🔒")
+    log("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(
       pr,
       octokit,
@@ -159,15 +139,15 @@ const main = async function () {
       ["pr-custom-review-team"],
     )
     if (users instanceof Error) {
-      core.setFailed(users)
-      return
+      log(users)
+      return "failure"
     }
     matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
   }
 
   const configFilePath = core.getInput("config-file")
   if (configFilePath === null || configFilePath.length === 0) {
-    console.log("No config file provided")
+    log("No config file provided")
   } else if (fs.existsSync(configFilePath)) {
     const configFile = fs.readFileSync(configFilePath, "utf8")
 
@@ -175,9 +155,8 @@ const main = async function () {
       YAML.parse(configFile),
     )
     if (validation_result.error) {
-      console.error("Configuration file is invalid", validation_result.error)
-      core.setFailed(validation_result.error)
-      return
+      log("Configuration file is invalid", validation_result.error)
+      return "failure"
     }
     const config = validation_result.value
 
@@ -189,7 +168,7 @@ const main = async function () {
         case "changed_files": {
           changedFilesLoop: for (const file of changedFiles) {
             if (condition.test(file)) {
-              console.log(`Matched ${rule.condition} on the file ${file}`)
+              log(`Matched ${rule.condition} on the file ${file}`)
               matched = true
               break changedFilesLoop
             }
@@ -198,15 +177,15 @@ const main = async function () {
         }
         case "diff": {
           if (condition.test(diff)) {
-            console.log(`Matched ${rule.condition} on diff`)
+            log(`Matched ${rule.condition} on diff`)
             matched = true
           }
           break
         }
         default: {
           const exhaustivenessCheck: never = rule.check_type
-          core.setFailed(`Check type is not handled: ${exhaustivenessCheck}`)
-          return
+          log(`Check type is not handled: ${exhaustivenessCheck}`)
+          return "failure"
         }
       }
       if (!matched) {
@@ -221,8 +200,8 @@ const main = async function () {
         rule.teams ?? [],
       )
       if (users instanceof Error) {
-        core.setFailed(users)
-        return
+        log(users)
+        return "failure"
       }
       matchedRules.push({
         name: rule.name,
@@ -231,11 +210,9 @@ const main = async function () {
       })
     }
   } else {
-    core.setFailed(`Could not read config file at ${configFilePath}`)
-    return
+    log(`Could not read config file at ${configFilePath}`)
+    return "failure"
   }
-
-  const workflowURL = `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`
 
   if (matchedRules.length !== 0) {
     const reviewsResponse = await octokit.rest.pulls.listReviews({
@@ -244,10 +221,10 @@ const main = async function () {
       pull_number: pr.number,
     })
     if (reviewsResponse.status !== 200) {
-      core.setFailed(
+      log(
         `Failed to fetch reviews from ${pr.html_url} (code ${reviewsResponse.status})`,
       )
-      return
+      return "failure"
     }
     const { data: reviews } = reviewsResponse
 
@@ -288,8 +265,10 @@ const main = async function () {
           }
         }
         if (approvedBy.size < rule.min_approvals) {
-          const missingApprovals: { username: string; team: string | null }[] =
-            []
+          const missingApprovals: {
+            username: string
+            team: string | null
+          }[] = []
           for (const [username, { team }] of rule.users) {
             if (!approvedBy.has(username)) {
               missingApprovals.push({ username, team })
@@ -328,7 +307,7 @@ const main = async function () {
       }
     }
 
-    console.log("usersToAskForReview", usersToAskForReview)
+    log("usersToAskForReview", usersToAskForReview)
     if (usersToAskForReview.size !== 0) {
       const teams: Set<string> = new Set()
       const users: Set<string> = new Set()
@@ -339,8 +318,8 @@ const main = async function () {
           teams.add(team)
         }
       }
-      console.log("reviewers", users)
-      console.log("team_reviewers", teams)
+      log("reviewers", users)
+      log("team_reviewers", teams)
       await octokit.request(
         "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
         {
@@ -368,33 +347,82 @@ const main = async function () {
     }
 
     if (problems.length !== 0) {
-      console.log("The following problems were found:")
+      log("The following problems were found:")
       for (const problem of problems) {
-        console.log(problem)
+        log(problem)
       }
-      const description = workflowURL
-      octokit.rest.repos.createCommitStatus({
-        owner: pr.base.repo.owner.login,
-        repo: pr.base.repo.name,
-        sha: pr.head.sha,
-        state: "failure",
-        context: `${env.GITHUB_WORKFLOW}?check_suite_focus=true`,
-        target_url: workflowURL,
-        description: description,
-      })
-      core.setFailed(description)
-      return
+      return "failure"
     }
   }
 
-  octokit.rest.repos.createCommitStatus({
-    owner: pr.base.repo.owner.login,
-    repo: pr.base.repo.name,
-    sha: pr.head.sha,
-    state: "success",
-    context: env.GITHUB_WORKFLOW,
-    target_url: workflowURL,
-  })
+  return "success"
+}
+
+const main = function () {
+  const env: {
+    GITHUB_SERVER_URL: string
+    GITHUB_WORKFLOW: string
+    GITHUB_RUN_ID: string
+    GITHUB_REPOSITORY: string
+  } = {
+    GITHUB_SERVER_URL: "",
+    GITHUB_WORKFLOW: "",
+    GITHUB_REPOSITORY: "",
+    GITHUB_RUN_ID: "",
+  }
+  for (const varName in env) {
+    const value = process.env[varName]
+    if (value === undefined) {
+      core.setFailed(`Missing environment variable $${varName}`)
+      return
+    }
+    env[varName as keyof typeof env] = value
+  }
+
+  const context = github.context
+  if (
+    context.eventName !== "pull_request" &&
+    context.eventName !== "pull_request_review"
+  ) {
+    core.setFailed(
+      `Invalid event: ${context.eventName}. This action should be triggered on pull_request and pull_request_review`,
+    )
+    return
+  }
+
+  const log = console.log
+
+  const pr = context.payload.pull_request as PR
+  const octokit = github.getOctokit(core.getInput("token"))
+
+  const exit = async function (state: "success" | "failure") {
+    const infoURL = `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`
+    await octokit.rest.repos.createCommitStatus({
+      owner: pr.base.repo.owner.login,
+      repo: pr.base.repo.name,
+      sha: pr.head.sha,
+      state,
+      context: env.GITHUB_WORKFLOW,
+      target_url: `${infoURL}?check_suite_focus=true`,
+      ...(state === "success"
+        ? {}
+        : { description: "Please check Details for more information" }),
+    })
+    log(`Final state: ${state}`)
+    // We always exit with 0 so that there are no lingering failure statuses in
+    // the pipeline for the action. The custom status created above will be the
+    // one to inform the outcome of this action.
+    process.exit(0)
+  }
+
+  runChecks(pr, octokit, env, log, context)
+    .then(function (state) {
+      exit(state)
+    })
+    .catch(function (error) {
+      log(error)
+      exit("failure")
+    })
 }
 
 main()
