@@ -67,7 +67,7 @@ class Logger {
   }
 
   public error = (...args: any[]) => {
-    // Uses escape codes for displaying the error line as red. 
+    // Uses escape codes for displaying the error line as red.
     // https://dustinpfister.github.io/2019/09/19/nodejs-ansi-escape-codes/
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.doLog("\n\u001b[31;1;4mERROR: ", ...args, "\u001b[39m")
@@ -87,7 +87,6 @@ class Logger {
 const combineUsers = async function (
   pr: PR,
   client: Octokit,
-  context: Context,
   presetUsers: string[],
   teams: string[],
 ) {
@@ -131,7 +130,6 @@ const runChecks = async function (
   pr: PR,
   octokit: Octokit,
   logger: Logger,
-  context: Context,
 ): Promise<"failure" | "success"> {
   const diffResponse: { data: string; status: number } = await octokit.request(
     pr.diff_url,
@@ -173,13 +171,7 @@ const runChecks = async function (
   const lockExpression = /🔒.*(\n^[+|-])|^[+|-].*🔒/gm
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
-    const users = await combineUsers(
-      pr,
-      octokit,
-      context,
-      [],
-      ["pr-custom-review-team"],
-    )
+    const users = await combineUsers(pr, octokit, [], ["pr-custom-review-team"])
     if (users instanceof Error) {
       logger.log(users)
       return "failure"
@@ -241,7 +233,6 @@ const runChecks = async function (
       const users = await combineUsers(
         pr,
         octokit,
-        context,
         rule.users ?? [],
         rule.teams ?? [],
       )
@@ -504,7 +495,7 @@ const main = function () {
     process.exit(0)
   }
 
-  runChecks(pr, octokit, logger, context)
+  runChecks(pr, octokit, logger)
     .then(function (state) {
       finish(state)
     })
