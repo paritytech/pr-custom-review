@@ -4,7 +4,9 @@ import { Context } from "@actions/github/lib/context"
 import * as Webhooks from "@octokit/webhooks-types"
 import * as fs from "fs"
 import Joi from "joi"
+import { inspect } from "util"
 import * as YAML from "yaml"
+import * as os from "os"
 
 type Octokit = ReturnType<typeof github.getOctokit>
 type PR =
@@ -34,7 +36,53 @@ const configurationSchema = Joi.object<Configuration>().keys({
   rules: Joi.array().items(ruleSchema).required(),
 })
 
-type RuleUser = { team: string | null }
+type RuleUserInfo = { team: string | null }
+
+// GitHub by default logs N lines when the job is starting.
+// N = 4 for pr-custom-review:
+// 1. Run org/pr-custom-review@tag
+// 2.   with:
+// 3.     token: ***
+// 4.     config-file: ./.github/pr-custom-review-config.yml
+const githubLogsInitialLineCount = 4
+class Logger {
+  lineCount: number = 0
+  public relevantStartingLine: number = 1
+
+  constructor() {}
+
+  doLog = (...args: any[]) => {
+    const message = args
+      .map(function (arg) {
+        return typeof arg === "string" ? arg : inspect(arg)
+      })
+      .join(" ")
+    process.stdout.write(`${message}${os.EOL}`)
+    this.lineCount += (message.match(/\n/g) || "").length + 1
+  }
+
+  public log = (...args: any[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    this.doLog(...args)
+  }
+
+  public error = (...args: any[]) => {
+    // Uses escape codes for displaying the error line as red. 
+    // https://dustinpfister.github.io/2019/09/19/nodejs-ansi-escape-codes/
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    this.doLog("\n\u001b[31;1;4mERROR: ", ...args, "\u001b[39m")
+  }
+
+  public warning = (...args: any[]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    this.doLog("WARNING: ", ...args)
+  }
+
+  public markNextLineAsRelevantStartingLine = (delta = 1) => {
+    this.relevantStartingLine =
+      this.lineCount + githubLogsInitialLineCount + delta
+  }
+}
 
 const combineUsers = async function (
   pr: PR,
@@ -43,7 +91,7 @@ const combineUsers = async function (
   presetUsers: string[],
   teams: string[],
 ) {
-  const users: Map<string, RuleUser> = new Map()
+  const users: Map<string, RuleUserInfo> = new Map()
 
   for (const user of presetUsers) {
     if (pr.user.login != user) {
@@ -82,14 +130,14 @@ const combineUsers = async function (
 const runChecks = async function (
   pr: PR,
   octokit: Octokit,
-  log: typeof console.log,
+  logger: Logger,
   context: Context,
 ): Promise<"failure" | "success"> {
   const diffResponse: { data: string; status: number } = await octokit.request(
     pr.diff_url,
   )
   if (diffResponse.status !== 200) {
-    log(
+    logger.log(
       `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
     )
     return "failure"
@@ -105,26 +153,26 @@ const runChecks = async function (
     },
   )
   if (changedFilesResponse.status !== 200) {
-    log(
+    logger.log(
       `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
     )
     return "failure"
   }
   const { data: changedFilesData } = changedFilesResponse
   const changedFiles = new Set(changedFilesData.map(({ filename }) => filename))
-  log("Changed files", changedFiles)
+  logger.log("Changed files", changedFiles)
 
   type MatchedRule = {
     name: string
     min_approvals: number
-    users: Map<string, RuleUser>
+    users: Map<string, RuleUserInfo>
   }
   const matchedRules: MatchedRule[] = []
 
   // Built in condition to search files with changes to locked lines
   const lockExpression = /🔒.*(\n^[+|-])|^[+|-].*🔒/gm
   if (lockExpression.test(diff)) {
-    log("Diff has changes to 🔒 lines or lines following 🔒")
+    logger.log("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(
       pr,
       octokit,
@@ -133,7 +181,7 @@ const runChecks = async function (
       ["pr-custom-review-team"],
     )
     if (users instanceof Error) {
-      log(users)
+      logger.log(users)
       return "failure"
     }
     matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
@@ -141,7 +189,7 @@ const runChecks = async function (
 
   const configFilePath = core.getInput("config-file")
   if (configFilePath === null || configFilePath.length === 0) {
-    log("No config file provided")
+    logger.log("No config file provided")
   } else if (fs.existsSync(configFilePath)) {
     const configFile = fs.readFileSync(configFilePath, "utf8")
 
@@ -149,7 +197,7 @@ const runChecks = async function (
       YAML.parse(configFile),
     )
     if (validation_result.error) {
-      log("Configuration file is invalid", validation_result.error)
+      logger.log("Configuration file is invalid", validation_result.error)
       return "failure"
     }
     const config = validation_result.value
@@ -162,8 +210,8 @@ const runChecks = async function (
         case "changed_files": {
           changedFilesLoop: for (const file of changedFiles) {
             if (condition.test(file)) {
-              log(
-                `Matched expression "${rule.condition}" for the file name ${file}`,
+              logger.log(
+                `Matched expression "${rule.condition}" of rule "${rule.name}" for the file ${file}`,
               )
               matched = true
               break changedFilesLoop
@@ -173,14 +221,16 @@ const runChecks = async function (
         }
         case "diff": {
           if (condition.test(diff)) {
-            log(`Matched expression "${rule.condition}" on diff`)
+            logger.log(
+              `Matched expression "${rule.condition}" of rule "${rule.name}" on diff`,
+            )
             matched = true
           }
           break
         }
         default: {
           const exhaustivenessCheck: never = rule.check_type
-          log(`Check type is not handled: ${exhaustivenessCheck}`)
+          logger.log(`Check type is not handled: ${exhaustivenessCheck}`)
           return "failure"
         }
       }
@@ -196,7 +246,7 @@ const runChecks = async function (
         rule.teams ?? [],
       )
       if (users instanceof Error) {
-        log(users)
+        logger.log(users)
         return "failure"
       }
       matchedRules.push({
@@ -206,7 +256,7 @@ const runChecks = async function (
       })
     }
   } else {
-    log(`Could not read config file at ${configFilePath}`)
+    logger.log(`Could not read config file at ${configFilePath}`)
     return "failure"
   }
 
@@ -217,7 +267,7 @@ const runChecks = async function (
       pull_number: pr.number,
     })
     if (reviewsResponse.status !== 200) {
-      log(
+      logger.log(
         `Failed to fetch reviews from ${pr.html_url} (code ${reviewsResponse.status})`,
       )
       return "failure"
@@ -226,7 +276,7 @@ const runChecks = async function (
 
     const latestReviews: Map<
       number,
-      { id: number; user: string; approved: boolean }
+      { id: number; user: string; isApproval: boolean }
     > = new Map()
     for (const review of reviews) {
       if (review.user === null || review.user === undefined) {
@@ -241,22 +291,21 @@ const runChecks = async function (
         latestReviews.set(review.user.id, {
           id: review.id,
           user: review.user.login,
-          approved: review.state === "APPROVED",
+          isApproval: review.state === "APPROVED",
         })
       }
     }
-    log("latestReviews", latestReviews)
+    logger.log("latestReviews", latestReviews.values())
 
     const problems: string[] = []
 
-    type Team = string | null
-    const usersToAskForReview: Map<string, Team> = new Map()
+    const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
     let highestMinApprovalsRule: MatchedRule | null = null
     for (const rule of matchedRules) {
       if (rule.users.size !== 0) {
         const approvedBy: Set<string> = new Set()
         for (const review of latestReviews.values()) {
-          if (rule.users.has(review.user) && review.approved) {
+          if (rule.users.has(review.user) && review.isApproval) {
             approvedBy.add(review.user)
           }
         }
@@ -279,7 +328,7 @@ const runChecks = async function (
                 // registered as part of a team.
                 team === null
               ) {
-                usersToAskForReview.set(username, team)
+                usersToAskForReview.set(username, { team })
               }
             }
           }
@@ -294,7 +343,7 @@ const runChecks = async function (
                   user.username
                 }${user.team ? ` (team: ${user.team})` : ""}`
               })
-              .join(", ")}`,
+              .join(", ")}.`,
           )
         }
       } else if (
@@ -306,10 +355,10 @@ const runChecks = async function (
     }
 
     if (usersToAskForReview.size !== 0) {
-      log("usersToAskForReview", usersToAskForReview)
+      logger.log("usersToAskForReview", usersToAskForReview)
       const teams: Set<string> = new Set()
       const users: Set<string> = new Set()
-      for (const [user, team] of usersToAskForReview) {
+      for (const [user, { team }] of usersToAskForReview) {
         if (team === null) {
           users.add(user)
         } else {
@@ -331,7 +380,7 @@ const runChecks = async function (
     if (highestMinApprovalsRule !== null) {
       let approvalCount = 0
       for (const review of latestReviews.values()) {
-        if (review.approved) {
+        if (review.isApproval) {
           approvalCount++
         }
       }
@@ -343,10 +392,12 @@ const runChecks = async function (
     }
 
     if (problems.length !== 0) {
-      log("The following problems were found:")
+      logger.markNextLineAsRelevantStartingLine(2)
+      logger.error("The following problems were found:")
       for (const problem of problems) {
-        log(problem)
+        logger.log(problem)
       }
+      logger.log("")
       return "failure"
     }
   }
@@ -366,49 +417,72 @@ const main = function () {
     return
   }
 
-  const log = console.log
+  const logger = new Logger()
 
   const pr = context.payload.pull_request as PR
-  const octokit = github.getOctokit(core.getInput("token"))
+  const octokit = github.getOctokit(core.getInput("token", { required: true }))
 
   const finish = async function (state: "success" | "failure") {
     // Fallback URL in case we are not able to detect the current job
     let detailsUrl = `${context.serverUrl}/${pr.base.repo.name}/runs/${context.runId}`
 
     if (state === "failure") {
-      // Fetch the jobs so that we'll be able to detect this step and provide a
-      // more accurate logging location
-      const jobsResponse = await octokit.rest.actions.listJobsForWorkflowRun({
-        owner: pr.base.repo.owner.login,
-        repo: pr.base.repo.name,
-        run_id: context.runId,
-      })
-      if (jobsResponse.status === 200) {
-        const {
-          data: { jobs },
-        } = jobsResponse
-        for (const job of jobs) {
-          if (job.name === process.env.GITHUB_JOB) {
-            let stepNumber: number | undefined = undefined
-            const actionRepositoryMatch = (
-              process.env.GITHUB_ACTION_REPOSITORY ?? ""
-            ).match(/[^/]*$/)
-            if (actionRepositoryMatch !== null) {
-              const thisActionStep = job.steps.find(function ({ name }) {
-                return name === actionRepositoryMatch[0]
-              })
-              stepNumber = thisActionStep?.number
-            }
-            detailsUrl = `${job.html_url}${
-              stepNumber ? `#step:${stepNumber}:1` : ""
-            }`
-            break
-          }
-        }
+      const jobName = process.env.GITHUB_JOB
+      if (jobName === undefined) {
+        logger.warning("Job name was not found in the environment")
       } else {
-        log(
-          `ERROR: Failed to fetch jobs for workflow run ${context.runId} (code ${jobsResponse.status})`,
-        )
+        // Fetch the jobs so that we'll be able to detect this step and provide a
+        // more accurate logging location
+        const jobsResponse = await octokit.rest.actions.listJobsForWorkflowRun({
+          owner: pr.base.repo.owner.login,
+          repo: pr.base.repo.name,
+          run_id: context.runId,
+        })
+        if (jobsResponse.status === 200) {
+          const {
+            data: { jobs },
+          } = jobsResponse
+          for (const job of jobs) {
+            if (job.name === jobName) {
+              let stepNumber: number | undefined = undefined
+              const actionRepository = process.env.GITHUB_ACTION_REPOSITORY
+              if (actionRepository === undefined) {
+                logger.warning(
+                  "Action repository was not found in the environment",
+                )
+              } else {
+                const actionRepositoryMatch = actionRepository.match(/[^/]*$/)
+                if (actionRepositoryMatch === null) {
+                  logger.warning(
+                    `Action repository name could not be extracted from ${actionRepository}`,
+                  )
+                } else {
+                  const actionStep = job.steps.find(function ({ name }) {
+                    return name === actionRepositoryMatch[0]
+                  })
+                  if (actionStep === undefined) {
+                    logger.warning(
+                      `Failed to find ${actionRepositoryMatch[0]} in the job's steps`,
+                      job.steps,
+                    )
+                  } else {
+                    stepNumber = actionStep.number
+                  }
+                }
+              }
+              detailsUrl = `${job.html_url}${
+                stepNumber
+                  ? `#step:${stepNumber}:${logger.relevantStartingLine}`
+                  : ""
+              }`
+              break
+            }
+          }
+        } else {
+          logger.error(
+            `Failed to fetch jobs for workflow run ${context.runId} (code ${jobsResponse.status})`,
+          )
+        }
       }
     }
 
@@ -422,7 +496,7 @@ const main = function () {
       description: "Please check Details for more information",
     })
 
-    log(`Final state: ${state}`)
+    logger.log(`Final state: ${state}`)
 
     // We always exit with 0 so that there are no lingering failure statuses in
     // the pipeline for the action. The custom status created above will be the
@@ -430,12 +504,12 @@ const main = function () {
     process.exit(0)
   }
 
-  runChecks(pr, octokit, log, context)
+  runChecks(pr, octokit, logger, context)
     .then(function (state) {
       finish(state)
     })
     .catch(function (error) {
-      log(error)
+      logger.log(error)
       finish("failure")
     })
 }
