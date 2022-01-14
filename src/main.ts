@@ -67,6 +67,8 @@ const combineUsers = async function (
       }
       if (
         pr.user.login != member.login &&
+        // We do not want to register a team for this user if their approval is
+        // supposed to be requested individually
         users.get(member.login) === undefined
       ) {
         users.set(member.login, { team })
@@ -271,8 +273,10 @@ const runChecks = async function (
                 // Avoid registering the same user twice
                 prevUser === undefined ||
                 // If the team is null, this user was not asked as part of a
-                // team, but individually. In that case we should register them
-                // with a null team so that they will be asked individually.
+                // team, but individually. They should always be registered with
+                // "team: null" that case to be sure the review will be
+                // requested individually, even if they were previously
+                // registered as part of a team.
                 team === null
               ) {
                 usersToAskForReview.set(username, team)
