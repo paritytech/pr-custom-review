@@ -403,7 +403,7 @@ const main = function () {
                     `Action repository name could not be extracted from ${actionRepository}`,
                   )
                 } else {
-                  const actionStep = job.steps.find(function ({ name }) {
+                  const actionStep = job.steps?.find(function ({ name }) {
                     return name === actionRepositoryMatch[0]
                   })
                   if (actionStep === undefined) {
@@ -455,7 +455,7 @@ const main = function () {
       finish(state)
     })
     .catch(function (error) {
-      logger.log(error)
+      logger.failure(error)
       finish("failure")
     })
 }
