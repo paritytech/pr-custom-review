@@ -13,6 +13,7 @@ const conf = {
   globals: {
     "ts-jest": { tsconfig: path.join(__dirname, "test", "tsconfig.json") },
   },
+  snapshotResolver: "./test/snapshotResolver.js",
 }
 
 module.exports = conf
