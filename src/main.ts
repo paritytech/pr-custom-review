@@ -88,9 +88,10 @@ const runChecks = async function (
     pr.diff_url,
   )
   if (diffResponse.status !== 200) {
-    logger.log(
+    logger.failure(
       `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
     )
+    logger.log(diffResponse.data)
     return "failure"
   }
   const { data: diff } = diffResponse
@@ -104,9 +105,10 @@ const runChecks = async function (
     },
   )
   if (changedFilesResponse.status !== 200) {
-    logger.log(
+    logger.failure(
       `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
     )
+    logger.log(changedFilesResponse.data)
     return "failure"
   }
   const { data: changedFilesData } = changedFilesResponse
@@ -126,7 +128,7 @@ const runChecks = async function (
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(pr, octokit, [], ["pr-custom-review-team"])
     if (users instanceof Error) {
-      logger.log(users)
+      logger.failure(users)
       return "failure"
     }
     matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
@@ -142,7 +144,8 @@ const runChecks = async function (
       YAML.parse(configFile),
     )
     if (validation_result.error) {
-      logger.log("Configuration file is invalid", validation_result.error)
+      logger.failure("Configuration file is invalid")
+      logger.log(validation_result.error)
       return "failure"
     }
     const config = validation_result.value
@@ -175,7 +178,7 @@ const runChecks = async function (
         }
         default: {
           const exhaustivenessCheck: never = rule.check_type
-          logger.log(`Check type is not handled: ${exhaustivenessCheck}`)
+          logger.failure(`Check type is not handled: ${exhaustivenessCheck}`)
           return "failure"
         }
       }
@@ -190,7 +193,7 @@ const runChecks = async function (
         rule.teams ?? [],
       )
       if (users instanceof Error) {
-        logger.log(users)
+        logger.failure(users)
         return "failure"
       }
       matchedRules.push({
@@ -200,7 +203,7 @@ const runChecks = async function (
       })
     }
   } else {
-    logger.log(`Could not read config file at ${configFilePath}`)
+    logger.failure(`Could not read config file at ${configFilePath}`)
     return "failure"
   }
 
@@ -211,9 +214,10 @@ const runChecks = async function (
       pull_number: pr.number,
     })
     if (reviewsResponse.status !== 200) {
-      logger.log(
+      logger.failure(
         `Failed to fetch reviews from ${pr.html_url} (code ${reviewsResponse.status})`,
       )
+      logger.log(reviewsResponse.data)
       return "failure"
     }
     const { data: reviews } = reviewsResponse
@@ -336,8 +340,7 @@ const runChecks = async function (
     }
 
     if (problems.length !== 0) {
-      logger.markNextLineAsRelevantStartingLine(2)
-      logger.error("The following problems were found:")
+      logger.failure("The following problems were found:")
       for (const problem of problems) {
         logger.log(problem)
       }
@@ -423,7 +426,7 @@ const main = function () {
             }
           }
         } else {
-          logger.error(
+          logger.failure(
             `Failed to fetch jobs for workflow run ${context.runId} (code ${jobsResponse.status})`,
           )
         }

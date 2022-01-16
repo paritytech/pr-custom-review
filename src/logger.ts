@@ -42,6 +42,16 @@ export class Logger {
     this.doLog("WARNING: ", ...args)
   }
 
+  public failure = (...args: any[]) => {
+    this.markNextLineAsRelevantStartingLine(
+      // This uses delta = 2 because the error logging adds an extra newline at
+      // the start
+      2,
+    )
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    this.error(...args)
+  }
+
   public markNextLineAsRelevantStartingLine = (delta = 1) => {
     this.relevantStartingLine =
       this.lineCount + githubLogsInitialLineCount + delta
