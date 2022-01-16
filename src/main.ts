@@ -51,14 +51,13 @@ const combineUsers = async function (
     }
   }
 
-  const org = pr.base.repo.owner.login
   for (const team of teams) {
     const teamMembersResponse = await client.rest.teams.listMembersInOrg({
-      org,
+      org: pr.base.repo.owner.login,
       team_slug: team,
     })
     if (teamMembersResponse.status !== 200) {
-      return new Error(`Failed to fetch team members from ${org}/${team}`)
+      return new Error(`Failed to fetch team members from ${team}`)
     }
 
     for (const member of teamMembersResponse.data) {
