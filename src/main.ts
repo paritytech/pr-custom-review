@@ -44,7 +44,7 @@ const combineUsers = async function (
   client: Octokit,
   presetUsers: string[],
   teams: string[],
-): Promise<Map<string, RuleUserInfo> | Error> {
+) {
   const users: Map<string, RuleUserInfo> = new Map()
 
   for (const user of presetUsers) {
@@ -59,7 +59,7 @@ const combineUsers = async function (
       team_slug: team,
     })
     if (teamMembersResponse.status !== 200) {
-      return new Error(`Failed to fetch team members from ${team}`)
+      throw new Error(`Failed to fetch team members from ${team}`)
     }
 
     for (const member of teamMembersResponse.data) {
@@ -128,10 +128,6 @@ const runChecks = async function (
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(pr, octokit, [], ["pr-custom-review-team"])
-    if (users instanceof Error) {
-      logger.failure(users)
-      return commitStateFailure
-    }
     matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
   }
 
@@ -193,10 +189,6 @@ const runChecks = async function (
         rule.users ?? [],
         rule.teams ?? [],
       )
-      if (users instanceof Error) {
-        logger.failure(users)
-        return commitStateFailure
-      }
       matchedRules.push({
         name: rule.name,
         min_approvals: rule.min_approvals,
