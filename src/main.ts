@@ -44,7 +44,7 @@ const combineUsers = async function (
   client: Octokit,
   presetUsers: string[],
   teams: string[],
-) {
+): Promise<Map<string, RuleUserInfo> | Error> {
   const users: Map<string, RuleUserInfo> = new Map()
 
   for (const user of presetUsers) {
