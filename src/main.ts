@@ -5,7 +5,9 @@ import * as fs from "fs"
 import Joi from "joi"
 import * as YAML from "yaml"
 
+import { commitStateFailure, commitStateSuccess } from "./constants"
 import Logger from "./logger"
+import { CommitState } from "./types"
 
 type Octokit = ReturnType<typeof github.getOctokit>
 type PR =
@@ -82,7 +84,7 @@ const runChecks = async function (
   pr: PR,
   octokit: Octokit,
   logger: Logger,
-): Promise<"failure" | "success"> {
+): Promise<CommitState> {
   const diffResponse: { data: string; status: number } = await octokit.request(
     pr.diff_url,
   )
@@ -91,7 +93,7 @@ const runChecks = async function (
       `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
     )
     logger.log(diffResponse.data)
-    return "failure"
+    return commitStateFailure
   }
   const { data: diff } = diffResponse
 
@@ -108,7 +110,7 @@ const runChecks = async function (
       `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
     )
     logger.log(changedFilesResponse.data)
-    return "failure"
+    return commitStateFailure
   }
   const { data: changedFilesData } = changedFilesResponse
   const changedFiles = new Set(changedFilesData.map(({ filename }) => filename))
@@ -128,7 +130,7 @@ const runChecks = async function (
     const users = await combineUsers(pr, octokit, [], ["pr-custom-review-team"])
     if (users instanceof Error) {
       logger.failure(users)
-      return "failure"
+      return commitStateFailure
     }
     matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
   }
@@ -145,7 +147,7 @@ const runChecks = async function (
     if (validation_result.error) {
       logger.failure("Configuration file is invalid")
       logger.log(validation_result.error)
-      return "failure"
+      return commitStateFailure
     }
     const config = validation_result.value
 
@@ -178,7 +180,7 @@ const runChecks = async function (
         default: {
           const exhaustivenessCheck: never = rule.check_type
           logger.failure(`Check type is not handled: ${exhaustivenessCheck}`)
-          return "failure"
+          return commitStateFailure
         }
       }
       if (!matched) {
@@ -193,7 +195,7 @@ const runChecks = async function (
       )
       if (users instanceof Error) {
         logger.failure(users)
-        return "failure"
+        return commitStateFailure
       }
       matchedRules.push({
         name: rule.name,
@@ -203,7 +205,7 @@ const runChecks = async function (
     }
   } else {
     logger.failure(`Could not read config file at ${configFilePath}`)
-    return "failure"
+    return commitStateFailure
   }
 
   if (matchedRules.length !== 0) {
@@ -217,7 +219,7 @@ const runChecks = async function (
         `Failed to fetch reviews from ${pr.html_url} (code ${reviewsResponse.status})`,
       )
       logger.log(reviewsResponse.data)
-      return "failure"
+      return commitStateFailure
     }
     const { data: reviews } = reviewsResponse
 
@@ -344,11 +346,11 @@ const runChecks = async function (
         logger.log(problem)
       }
       logger.log("")
-      return "failure"
+      return commitStateFailure
     }
   }
 
-  return "success"
+  return commitStateSuccess
 }
 
 const main = function () {
@@ -368,11 +370,11 @@ const main = function () {
   const pr = context.payload.pull_request as PR
   const octokit = github.getOctokit(core.getInput("token", { required: true }))
 
-  const finish = async function (state: "success" | "failure") {
+  const finish = async function (state: CommitState) {
     // Fallback URL in case we are not able to detect the current job
     let detailsUrl = `${context.serverUrl}/${pr.base.repo.name}/runs/${context.runId}`
 
-    if (state === "failure") {
+    if (state === commitStateFailure) {
       const jobName = process.env.GITHUB_JOB
       if (jobName === undefined) {
         logger.warning("Job name was not found in the environment")
@@ -456,7 +458,7 @@ const main = function () {
     })
     .catch(function (error) {
       logger.failure(error)
-      finish("failure")
+      finish(commitStateFailure)
     })
 }
 
