@@ -89,10 +89,12 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
-          # Custom token with read-only organization permission is required for
-          # requesting reviews from teams. The inherent action token will not
-          # work for this.
+          # A token with read-only organization permission is required for
+          # requesting reviews from teams.
           token: ${{ secrets.GITHUB_TOKEN }}
+
+          # The team which will handle the "locks touched" built-in rule.
+          locks-review-team: my-custom-team
 
           # Optional: Disable the configuration file and only use built-in checks
           # config-file:
