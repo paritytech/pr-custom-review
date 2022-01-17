@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit",
     "test:check": "npm run typecheck && npm run lint && npm run test",
     "test": "jest",
+    "coverage": "npm run test -- --coverage",
     "lint": "eslint '**/*.ts'",
     "fix": "npm run lint -- --fix",
     "package": "ncc build --source-map --license licenses.txt build/main.js",
