@@ -364,7 +364,7 @@ const main = function () {
 
   const finish = async function (state: CommitState) {
     // Fallback URL in case we are not able to detect the current job
-    let detailsUrl = `${context.serverUrl}/${pr.base.repo.name}/runs/${context.runId}`
+    let detailsUrl = `${context.serverUrl}/${pr.base.repo.owner}/${pr.base.repo.name}/actions/runs/${context.runId}`
 
     if (state === commitStateFailure) {
       const jobName = process.env.GITHUB_JOB
