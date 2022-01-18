@@ -26,17 +26,52 @@ export type PR = {
   html_url: string
 }
 
-export type Rule = {
+export type BaseRule = {
   name: string
   condition: string
   check_type: "diff" | "changed_files"
+}
+
+export type RuleCriteria = {
   min_approvals: number
   users: Array<string> | undefined | null
   teams: Array<string> | undefined | null
 }
+
+export type BasicRule = BaseRule & RuleCriteria
+
+export type OrRule = BaseRule & {
+  any: RuleCriteria[]
+}
+
+export type AndRule = BaseRule & {
+  all: RuleCriteria[]
+}
+
+export type RuleKind = "BasicRule" | "OrRule" | "AndRule"
+export type Rule = BasicRule | OrRule | AndRule
 
 export type Configuration = {
   rules: Rule[]
 }
 
 export type RuleUserInfo = { team: string | null }
+
+export type MatchedRule = {
+  name: string
+  min_approvals: number
+  users: Map<string, RuleUserInfo>
+  kind: "BasicRule" | "AndRule" | "OrRule"
+  id: number
+}
+
+export class RuleSuccess {
+  constructor(public rule: MatchedRule) {}
+}
+export class RuleFailure {
+  constructor(
+    public rule: MatchedRule,
+    public problem: string,
+    public usersToAskForReview: Map<string, RuleUserInfo>,
+  ) {}
+}
