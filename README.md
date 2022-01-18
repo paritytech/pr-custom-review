@@ -189,4 +189,5 @@ installed.
 Run `npm run test`.
 
 Test logging is saved to [snapshots](./test/batch) (`.snap` files). If your
-changes some snapshot then run `npm run test -u` after review.
+code changes affect some snapshot then review the modifications and run `npm
+run test -u`.
