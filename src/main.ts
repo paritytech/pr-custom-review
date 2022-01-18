@@ -3,7 +3,7 @@ import { context, getOctokit } from "@actions/github"
 
 import { runChecks } from "./core"
 import Logger from "./logger"
-import { PR } from "./types"
+import { CommitState, PR } from "./types"
 
 const main = function () {
   if (
@@ -21,7 +21,7 @@ const main = function () {
   const pr = context.payload.pull_request as PR
   const octokit = getOctokit(getInput("token", { required: true }))
 
-  const finish = async function (state: "success" | "failure") {
+  const finish = async function (state: CommitState) {
     // Fallback URL in case we are not able to detect the current job
     let detailsUrl = `${context.serverUrl}/${pr.base.repo.name}/runs/${context.runId}`
 

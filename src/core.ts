@@ -1,5 +1,6 @@
 import YAML from "yaml"
 
+import { commitStateFailure, commitStateSuccess } from "./constants"
 import { LoggerInterface } from "./logger"
 import { Octokit, PR, RuleUserInfo } from "./types"
 import { configurationSchema } from "./validation"
@@ -24,7 +25,7 @@ const combineUsers = async function (
       team_slug: team,
     })
     if (teamMembersResponse.status !== 200) {
-      return new Error(`Failed to fetch team members from ${team}`)
+      throw new Error(`Failed to fetch team members from ${team}`)
     }
 
     for (const member of teamMembersResponse.data) {
@@ -59,7 +60,7 @@ export const runChecks = async function (
     configFilePath: string
     locksReviewTeam: string
   },
-): Promise<"failure" | "success"> {
+) {
   const diffResponse: { data: string; status: number } = await octokit.request(
     pr.diff_url,
   )
@@ -68,7 +69,7 @@ export const runChecks = async function (
       `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
     )
     logger.log(diffResponse.data)
-    return "failure"
+    return commitStateFailure
   }
   const { data: diff } = diffResponse
 
@@ -84,10 +85,6 @@ export const runChecks = async function (
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(pr, octokit, [], [locksReviewTeam])
-    if (users instanceof Error) {
-      logger.failure(users)
-      return "failure"
-    }
     matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
   }
 
@@ -109,7 +106,7 @@ export const runChecks = async function (
         `Failed to get the contents of ${configFilePath} (code ${configFileResponse.status})`,
       )
       logger.log(configFileResponse.data)
-      return "failure"
+      return commitStateFailure
     }
     const { data } = configFileResponse
     if (typeof data !== "object" || !("content" in data)) {
@@ -117,7 +114,7 @@ export const runChecks = async function (
         `Data response for ${configFilePath} had unexpected type (expected object)`,
       )
       logger.log(configFileResponse.data)
-      return "failure"
+      return commitStateFailure
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const configFileContentsEnconded = data.content
@@ -126,7 +123,7 @@ export const runChecks = async function (
         `Content response for ${configFilePath} had unexpected type (expected string)`,
       )
       logger.log(configFileResponse.data)
-      return "failure"
+      return commitStateFailure
     }
 
     const configFileContents = Buffer.from(
@@ -139,7 +136,7 @@ export const runChecks = async function (
     if (validationResult.error) {
       logger.failure("Configuration file is invalid")
       logger.log(validationResult.error)
-      return "failure"
+      return commitStateFailure
     }
     const config = validationResult.value
 
@@ -169,7 +166,7 @@ export const runChecks = async function (
                 `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
               )
               logger.log(changedFilesResponse.data)
-              return "failure"
+              return commitStateFailure
             }
             const { data: changedFilesData } = changedFilesResponse
             changedFiles = new Set(
@@ -200,7 +197,7 @@ export const runChecks = async function (
         default: {
           const exhaustivenessCheck: never = rule.check_type
           logger.failure(`Check type is not handled: ${exhaustivenessCheck}`)
-          return "failure"
+          return commitStateFailure
         }
       }
       if (!matched) {
@@ -213,10 +210,7 @@ export const runChecks = async function (
         rule.users ?? [],
         rule.teams ?? [],
       )
-      if (users instanceof Error) {
-        logger.failure(users)
-        return "failure"
-      }
+
       matchedRules.push({
         name: rule.name,
         min_approvals: rule.min_approvals,
@@ -236,7 +230,7 @@ export const runChecks = async function (
         `Failed to fetch reviews from ${pr.html_url} (code ${reviewsResponse.status})`,
       )
       logger.log(reviewsResponse.data)
-      return "failure"
+      return commitStateFailure
     }
     const { data: reviews } = reviewsResponse
 
@@ -363,9 +357,9 @@ export const runChecks = async function (
         logger.log(problem)
       }
       logger.log("")
-      return "failure"
+      return commitStateFailure
     }
   }
 
-  return "success"
+  return commitStateSuccess
 }
