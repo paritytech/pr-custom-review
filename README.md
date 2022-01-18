@@ -90,8 +90,7 @@ rules:
 #### And Rule syntax <a name="and-rule-syntax"></a>
 
 And Rules will only match if **all** the subconditions listed in `all` are
-fulfilled. Note that we are not specifying top-level fields from
-[basic rules](#basic-rule-syntax).
+fulfilled.
 
 ```yaml
 rules:
@@ -115,8 +114,6 @@ field.
 #### Or Rule syntax <a name="or-rule-syntax"></a>
 
 Or Rules will match if **any** subconditions listed in `any` are fulfilled.
-Note that we are not specifying top-level fields from
-[basic rules](#basic-rule-syntax).
 
 ```yaml
 rules:
