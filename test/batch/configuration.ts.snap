@@ -36,7 +36,7 @@ Array [
 
 exports[`Configuration Configuration is invalid if locksReviewTeam is empty or missing 1`] = `
 Array [
-  "ERROR:  Locks review team should be provided",
+  "ERROR:  Locks Review Team should be provided",
 ]
 `;
 
