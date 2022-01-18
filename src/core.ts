@@ -61,6 +61,11 @@ export const runChecks = async function (
     locksReviewTeam: string
   },
 ) {
+  if (locksReviewTeam.length === 0) {
+    logger.failure("Locks review team should be provided")
+    return commitStateFailure
+  }
+
   const diffResponse: { data: string; status: number } = await octokit.request(
     pr.diff_url,
   )

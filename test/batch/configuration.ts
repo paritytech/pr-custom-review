@@ -90,6 +90,17 @@ describe("Configuration", function () {
     expect(logHistory).toMatchSnapshot()
   })
 
+  it("Configuration is invalid if locksReviewTeam is empty or missing", async function () {
+    expect(
+      await runChecks(basePR, octokit, logger, {
+        configFilePath,
+        locksReviewTeam: "",
+      }),
+    ).toBe("failure")
+
+    expect(logHistory).toMatchSnapshot()
+  })
+
   afterEach(function () {
     nock.cleanAll()
     nock.enableNetConnect()
