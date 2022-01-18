@@ -16,7 +16,7 @@
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
     "format:check": "prettier --check '**/*.ts'",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p ./tsconfig.lint.json --noEmit",
     "test:check": "npm run typecheck && npm run lint && npm run test",
     "test": "jest",
     "coverage": "npm run test -- --coverage",
