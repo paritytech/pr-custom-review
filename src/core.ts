@@ -1,8 +1,10 @@
 import YAML from "yaml"
 
 import {
+  actionReviewTeamFiles,
   commitStateFailure,
   commitStateSuccess,
+  configFilePath,
   rulesConfigurations,
   variableNameToActionInputName,
 } from "./constants"
@@ -69,11 +71,11 @@ export const runChecks = async function (
   octokit: Octokit,
   logger: LoggerInterface,
   {
-    configFilePath,
+    actionReviewTeam,
     locksReviewTeam,
     teamLeadsTeam,
   }: {
-    configFilePath: string
+    actionReviewTeam: string
     locksReviewTeam: string
     teamLeadsTeam: string
   },
@@ -87,6 +89,12 @@ export const runChecks = async function (
   if (teamLeadsTeam.length === 0) {
     logger.failure(
       `Team Leads Team (action input: ${variableNameToActionInputName.teamLeadsTeam}) should be provided`,
+    )
+    return commitStateFailure
+  }
+  if (actionReviewTeam.length === 0) {
+    logger.failure(
+      `Action Review Team (action input: ${variableNameToActionInputName.actionReviewTeam}) should be provided`,
     )
     return commitStateFailure
   }
@@ -122,204 +130,201 @@ export const runChecks = async function (
     }
   }
 
-  if (configFilePath === null || configFilePath.length === 0) {
-    logger.log("No config file provided")
-  } else {
-    // Github API does not accept "./*"
-    if (configFilePath.startsWith("./")) {
-      configFilePath = configFilePath.slice(2)
-    }
-
-    const configFileResponse = await octokit.rest.repos.getContent({
+  const changedFilesResponse = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
+    {
       owner: pr.base.repo.owner.login,
       repo: pr.base.repo.name,
-      path: configFilePath,
-    })
-    if (configFileResponse.status !== 200) {
-      logger.failure(
-        `Failed to get the contents of ${configFilePath} (code ${configFileResponse.status})`,
-      )
-      logger.log(configFileResponse.data)
-      return commitStateFailure
-    }
-    const { data } = configFileResponse
-    if (typeof data !== "object" || !("content" in data)) {
-      logger.failure(
-        `Data response for ${configFilePath} had unexpected type (expected object)`,
-      )
-      logger.log(configFileResponse.data)
-      return commitStateFailure
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const configFileContentsEnconded = data.content
-    if (typeof configFileContentsEnconded !== "string") {
-      logger.failure(
-        `Content response for ${configFilePath} had unexpected type (expected string)`,
-      )
-      logger.log(configFileResponse.data)
-      return commitStateFailure
-    }
-
-    const configFileContents = Buffer.from(
-      configFileContentsEnconded,
-      "base64",
-    ).toString("utf-8")
-    const validationResult = configurationSchema.validate(
-      YAML.parse(configFileContents),
+      pull_number: pr.number,
+    },
+  )
+  if (changedFilesResponse.status !== 200) {
+    logger.failure(
+      `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
     )
-    if (validationResult.error) {
-      logger.failure("Configuration file is invalid")
-      logger.log(validationResult.error)
-      return commitStateFailure
+    logger.log(changedFilesResponse.data)
+    return commitStateFailure
+  }
+  const { data: changedFilesData } = changedFilesResponse
+  const changedFiles = new Set(changedFilesData.map(({ filename }) => filename))
+  logger.log("Changed files", changedFiles)
+
+  for (const actionReviewFile of actionReviewTeamFiles) {
+    if (changedFiles.has(actionReviewFile)) {
+      const users = await combineUsers(pr, octokit, [], [actionReviewTeam])
+      matchedRules.push({
+        name: "Action files changed",
+        min_approvals: 1,
+        kind: "BasicRule",
+        users,
+        id: ++nextMatchedRuleId,
+      })
+      break
     }
-    const config = validationResult.value
+  }
 
-    const processComplexRule = async function (
-      id: MatchedRule["id"],
-      name: string,
-      kind: RuleKind,
-      subConditions: RuleCriteria[],
-    ) {
-      let conditionIndex = -1
-      for (const subCondition of subConditions) {
-        const users = await combineUsers(
-          pr,
-          octokit,
-          subCondition.users ?? [],
-          subCondition.teams ?? [],
-        )
-        matchedRules.push({
-          name: `${name}[${++conditionIndex}]`,
-          min_approvals: subCondition.min_approvals,
-          users,
-          kind,
-          id,
-        })
-      }
+  const configFileResponse = await octokit.rest.repos.getContent({
+    owner: pr.base.repo.owner.login,
+    repo: pr.base.repo.name,
+    path: configFilePath,
+  })
+  if (configFileResponse.status !== 200) {
+    logger.failure(
+      `Failed to get the contents of ${configFilePath} (code ${configFileResponse.status})`,
+    )
+    logger.log(configFileResponse.data)
+    return commitStateFailure
+  }
+  const { data } = configFileResponse
+  if (typeof data !== "object" || !("content" in data)) {
+    logger.failure(
+      `Data response for ${configFilePath} had unexpected type (expected object)`,
+    )
+    logger.log(configFileResponse.data)
+    return commitStateFailure
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const configFileContentsEnconded = data.content
+  if (typeof configFileContentsEnconded !== "string") {
+    logger.failure(
+      `Content response for ${configFilePath} had unexpected type (expected string)`,
+    )
+    logger.log(configFileResponse.data)
+    return commitStateFailure
+  }
+
+  const configFileContents = Buffer.from(
+    configFileContentsEnconded,
+    "base64",
+  ).toString("utf-8")
+  const validationResult = configurationSchema.validate(
+    YAML.parse(configFileContents),
+  )
+  if (validationResult.error) {
+    logger.failure("Configuration file is invalid")
+    logger.log(validationResult.error)
+    return commitStateFailure
+  }
+  const config = validationResult.value
+
+  const processComplexRule = async function (
+    id: MatchedRule["id"],
+    name: string,
+    kind: RuleKind,
+    subConditions: RuleCriteria[],
+  ) {
+    let conditionIndex = -1
+    for (const subCondition of subConditions) {
+      const users = await combineUsers(
+        pr,
+        octokit,
+        subCondition.users ?? [],
+        subCondition.teams ?? [],
+      )
+      matchedRules.push({
+        name: `${name}[${++conditionIndex}]`,
+        min_approvals: subCondition.min_approvals,
+        users,
+        kind,
+        id,
+      })
     }
+  }
 
-    // Unlike diff, which is always requested for checking the locks built-in
-    // rule, we do not need to load the changed files upfront, only if there's
-    // some changed_files rule
-    // The actual files will be loaded later in case some rule needs it
-    let changedFiles: Set<string> | undefined = undefined
-    for (const rule of config.rules) {
-      const condition: RegExp = new RegExp(rule.condition, "gm")
+  for (const rule of config.rules) {
+    const condition: RegExp = new RegExp(rule.condition, "gm")
 
-      // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
-      for (const { kind, uniqueFields, invalidFields } of Object.values(
-        rulesConfigurations,
-      )) {
-        for (const field of uniqueFields) {
-          if (field in rule) {
-            for (const invalidField of invalidFields) {
-              if (invalidField in rule) {
-                logger.failure(
-                  `Rule "${rule.name}" was expected to be of kind "${kind}" because it had the field "${field}", but it also has the field "${invalidField}", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.`,
-                )
-                return commitStateFailure
-              }
-            }
-          }
-        }
-      }
-
-      let matched = false
-      switch (rule.check_type) {
-        case "changed_files": {
-          if (changedFiles === undefined) {
-            const changedFilesResponse = await octokit.request(
-              "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
-              {
-                owner: pr.base.repo.owner.login,
-                repo: pr.base.repo.name,
-                pull_number: pr.number,
-              },
-            )
-            if (changedFilesResponse.status !== 200) {
+    // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
+    for (const { kind, uniqueFields, invalidFields } of Object.values(
+      rulesConfigurations,
+    )) {
+      for (const field of uniqueFields) {
+        if (field in rule) {
+          for (const invalidField of invalidFields) {
+            if (invalidField in rule) {
               logger.failure(
-                `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
+                `Rule "${rule.name}" was expected to be of kind "${kind}" because it had the field "${field}", but it also has the field "${invalidField}", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.`,
               )
-              logger.log(changedFilesResponse.data)
               return commitStateFailure
             }
-            const { data: changedFilesData } = changedFilesResponse
-            changedFiles = new Set(
-              changedFilesData.map(({ filename }) => filename),
-            )
-            logger.log("Changed files", changedFiles)
           }
-          changedFilesLoop: for (const file of changedFiles) {
-            if (condition.test(file)) {
-              logger.log(
-                `Matched expression "${rule.condition}" of rule "${rule.name}" for the file ${file}`,
-              )
-              matched = true
-              break changedFilesLoop
-            }
-          }
-          break
         }
-        case "diff": {
-          if (condition.test(diff)) {
+      }
+    }
+
+    let matched = false
+    switch (rule.check_type) {
+      case "changed_files": {
+        changedFilesLoop: for (const file of changedFiles) {
+          if (condition.test(file)) {
             logger.log(
-              `Matched expression "${rule.condition}" of rule "${rule.name}" on diff`,
+              `Matched expression "${rule.condition}" of rule "${rule.name}" for the file ${file}`,
             )
             matched = true
+            break changedFilesLoop
           }
-          break
         }
-        default: {
-          const exhaustivenessCheck: never = rule.check_type
-          logger.failure(`Check type is not handled: ${exhaustivenessCheck}`)
-          return commitStateFailure
-        }
+        break
       }
-      if (!matched) {
-        continue
+      case "diff": {
+        if (condition.test(diff)) {
+          logger.log(
+            `Matched expression "${rule.condition}" of rule "${rule.name}" on diff`,
+          )
+          matched = true
+        }
+        break
+      }
+      default: {
+        const exhaustivenessCheck: never = rule.check_type
+        logger.failure(`Check type is not handled: ${exhaustivenessCheck}`)
+        return commitStateFailure
+      }
+    }
+    if (!matched) {
+      continue
+    }
+
+    if (/* BasicRule */ "min_approvals" in rule) {
+      if (typeof rule.min_approvals !== "number") {
+        logger.failure(`Rule "${rule.name}" has invalid min_approvals`)
+        logger.log(rule)
+        return commitStateFailure
       }
 
-      if (/* BasicRule */ "min_approvals" in rule) {
-        if (typeof rule.min_approvals !== "number") {
-          logger.failure(`Rule "${rule.name}" has invalid min_approvals`)
-          logger.log(rule)
-          return commitStateFailure
-        }
+      const users = await combineUsers(
+        pr,
+        octokit,
+        rule.users ?? [],
+        rule.teams ?? [],
+      )
 
-        const users = await combineUsers(
-          pr,
-          octokit,
-          rule.users ?? [],
-          rule.teams ?? [],
-        )
-
-        matchedRules.push({
-          name: rule.name,
-          min_approvals: rule.min_approvals,
-          users,
-          kind: "BasicRule",
-          id: ++nextMatchedRuleId,
-        })
-      } else if (/* AndRule */ "all" in rule) {
-        await processComplexRule(
-          ++nextMatchedRuleId,
-          rule.name,
-          "AndRule",
-          rule.all,
-        )
-      } else if (/* OrRule */ "any" in rule) {
-        await processComplexRule(
-          ++nextMatchedRuleId,
-          rule.name,
-          "OrRule",
-          rule.any,
-        )
-      } else {
-        const unmatchedRule = rule as BaseRule
-        throw new Error(
-          `Rule "${unmatchedRule.name}" could not be matched to any known kind`,
-        )
-      }
+      matchedRules.push({
+        name: rule.name,
+        min_approvals: rule.min_approvals,
+        users,
+        kind: "BasicRule",
+        id: ++nextMatchedRuleId,
+      })
+    } else if (/* AndRule */ "all" in rule) {
+      await processComplexRule(
+        ++nextMatchedRuleId,
+        rule.name,
+        "AndRule",
+        rule.all,
+      )
+    } else if (/* OrRule */ "any" in rule) {
+      await processComplexRule(
+        ++nextMatchedRuleId,
+        rule.name,
+        "OrRule",
+        rule.any,
+      )
+    } else {
+      const unmatchedRule = rule as BaseRule
+      throw new Error(
+        `Rule "${unmatchedRule.name}" could not be matched to any known kind`,
+      )
     }
   }
 

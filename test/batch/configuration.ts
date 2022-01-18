@@ -4,14 +4,15 @@ import YAML from "yaml"
 
 import {
   basePR,
+  changedFilesApiPath,
   condition,
   configFileContentsApiPath,
-  configFilePath,
   githubApi,
   githubWebsite,
   rulesExamples,
   team,
   team2,
+  team3,
 } from "test/constants"
 import Logger from "test/logger"
 
@@ -34,6 +35,9 @@ describe("Configuration", function () {
     nock(githubWebsite)
       .get(basePR.diff_url.slice(githubWebsite.length))
       .reply(200, condition)
+    nock(githubApi)
+      .get(changedFilesApiPath)
+      .reply(200, [{ filename: condition }])
   })
 
   for (const [missingField, value] of [
@@ -63,9 +67,9 @@ describe("Configuration", function () {
 
       expect(
         await runChecks(basePR, octokit, logger, {
-          configFilePath,
           locksReviewTeam: team,
           teamLeadsTeam: team2,
+          actionReviewTeam: team3,
         }),
       ).toBe("failure")
 
@@ -90,9 +94,9 @@ describe("Configuration", function () {
 
     expect(
       await runChecks(basePR, octokit, logger, {
-        configFilePath,
         locksReviewTeam: team,
         teamLeadsTeam: team2,
+        actionReviewTeam: team3,
       }),
     ).toBe("failure")
 
@@ -103,9 +107,9 @@ describe("Configuration", function () {
     it(`Configuration is invalid if ${name} is empty or missing`, async function () {
       expect(
         await runChecks(basePR, octokit, logger, {
-          configFilePath,
           locksReviewTeam: team,
           teamLeadsTeam: team2,
+          actionReviewTeam: team3,
           [name]: "",
         }),
       ).toBe("failure")
@@ -151,9 +155,9 @@ describe("Configuration", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath,
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe("failure")
 
@@ -191,9 +195,9 @@ describe("Configuration", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath,
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe("failure")
 

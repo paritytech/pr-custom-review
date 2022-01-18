@@ -6,7 +6,6 @@ import {
   changedFilesApiPath,
   condition,
   configFileContentsApiPath,
-  configFilePath,
   coworkers,
   githubApi,
   githubWebsite,
@@ -15,10 +14,12 @@ import {
   reviewsApiPath,
   team,
   team2,
+  team3,
   userCoworker3,
 } from "test/constants"
 import Logger from "test/logger"
 
+import { actionReviewTeamFiles } from "src/constants"
 import { runChecks } from "src/core"
 
 describe("Rules", function () {
@@ -44,14 +45,19 @@ describe("Rules", function () {
       users,
       diff,
       teams,
+      hasEmptyConfiguration,
+      changedFiles,
     }: {
       users?: string[]
       diff?: string
       teams?: { name: string; members: string[] }[]
+      hasEmptyConfiguration?: boolean
+      changedFiles?: string[]
     } = {}) {
       users ??= coworkers
       diff ??= condition
       teams ??= [{ name: team, members: users }]
+      changedFiles ??= [condition]
 
       nock(githubWebsite)
         .get(basePR.diff_url.slice(githubWebsite.length))
@@ -90,7 +96,18 @@ describe("Rules", function () {
 
       nock(githubApi)
         .get(changedFilesApiPath)
-        .reply(200, [{ filename: condition }])
+        .reply(
+          200,
+          changedFiles.map(function (filename) {
+            return { filename }
+          }),
+        )
+
+      if (hasEmptyConfiguration) {
+        nock(githubApi)
+          .get(configFileContentsApiPath)
+          .reply(200, { content: Buffer.from("rules: []").toString("base64") })
+      }
     }
 
     for (const checkType of ["diff", "changed_files"] as const) {
@@ -143,9 +160,9 @@ describe("Rules", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath,
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -185,9 +202,9 @@ describe("Rules", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath,
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -243,9 +260,9 @@ describe("Rules", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath,
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -287,9 +304,9 @@ describe("Rules", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath,
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -365,9 +382,9 @@ describe("Rules", function () {
 
           expect(
             await runChecks(basePR, octokit, logger, {
-              configFilePath,
               locksReviewTeam: team,
               teamLeadsTeam: team2,
+              actionReviewTeam: team3,
             }),
           ).toBe(expected)
 
@@ -454,9 +471,9 @@ describe("Rules", function () {
 
           expect(
             await runChecks(basePR, octokit, logger, {
-              configFilePath,
               locksReviewTeam: team,
               teamLeadsTeam: team2,
+              actionReviewTeam: team3,
             }),
           ).toBe(expectedCheckOutcome)
 
@@ -547,9 +564,9 @@ describe("Rules", function () {
 
           expect(
             await runChecks(basePR, octokit, logger, {
-              configFilePath,
               locksReviewTeam: team,
               teamLeadsTeam: team2,
+              actionReviewTeam: team3,
             }),
           ).toBe(expectedCheckOutcome)
 
@@ -566,6 +583,7 @@ describe("Rules", function () {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
+          hasEmptyConfiguration: true,
         })
 
         switch (scenario) {
@@ -587,9 +605,9 @@ describe("Rules", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath: "",
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -603,6 +621,7 @@ describe("Rules", function () {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
+          hasEmptyConfiguration: true,
         })
 
         switch (scenario) {
@@ -624,9 +643,45 @@ describe("Rules", function () {
 
         expect(
           await runChecks(basePR, octokit, logger, {
-            configFilePath: "",
             locksReviewTeam: team,
             teamLeadsTeam: team2,
+            actionReviewTeam: team3,
+          }),
+        ).toBe(scenario === "Approved" ? "success" : "failure")
+
+        expect(logHistory).toMatchSnapshot()
+      })
+    }
+
+    for (const actionReviewFile of actionReviewTeamFiles) {
+      it(`${scenario} when ${actionReviewFile} is changed`, async function () {
+        setup({
+          hasEmptyConfiguration: true,
+          changedFiles: [actionReviewFile],
+          teams: [{ name: team3, members: [coworkers[1]] }],
+        })
+
+        switch (scenario) {
+          case "Has no approval":
+          case "Is missing approval": {
+            nock(githubApi)
+              .post(requestedReviewersApiPath, function (body) {
+                expect(body).toMatchObject({
+                  reviewers: [],
+                  team_reviewers: [team3],
+                })
+                return true
+              })
+              .reply(201)
+            break
+          }
+        }
+
+        expect(
+          await runChecks(basePR, octokit, logger, {
+            locksReviewTeam: team,
+            teamLeadsTeam: team2,
+            actionReviewTeam: team3,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
