@@ -91,6 +91,12 @@ Array [
 ]
 `;
 
+exports[`Configuration Configuration is invalid if teamLeadsTeam is empty or missing 1`] = `
+Array [
+  "ERROR:  Team Leads Team should be provided",
+]
+`;
+
 exports[`Configuration Rule kind AndRule does not allow invalid field any 1`] = `
 Array [
   "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",

@@ -70,13 +70,19 @@ export const runChecks = async function (
   {
     configFilePath,
     locksReviewTeam,
+    teamLeadsTeam,
   }: {
     configFilePath: string
     locksReviewTeam: string
+    teamLeadsTeam: string
   },
 ) {
   if (locksReviewTeam.length === 0) {
     logger.failure("Locks Review Team should be provided")
+    return commitStateFailure
+  }
+  if (teamLeadsTeam.length === 0) {
+    logger.failure("Team Leads Team should be provided")
     return commitStateFailure
   }
 
@@ -99,15 +105,16 @@ export const runChecks = async function (
   const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
-    const users = await combineUsers(pr, octokit, [], [locksReviewTeam])
-    const name = "LOCKS TOUCHED"
-    matchedRules.push({
-      name: name,
-      min_approvals: 2,
-      kind: "BasicRule",
-      users,
-      id: ++nextMatchedRuleId,
-    })
+    for (const team of [locksReviewTeam, teamLeadsTeam]) {
+      const users = await combineUsers(pr, octokit, [], [team])
+      matchedRules.push({
+        name: `LOCKS TOUCHED (team: ${team})`,
+        min_approvals: 1,
+        kind: "AndRule",
+        users,
+        id: ++nextMatchedRuleId,
+      })
+    }
   }
 
   if (configFilePath === null || configFilePath.length === 0) {
@@ -162,23 +169,23 @@ export const runChecks = async function (
     }
     const config = validationResult.value
 
-    const processRulesConditions = async function (
+    const processComplexRule = async function (
       id: MatchedRule["id"],
-      ruleName: string,
-      ruleCriterias: RuleCriteria[],
+      name: string,
       kind: RuleKind,
+      subConditions: RuleCriteria[],
     ) {
       let conditionIndex = -1
-      for (const condition of ruleCriterias) {
+      for (const subCondition of subConditions) {
         const users = await combineUsers(
           pr,
           octokit,
-          condition.users ?? [],
-          condition.teams ?? [],
+          subCondition.users ?? [],
+          subCondition.teams ?? [],
         )
         matchedRules.push({
-          name: `${ruleName}[${++conditionIndex}]`,
-          min_approvals: condition.min_approvals,
+          name: `${name}[${++conditionIndex}]`,
+          min_approvals: subCondition.min_approvals,
           users,
           kind,
           id,
@@ -289,18 +296,18 @@ export const runChecks = async function (
           id: ++nextMatchedRuleId,
         })
       } else if (/* AndRule */ "all" in rule) {
-        await processRulesConditions(
+        await processComplexRule(
           ++nextMatchedRuleId,
           rule.name,
-          rule.all,
           "AndRule",
+          rule.all,
         )
       } else if (/* OrRule */ "any" in rule) {
-        await processRulesConditions(
+        await processComplexRule(
           ++nextMatchedRuleId,
           rule.name,
-          rule.any,
           "OrRule",
+          rule.any,
         )
       } else {
         const unmatchedRule = rule as BaseRule

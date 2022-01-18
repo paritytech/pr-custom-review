@@ -5,6 +5,7 @@ export const repo = "repo"
 export const user = "user"
 
 export const team = "team"
+export const team2 = "team2"
 export const userCoworker = "userCoworker"
 export const userCoworker2 = "userCoworker2"
 export const userCoworker3 = "userCoworker3"

@@ -106,6 +106,7 @@ const main = function () {
   runChecks(pr, octokit, logger, {
     configFilePath: getInput("config-file"),
     locksReviewTeam: getInput("locks-review-team"),
+    teamLeadsTeam: getInput("team-leads-team"),
   })
     .then(function (state) {
       finish(state)

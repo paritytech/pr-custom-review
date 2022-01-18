@@ -11,6 +11,7 @@ import {
   githubWebsite,
   rulesExamples,
   team,
+  team2,
 } from "test/constants"
 import Logger from "test/logger"
 
@@ -61,6 +62,7 @@ describe("Configuration", function () {
         await runChecks(basePR, octokit, logger, {
           configFilePath,
           locksReviewTeam: team,
+          teamLeadsTeam: team2,
         }),
       ).toBe("failure")
 
@@ -87,6 +89,19 @@ describe("Configuration", function () {
       await runChecks(basePR, octokit, logger, {
         configFilePath,
         locksReviewTeam: team,
+        teamLeadsTeam: team2,
+      }),
+    ).toBe("failure")
+
+    expect(logHistory).toMatchSnapshot()
+  })
+
+  it("Configuration is invalid if teamLeadsTeam is empty or missing", async function () {
+    expect(
+      await runChecks(basePR, octokit, logger, {
+        configFilePath,
+        locksReviewTeam: team,
+        teamLeadsTeam: "",
       }),
     ).toBe("failure")
 
@@ -98,6 +113,7 @@ describe("Configuration", function () {
       await runChecks(basePR, octokit, logger, {
         configFilePath,
         locksReviewTeam: "",
+        teamLeadsTeam: team,
       }),
     ).toBe("failure")
 
@@ -143,6 +159,7 @@ describe("Configuration", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe("failure")
 
@@ -182,6 +199,7 @@ describe("Configuration", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe("failure")
 
