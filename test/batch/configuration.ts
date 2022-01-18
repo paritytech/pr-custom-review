@@ -65,7 +65,7 @@ describe("Configuration", function () {
     })
   }
 
-  it(`Configuration is invalid if min_approvals is less than 1`, async function () {
+  it("Configuration is invalid if min_approvals is less than 1", async function () {
     nock(githubApi)
       .get(configFileContentsApiPath)
       .reply(200, {
