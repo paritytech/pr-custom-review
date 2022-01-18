@@ -50,6 +50,31 @@ export type AndRule = BaseRule & {
 
 export type RuleKind = "BasicRule" | "OrRule" | "AndRule"
 export type Rule = BasicRule | OrRule | AndRule
+export type RuleConfiguration<Kind extends RuleKind> = Kind extends "BasicRule"
+  ? {
+      kind: Kind
+      uniqueFields: ["min_approvals", "teams", "users"]
+      invalidFields: ["any", "all"]
+    }
+  : Kind extends "AndRule"
+  ? {
+      kind: Kind
+      uniqueFields: ["all"]
+      invalidFields: ["min_approvals", "teams", "users", "any"]
+    }
+  : Kind extends "OrRule"
+  ? {
+      kind: Kind
+      uniqueFields: ["any"]
+      invalidFields: ["min_approvals", "teams", "users", "all"]
+    }
+  : never
+
+export type RulesConfigurations = {
+  basic: RuleConfiguration<"BasicRule">
+  and: RuleConfiguration<"AndRule">
+  or: RuleConfiguration<"OrRule">
+}
 
 export type Configuration = {
   rules: Rule[]

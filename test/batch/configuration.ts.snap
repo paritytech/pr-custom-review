@@ -57,6 +57,23 @@ Array [
 ]
 `;
 
+exports[`Configuration Configuration is invalid if min_approvals is less than 1 2`] = `
+Array [
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0].min_approvals\\" must be greater than or equal to 1] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0].min_approvals\\" must be greater than or equal to 1',
+      path: [Array],
+      type: 'number.min',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
 exports[`Configuration Configuration is invalid if min_approvals is missing 1`] = `
 Array [
   "ERROR:  Configuration file is invalid",
@@ -88,5 +105,65 @@ Array [
     }
   ]
 }",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field any 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field min_approvals 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field teams 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"teams\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field users 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"users\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind BasicRule does not allow invalid field all 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind BasicRule does not allow invalid field any 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field all 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field min_approvals 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field teams 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"teams\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field users 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"users\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
 ]
 `;

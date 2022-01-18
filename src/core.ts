@@ -1,11 +1,9 @@
 import YAML from "yaml"
 
 import {
-  andRuleUniqueFields,
   commitStateFailure,
   commitStateSuccess,
-  orRuleUniqueFields,
-  simpleRuleUniqueFields,
+  rulesConfigurations,
 } from "./constants"
 import { LoggerInterface } from "./logger"
 import {
@@ -200,33 +198,17 @@ export const runChecks = async function (
       const condition: RegExp = new RegExp(rule.condition, "gm")
 
       // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
-      for (const [kind, fields, invalidFieldsGroup] of [
-        [
-          "BasicRule",
-          simpleRuleUniqueFields,
-          [andRuleUniqueFields, orRuleUniqueFields],
-        ],
-        [
-          "AndRule",
-          andRuleUniqueFields,
-          [simpleRuleUniqueFields, orRuleUniqueFields],
-        ],
-        [
-          "OrRule",
-          orRuleUniqueFields,
-          [simpleRuleUniqueFields, andRuleUniqueFields],
-        ],
-      ]) {
-        for (const field of fields) {
-          if (typeof field === "string" && field in rule) {
-            for (const invalidFields of invalidFieldsGroup) {
-              for (const invalidField of invalidFields) {
-                if (invalidField in rule) {
-                  logger.failure(
-                    `Rule "${rule.name}" was expected to be of kind "${kind}" because it had the field "${field}", but it also has the field "${invalidField}", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.`,
-                  )
-                  return commitStateFailure
-                }
+      for (const { kind, uniqueFields, invalidFields } of Object.values(
+        rulesConfigurations,
+      )) {
+        for (const field of uniqueFields) {
+          if (field in rule) {
+            for (const invalidField of invalidFields) {
+              if (invalidField in rule) {
+                logger.failure(
+                  `Rule "${rule.name}" was expected to be of kind "${kind}" because it had the field "${field}", but it also has the field "${invalidField}", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.`,
+                )
+                return commitStateFailure
               }
             }
           }
