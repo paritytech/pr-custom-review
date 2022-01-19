@@ -1,10 +1,4 @@
-import {
-  AndRule,
-  BasicRule,
-  CommitState,
-  OrRule,
-  RulesConfigurations,
-} from "./types"
+import { CommitState, RulesConfigurations } from "./types"
 
 export const commitStateSuccess: CommitState = "success"
 export const commitStateFailure: CommitState = "failure"
@@ -26,13 +20,3 @@ export const rulesConfigurations: RulesConfigurations = {
     invalidFields: ["min_approvals", "teams", "users", "all"],
   },
 }
-
-// Fields used for detecting the different kinds of rules
-export const simpleRuleUniqueFields: RulesConfigurations["basic"]["uniqueFields"] =
-  ["min_approvals", "teams", "users"]
-export const andRuleUniqueFields: RulesConfigurations["and"]["uniqueFields"] = [
-  "all",
-]
-export const orRuleUniqueFields: RulesConfigurations["or"]["uniqueFields"] = [
-  "any",
-]
