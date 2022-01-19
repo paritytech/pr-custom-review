@@ -38,19 +38,19 @@ export type RuleCriteria = {
   teams: Array<string> | undefined | null
 }
 
-export type BasicRule = BaseRule & RuleCriteria
+type BasicRule = BaseRule & RuleCriteria
 
-export type OrRule = BaseRule & {
+type OrRule = BaseRule & {
   any: RuleCriteria[]
 }
 
-export type AndRule = BaseRule & {
+type AndRule = BaseRule & {
   all: RuleCriteria[]
 }
 
 export type RuleKind = "BasicRule" | "OrRule" | "AndRule"
 export type Rule = BasicRule | OrRule | AndRule
-export type RuleConfiguration<Kind extends RuleKind> = Kind extends "BasicRule"
+type RuleConfiguration<Kind extends RuleKind> = Kind extends "BasicRule"
   ? {
       kind: Kind
       uniqueFields: ["min_approvals", "teams", "users"]
