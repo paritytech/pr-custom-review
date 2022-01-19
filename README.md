@@ -10,8 +10,8 @@ This is a GitHub Action created for complex pull request approval scenarios whic
   - [Action configuration](#action-configuration)
   - [Rules syntax](#rules-syntax)
     - [Basic Rule syntax](#basic-rule-syntax)
-    - [And Rule syntax](#and-rule-syntax)
-    - [Or Rule syntax](#or-rule-syntax)
+    - [AND Rule syntax](#and-rule-syntax)
+    - [OR Rule syntax](#or-rule-syntax)
   - [Workflow configuration](#workflow-configuration)
   - [GitHub repository configuration](#github-repository-configuration)
 - [Development](#development)
@@ -48,19 +48,20 @@ If you don't want to use a configuration file, set `config-file` to an empty val
 
 Three kinds of rules are available:
 
-- **Basic** Rule, through which you specify **top-level** `users` and `teams`
-  for reaching `min_approvals`
+- Basic Rule, through which you specify **top-level** `users` and `teams` for
+  reaching `min_approvals`
 
-- **All** Rule, through which you specify sub-conditions of `users` and
-  `teams`, each with its own `min_approvals`, and **all** of them (logical
-  `AND`) should reach their respective `min_approvals`
+- AND Rule, through which you specify sub-conditions of `users` and `teams`,
+  each with its own `min_approvals`, and **all** of them (logical `AND`) should
+  reach their respective `min_approvals`
 
-- **Or** Rule, through which you specify sub-conditions of `users` and `teams`,
+- OR Rule, through which you specify sub-conditions of `users` and `teams`,
   each with its own `min_approvals`, and **any** of them (logical `OR`) should
   reach their respective `min_approvals`
 
-Note that each rule kind is treated separately. For instance, it's not possible
-to specify a top-level `min_approvals` for **All** or **Or** rules.
+It's not possible to mix fields from different rules kinds. For instance, it's
+invalid to specify a **top-level** `min_approvals` for AND or OR rules: the
+criteria should be put in the sub-conditions instead.
 
 #### Basic Rule syntax <a name="basic-rule-syntax"></a>
 
@@ -87,9 +88,9 @@ rules:
       - team2
 ```
 
-#### And Rule syntax <a name="and-rule-syntax"></a>
+#### AND Rule syntax <a name="and-rule-syntax"></a>
 
-And Rules will only match if **all** the subconditions listed in `all` are
+AND Rules will only match if **all** the subconditions listed in `all` are
 fulfilled.
 
 ```yaml
@@ -111,9 +112,9 @@ rules:
 Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
 field.
 
-#### Or Rule syntax <a name="or-rule-syntax"></a>
+#### OR Rule syntax <a name="or-rule-syntax"></a>
 
-Or Rules will match if **any** subconditions listed in `any` are fulfilled.
+OR Rules will match if **any** subconditions listed in `any` are fulfilled.
 
 ```yaml
 rules:
