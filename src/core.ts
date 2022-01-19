@@ -86,7 +86,7 @@ export const runChecks = async function (
   }
   if (teamLeadsTeam.length === 0) {
     logger.failure(
-      `Locks Review Team (action input: ${variableNameToActionInputName.teamLeadsTeam}) should be provided`,
+      `Team Leads Team (action input: ${variableNameToActionInputName.teamLeadsTeam}) should be provided`,
     )
     return commitStateFailure
   }
