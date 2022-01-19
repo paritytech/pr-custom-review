@@ -10,11 +10,17 @@ module.exports = {
     "import",
     "prettier",
   ],
-  ignorePatterns: ["build/*"],
+  ignorePatterns: ["build/*", "dist/*"],
   parserOptions: {
     project: "./tsconfig.lint.json",
     tsconfigRootDir: __dirname,
   },
+  overrides: [
+    {
+      files: "test/batch/*.ts",
+      rules: { "@typescript-eslint/no-unsafe-member-access": "off" },
+    },
+  ],
   rules: {
     // prettier
     "prettier/prettier": "error",
@@ -44,7 +50,8 @@ module.exports = {
       "error",
       {
         groups: [
-          ["^([^s.]|s($|[^r])|s($|[^r]$|r[^c])|sr($|c[^/]))"],
+          ["^([^st.]|[st][^re]|[st][er][^cs]|src[^/]|tes[^t]|test[^/])"],
+          ["^test"],
           ["^src"],
           ["."],
         ],
@@ -54,7 +61,6 @@ module.exports = {
     "import/newline-after-import": "error",
     "import/no-duplicates": ["error", { considerQueryString: true }],
     "no-restricted-imports": ["error", { patterns: ["**/../**", ".."] }],
-    "import/no-internal-modules": ["error", { forbid: ["src/**"] }],
 
     // typescript already enforces the following
     "no-undef": "off",
@@ -98,6 +104,6 @@ module.exports = {
     "@typescript-eslint/no-unsafe-assignment": "error",
     "@typescript-eslint/no-unsafe-argument": "error",
     "@typescript-eslint/no-unsafe-member-access": "error",
-    "@typescript-eslint/no-unsafe-return": "error"
+    "@typescript-eslint/no-unsafe-return": "error",
   },
 }

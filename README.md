@@ -47,9 +47,8 @@ If you don't want to use a configuration file, set `config-file` to an empty val
 rules:
   - name: CHECK NAME     # Used for the status check description. Keep it short
                          # as GitHub imposes a limit of 140 chars.
-    condition: ^.*$      # Javascript Regular Expression used to match the rule.
+    condition: .*        # Javascript Regular Expression used to match the rule.
                          # Do not include the slashes at the beginning or end.
-                         # "gm" modifiers will be added by the action.
     check_type: diff     # Either "diff" or "changed_files".
     min_approvals: 2     # Minimum required approvals.
     users:
@@ -87,19 +86,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Use actions/checkout before pr-custom-review so that the PR's branch
-      # will be cloned (required for "diff" rules).
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
-          # Custom token with read-only organization permission is required for
-          # requesting reviews from teams. The inherent action token will not
-          # work for this.
+          # A token with read-only organization permission is required for
+          # requesting reviews from teams.
           token: ${{ secrets.GITHUB_TOKEN }}
+
+          # The team which will handle the "locks touched" built-in rule.
+          locks-review-team: my-custom-team
 
           # Optional: Disable the configuration file and only use built-in checks
           # config-file:
@@ -188,3 +183,11 @@ installed.
 -uses: paritytech/pr-custom-review@1
 +uses: paritytech/pr-custom-review@2
 ```
+
+### Testing
+
+Run `npm run test`.
+
+Test logging is saved to [snapshots](./test/batch) (`.snap` files). If your
+code changes affect some snapshot then review the modifications and run `npm
+run test -- -u`.

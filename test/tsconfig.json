@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "sourceMap": true, // jest uses this for precise coverage line mapping
+  },
+  "include": ["../src", "../test"]
+}

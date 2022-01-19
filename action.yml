@@ -12,6 +12,9 @@ inputs:
   token:
     required: true
     description: 'Repository token'
+  locks-review-team:
+    required: true
+    description: 'The team which will be asked for review if locks are touched'
 runs:
   using: 'node16'
   main: 'dist/index.js'

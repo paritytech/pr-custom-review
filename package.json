@@ -14,21 +14,28 @@
   ],
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
+    "format": "prettier --write '**/*.ts'",
+    "format:check": "prettier --check '**/*.ts'",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/**/*.ts",
+    "test:check": "npm run typecheck && npm run lint && npm run test",
+    "test": "jest",
+    "coverage": "npm run test -- --coverage",
+    "lint": "eslint '**/*.ts'",
+    "fix": "npm run lint -- --fix",
     "package": "ncc build --source-map --license licenses.txt build/main.js",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "dependencies": {
     "@actions/core": "^1.4.0",
     "@actions/github": "^5.0.0",
+    "@octokit/rest": "^18.12.0",
     "@octokit/webhooks-types": "^4.0.3",
     "joi": "^17.5.0",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "@types/nock": "^11.1.0",
     "@types/node": "^15.12.5",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
@@ -39,8 +46,11 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "jest": "^27.4.7",
+    "nock": "^13.2.2",
     "prettier": "^2.3.2",
     "prettier-plugin-compactify": "^0.1.5",
+    "ts-jest": "^27.1.2",
     "typescript": "^4.5.4"
   }
 }
