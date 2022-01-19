@@ -34,17 +34,17 @@ export type BaseRule = {
 
 export type RuleCriteria = {
   min_approvals: number
-  users: Array<string> | undefined | null
-  teams: Array<string> | undefined | null
+  users?: Array<string> | null
+  teams?: Array<string> | null
 }
 
-type BasicRule = BaseRule & RuleCriteria
+export type BasicRule = BaseRule & RuleCriteria
 
-type OrRule = BaseRule & {
+export type OrRule = BaseRule & {
   any: RuleCriteria[]
 }
 
-type AndRule = BaseRule & {
+export type AndRule = BaseRule & {
   all: RuleCriteria[]
 }
 
