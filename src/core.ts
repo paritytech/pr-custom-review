@@ -421,30 +421,26 @@ export const runChecks = async function (
             }
           }
         } else if (outcome instanceof RuleFailure) {
-          if (outcome instanceof RuleFailure) {
-            pendingProblems.push(outcome.problem)
-            for (const [username, userInfo] of outcome.usersToAskForReview) {
-              const prevUser = pendingUsersToAskForReview.get(username)
-              if (
-                // Avoid registering the same user twice
-                prevUser === undefined ||
-                // If the team is null, this user was not asked as part of a
-                // team, but individually. They should always be registered with
-                // "team: null" that case to be sure the review will be
-                // requested individually, even if they were previously
-                // registered as part of a team.
-                userInfo.team === null
-              ) {
-                pendingUsersToAskForReview.set(username, {
-                  team: userInfo.team,
-                })
-              }
+          pendingProblems.push(outcome.problem)
+          for (const [username, userInfo] of outcome.usersToAskForReview) {
+            const prevUser = pendingUsersToAskForReview.get(username)
+            if (
+              // Avoid registering the same user twice
+              prevUser === undefined ||
+              // If the team is null, this user was not asked as part of a
+              // team, but individually. They should always be registered with
+              // "team: null" that case to be sure the review will be
+              // requested individually, even if they were previously
+              // registered as part of a team.
+              userInfo.team === null
+            ) {
+              pendingUsersToAskForReview.set(username, { team: userInfo.team })
             }
-          } else {
-            logger.failure("Unable to process unexpected rule outcome")
-            logger.log(outcome)
-            return commitStateFailure
           }
+        } else {
+          logger.failure("Unable to process unexpected rule outcome")
+          logger.log(outcome)
+          return commitStateFailure
         }
       }
       for (const pendingProblem of pendingProblems) {
