@@ -7,6 +7,8 @@ export const actionReviewTeamFiles = [configFilePath, workflowFilePath]
 export const commitStateSuccess: CommitState = "success"
 export const commitStateFailure: CommitState = "failure"
 
+export const maxGithubApiFilesPerPage = 100
+
 export const rulesConfigurations: RulesConfigurations = {
   basic: {
     kind: "BasicRule",
