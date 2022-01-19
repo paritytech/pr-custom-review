@@ -4,6 +4,7 @@ import {
   commitStateFailure,
   commitStateSuccess,
   rulesConfigurations,
+  variableNameToActionInputName,
 } from "./constants"
 import { LoggerInterface } from "./logger"
 import {
@@ -78,11 +79,15 @@ export const runChecks = async function (
   },
 ) {
   if (locksReviewTeam.length === 0) {
-    logger.failure("Locks Review Team should be provided")
+    logger.failure(
+      `Locks Review Team (action input: ${variableNameToActionInputName.locksReviewTeam}) should be provided`,
+    )
     return commitStateFailure
   }
   if (teamLeadsTeam.length === 0) {
-    logger.failure("Team Leads Team should be provided")
+    logger.failure(
+      `Locks Review Team (action input: ${variableNameToActionInputName.teamLeadsTeam}) should be provided`,
+    )
     return commitStateFailure
   }
 
