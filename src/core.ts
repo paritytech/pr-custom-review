@@ -193,8 +193,6 @@ export const runChecks = async function (
     }
 
     for (const rule of config.rules) {
-      const id = ++nextMatchedRuleId
-
       const condition: RegExp = new RegExp(rule.condition, "gm")
 
       // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
@@ -285,12 +283,22 @@ export const runChecks = async function (
           min_approvals: rule.min_approvals,
           users,
           kind: "BasicRule",
-          id,
+          id: ++nextMatchedRuleId,
         })
       } else if ("all" in rule) {
-        await processRulesConditions(id, rule.name, rule.all, "AndRule")
+        await processRulesConditions(
+          ++nextMatchedRuleId,
+          rule.name,
+          rule.all,
+          "AndRule",
+        )
       } else if ("any" in rule) {
-        await processRulesConditions(id, rule.name, rule.any, "OrRule")
+        await processRulesConditions(
+          ++nextMatchedRuleId,
+          rule.name,
+          rule.any,
+          "OrRule",
+        )
       } else {
         const unmatchedRule = rule as BaseRule
         throw new Error(
