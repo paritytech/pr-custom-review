@@ -9,6 +9,7 @@ import {
   configFilePath,
   githubApi,
   githubWebsite,
+  rulesExamples,
   team,
 } from "test/constants"
 import Logger from "test/logger"
@@ -104,38 +105,7 @@ describe("Configuration", function () {
   })
 
   for (const { kind, invalidFields } of Object.values(rulesConfigurations)) {
-    const goodRule = (function () {
-      switch (kind) {
-        case "BasicRule": {
-          return {
-            name: condition,
-            condition: condition,
-            check_type: "diff",
-            min_approvals: 1,
-          }
-        }
-        case "AndRule": {
-          return {
-            name: condition,
-            condition: condition,
-            check_type: "diff",
-            all: [],
-          }
-        }
-        case "OrRule": {
-          return {
-            name: condition,
-            condition: condition,
-            check_type: "diff",
-            any: [],
-          }
-        }
-        default: {
-          const exhaustivenessCheck: never = kind
-          throw new Error(`Rule kind is not handled: ${exhaustivenessCheck}`)
-        }
-      }
-    })()
+    const goodRule = rulesExamples[kind]
 
     for (const invalidField of invalidFields) {
       const invalidFieldValidValue = (function () {
@@ -181,30 +151,44 @@ describe("Configuration", function () {
     }
   }
 
-  it("Configuration is invalid if min_approvals is less than 1", async function () {
-    nock(githubApi)
-      .get(configFileContentsApiPath)
-      .reply(200, {
-        content: Buffer.from(
-          `
-          rules:
-            - name: ${condition}
-              condition: ${condition}
-              check_type: diff
-              min_approvals: 0
-          `,
-        ).toString("base64"),
+  for (const [kind, exampleRule] of Object.entries(rulesExamples)) {
+    for (const [invalidValue, description] of [
+      [0, "less than 1"],
+      [null, "null"],
+    ]) {
+      it(`min_approvals is invalid for ${kind} if it is ${description}`, async function () {
+        nock(githubApi)
+          .get(configFileContentsApiPath)
+          .reply(200, {
+            content: Buffer.from(
+              YAML.stringify({
+                rules: [
+                  {
+                    ...exampleRule,
+                    ...("min_approvals" in exampleRule
+                      ? { min_approvals: invalidValue }
+                      : "all" in exampleRule
+                      ? { all: [{ min_approvals: invalidValue }] }
+                      : "any" in exampleRule
+                      ? { any: [{ min_approvals: invalidValue }] }
+                      : {}),
+                  },
+                ],
+              }),
+            ).toString("base64"),
+          })
+
+        expect(
+          await runChecks(basePR, octokit, logger, {
+            configFilePath,
+            locksReviewTeam: team,
+          }),
+        ).toBe("failure")
+
+        expect(logHistory).toMatchSnapshot()
       })
-
-    expect(
-      await runChecks(basePR, octokit, logger, {
-        configFilePath,
-        locksReviewTeam: team,
-      }),
-    ).toBe("failure")
-
-    expect(logHistory).toMatchSnapshot()
-  })
+    }
+  }
 
   afterEach(function () {
     nock.cleanAll()

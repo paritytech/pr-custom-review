@@ -1,4 +1,4 @@
-import { PR } from "src/types"
+import { AndRule, BasicRule, OrRule, PR } from "src/types"
 
 export const org = "org"
 export const repo = "repo"
@@ -31,4 +31,29 @@ export const basePR: PR = {
   user: { login: user },
   html_url: `${githubWebsite}${org}/${repo}/pull/${prNumber}`,
   diff_url: `${githubWebsite}/${org}/${repo}/pull/${prNumber}.diff`,
+}
+
+export const rulesExamples: {
+  BasicRule: BasicRule
+  AndRule: AndRule
+  OrRule: OrRule
+} = {
+  BasicRule: {
+    name: condition,
+    condition: condition,
+    check_type: "diff",
+    min_approvals: 1,
+  },
+  AndRule: {
+    name: condition,
+    condition: condition,
+    check_type: "diff",
+    all: [],
+  },
+  OrRule: {
+    name: condition,
+    condition: condition,
+    check_type: "diff",
+    any: [],
+  },
 }
