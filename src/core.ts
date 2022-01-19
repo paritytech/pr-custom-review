@@ -162,12 +162,6 @@ export const runChecks = async function (
     }
     const config = validationResult.value
 
-    // Unlike diff, which is always requested for checking the locks built-in
-    // rule, we do not need to load the changed files upfront, only if there's
-    // some changed_files rule
-    // The actual files will be loaded later in case some rule needs it
-    let changedFiles: Set<string> | undefined = undefined
-
     const processRulesConditions = async function (
       id: MatchedRule["id"],
       ruleName: string,
@@ -192,6 +186,11 @@ export const runChecks = async function (
       }
     }
 
+    // Unlike diff, which is always requested for checking the locks built-in
+    // rule, we do not need to load the changed files upfront, only if there's
+    // some changed_files rule
+    // The actual files will be loaded later in case some rule needs it
+    let changedFiles: Set<string> | undefined = undefined
     for (const rule of config.rules) {
       const condition: RegExp = new RegExp(rule.condition, "gm")
 
