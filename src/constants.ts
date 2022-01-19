@@ -9,15 +9,6 @@ import {
 export const commitStateSuccess: CommitState = "success"
 export const commitStateFailure: CommitState = "failure"
 
-// Fields used for detecting the different kinds of rules
-export const simpleRuleUniqueFields: Array<keyof BasicRule> = [
-  "min_approvals",
-  "teams",
-  "users",
-]
-export const andRuleUniqueFields: Array<keyof AndRule> = ["all"]
-export const orRuleUniqueFields: Array<keyof OrRule> = ["any"]
-
 export const rulesConfigurations: RulesConfigurations = {
   basic: {
     kind: "BasicRule",
@@ -35,3 +26,13 @@ export const rulesConfigurations: RulesConfigurations = {
     invalidFields: ["min_approvals", "teams", "users", "all"],
   },
 }
+
+// Fields used for detecting the different kinds of rules
+export const simpleRuleUniqueFields: RulesConfigurations["basic"]["uniqueFields"] =
+  ["min_approvals", "teams", "users"]
+export const andRuleUniqueFields: RulesConfigurations["and"]["uniqueFields"] = [
+  "all",
+]
+export const orRuleUniqueFields: RulesConfigurations["or"]["uniqueFields"] = [
+  "any",
+]
