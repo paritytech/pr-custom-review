@@ -50,6 +50,7 @@ export type AndRule = BaseRule & {
 
 export type RuleKind = "BasicRule" | "OrRule" | "AndRule"
 export type Rule = BasicRule | OrRule | AndRule
+
 type RuleConfiguration<Kind extends RuleKind> = Kind extends "BasicRule"
   ? {
       kind: Kind
@@ -69,7 +70,6 @@ type RuleConfiguration<Kind extends RuleKind> = Kind extends "BasicRule"
       invalidFields: ["min_approvals", "teams", "users", "all"]
     }
   : never
-
 export type RulesConfigurations = {
   basic: RuleConfiguration<"BasicRule">
   and: RuleConfiguration<"AndRule">
@@ -86,7 +86,7 @@ export type MatchedRule = {
   name: string
   min_approvals: number
   users: Map<string, RuleUserInfo>
-  kind: "BasicRule" | "AndRule" | "OrRule"
+  kind: RuleKind
   id: number
 }
 
