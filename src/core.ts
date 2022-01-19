@@ -267,8 +267,12 @@ export const runChecks = async function (
         continue
       }
 
-      if ("min_approvals" in rule) {
-        // BasicRule
+      if (/* BasicRule */ "min_approvals" in rule) {
+        if (typeof rule.min_approvals !== "number") {
+          logger.failure(`Rule "${rule.name}" has invalid min_approvals`)
+          logger.log(rule)
+          return commitStateFailure
+        }
 
         const users = await combineUsers(
           pr,
@@ -284,14 +288,14 @@ export const runChecks = async function (
           kind: "BasicRule",
           id: ++nextMatchedRuleId,
         })
-      } else if ("all" in rule) {
+      } else if (/* AndRule */ "all" in rule) {
         await processRulesConditions(
           ++nextMatchedRuleId,
           rule.name,
           rule.all,
           "AndRule",
         )
-      } else if ("any" in rule) {
+      } else if (/* OrRule */ "any" in rule) {
         await processRulesConditions(
           ++nextMatchedRuleId,
           rule.name,
