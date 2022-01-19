@@ -1,8 +1,22 @@
 import YAML from "yaml"
 
-import { commitStateFailure, commitStateSuccess } from "./constants"
+import {
+  commitStateFailure,
+  commitStateSuccess,
+  rulesConfigurations,
+} from "./constants"
 import { LoggerInterface } from "./logger"
-import { Octokit, PR, RuleUserInfo } from "./types"
+import {
+  BaseRule,
+  MatchedRule,
+  Octokit,
+  PR,
+  RuleCriteria,
+  RuleFailure,
+  RuleKind,
+  RuleSuccess,
+  RuleUserInfo,
+} from "./types"
 import { configurationSchema } from "./validation"
 
 const combineUsers = async function (
@@ -78,19 +92,22 @@ export const runChecks = async function (
   }
   const { data: diff } = diffResponse
 
-  type MatchedRule = {
-    name: string
-    min_approvals: number
-    users: Map<string, RuleUserInfo>
-  }
   const matchedRules: MatchedRule[] = []
+  let nextMatchedRuleId = -1
 
   // Built in condition to search files with changes to locked lines
   const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(pr, octokit, [], [locksReviewTeam])
-    matchedRules.push({ name: "LOCKS TOUCHED", min_approvals: 2, users })
+    const name = "LOCKS TOUCHED"
+    matchedRules.push({
+      name: name,
+      min_approvals: 2,
+      kind: "BasicRule",
+      users,
+      id: ++nextMatchedRuleId,
+    })
   }
 
   if (configFilePath === null || configFilePath.length === 0) {
@@ -145,14 +162,55 @@ export const runChecks = async function (
     }
     const config = validationResult.value
 
+    const processRulesConditions = async function (
+      id: MatchedRule["id"],
+      ruleName: string,
+      ruleCriterias: RuleCriteria[],
+      kind: RuleKind,
+    ) {
+      let conditionIndex = -1
+      for (const condition of ruleCriterias) {
+        const users = await combineUsers(
+          pr,
+          octokit,
+          condition.users ?? [],
+          condition.teams ?? [],
+        )
+        matchedRules.push({
+          name: `${ruleName}[${++conditionIndex}]`,
+          min_approvals: condition.min_approvals,
+          users,
+          kind,
+          id,
+        })
+      }
+    }
+
     // Unlike diff, which is always requested for checking the locks built-in
     // rule, we do not need to load the changed files upfront, only if there's
     // some changed_files rule
     // The actual files will be loaded later in case some rule needs it
     let changedFiles: Set<string> | undefined = undefined
-
     for (const rule of config.rules) {
       const condition: RegExp = new RegExp(rule.condition, "gm")
+
+      // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
+      for (const { kind, uniqueFields, invalidFields } of Object.values(
+        rulesConfigurations,
+      )) {
+        for (const field of uniqueFields) {
+          if (field in rule) {
+            for (const invalidField of invalidFields) {
+              if (invalidField in rule) {
+                logger.failure(
+                  `Rule "${rule.name}" was expected to be of kind "${kind}" because it had the field "${field}", but it also has the field "${invalidField}", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.`,
+                )
+                return commitStateFailure
+              }
+            }
+          }
+        }
+      }
 
       let matched = false
       switch (rule.check_type) {
@@ -209,18 +267,47 @@ export const runChecks = async function (
         continue
       }
 
-      const users = await combineUsers(
-        pr,
-        octokit,
-        rule.users ?? [],
-        rule.teams ?? [],
-      )
+      if (/* BasicRule */ "min_approvals" in rule) {
+        if (typeof rule.min_approvals !== "number") {
+          logger.failure(`Rule "${rule.name}" has invalid min_approvals`)
+          logger.log(rule)
+          return commitStateFailure
+        }
 
-      matchedRules.push({
-        name: rule.name,
-        min_approvals: rule.min_approvals,
-        users,
-      })
+        const users = await combineUsers(
+          pr,
+          octokit,
+          rule.users ?? [],
+          rule.teams ?? [],
+        )
+
+        matchedRules.push({
+          name: rule.name,
+          min_approvals: rule.min_approvals,
+          users,
+          kind: "BasicRule",
+          id: ++nextMatchedRuleId,
+        })
+      } else if (/* AndRule */ "all" in rule) {
+        await processRulesConditions(
+          ++nextMatchedRuleId,
+          rule.name,
+          rule.all,
+          "AndRule",
+        )
+      } else if (/* OrRule */ "any" in rule) {
+        await processRulesConditions(
+          ++nextMatchedRuleId,
+          rule.name,
+          rule.any,
+          "OrRule",
+        )
+      } else {
+        const unmatchedRule = rule as BaseRule
+        throw new Error(
+          `Rule "${unmatchedRule.name}" could not be matched to any known kind`,
+        )
+      }
     }
   }
 
@@ -262,18 +349,26 @@ export const runChecks = async function (
     }
     logger.log("latestReviews", latestReviews.values())
 
-    const problems: string[] = []
+    const rulesOutcomes: Map<
+      MatchedRule["id"],
+      Array<RuleSuccess | RuleFailure>
+    > = new Map()
 
-    const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
     let highestMinApprovalsRule: MatchedRule | null = null
     for (const rule of matchedRules) {
+      const outcomes = rulesOutcomes.get(rule.id) ?? []
+
       if (rule.users.size !== 0) {
         const approvedBy: Set<string> = new Set()
+
         for (const review of latestReviews.values()) {
           if (rule.users.has(review.user) && review.isApproval) {
             approvedBy.add(review.user)
           }
         }
+
+        const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
+
         if (approvedBy.size < rule.min_approvals) {
           const missingApprovals: {
             username: string
@@ -297,25 +392,85 @@ export const runChecks = async function (
               }
             }
           }
-          problems.push(
-            `Rule "${rule.name}" needs at least ${
-              rule.min_approvals
-            } approvals, but ${
-              approvedBy.size
-            } were matched. The following users have not approved yet: ${missingApprovals
-              .map(function (user) {
-                return `${
-                  user.username
-                }${user.team ? ` (team: ${user.team})` : ""}`
-              })
-              .join(", ")}.`,
-          )
+          const problem = `Rule "${rule.name}" needs at least ${
+            rule.min_approvals
+          } approvals, but ${
+            approvedBy.size
+          } were matched. The following users have not approved yet: ${missingApprovals
+            .map(function (user) {
+              return `${
+                user.username
+              }${user.team ? ` (team: ${user.team})` : ""}`
+            })
+            .join(", ")}.`
+          outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
+        } else {
+          outcomes.push(new RuleSuccess(rule))
         }
+
+        rulesOutcomes.set(rule.id, outcomes)
       } else if (
         highestMinApprovalsRule === null ||
         highestMinApprovalsRule.min_approvals < rule.min_approvals
       ) {
         highestMinApprovalsRule = rule
+      }
+    }
+
+    const problems: string[] = []
+    const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
+
+    toNextOutcomes: for (const outcomes of rulesOutcomes.values()) {
+      const pendingUsersToAskForReview: Map<string, RuleUserInfo> = new Map()
+      const pendingProblems: string[] = []
+      for (const outcome of outcomes) {
+        if (outcome instanceof RuleSuccess) {
+          switch (outcome.rule.kind) {
+            case "BasicRule":
+            case "OrRule": {
+              continue toNextOutcomes
+            }
+          }
+        } else if (outcome instanceof RuleFailure) {
+          pendingProblems.push(outcome.problem)
+          for (const [username, userInfo] of outcome.usersToAskForReview) {
+            const prevUser = pendingUsersToAskForReview.get(username)
+            if (
+              // Avoid registering the same user twice
+              prevUser === undefined ||
+              // If the team is null, this user was not asked as part of a
+              // team, but individually. They should always be registered with
+              // "team: null" that case to be sure the review will be
+              // requested individually, even if they were previously
+              // registered as part of a team.
+              userInfo.team === null
+            ) {
+              pendingUsersToAskForReview.set(username, { team: userInfo.team })
+            }
+          }
+        } else {
+          logger.failure("Unable to process unexpected rule outcome")
+          logger.log(outcome)
+          return commitStateFailure
+        }
+      }
+      for (const pendingProblem of pendingProblems) {
+        problems.push(pendingProblem)
+      }
+      for (const [username, userInfo] of pendingUsersToAskForReview) {
+        const prevUser = usersToAskForReview.get(username)
+        if (
+          // Avoid registering the same user twice
+          prevUser === undefined ||
+          // If the team is null, this user was not asked as part of a
+          // team, but individually. They should always be registered with
+          // "team: null" that case to be sure the review will be
+          // requested individually, even if they were previously
+          // registered as part of a team.
+          userInfo.team === null
+        ) {
+          usersToAskForReview.set(username, { team: userInfo.team })
+        }
       }
     }
 

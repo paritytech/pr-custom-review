@@ -90,3 +90,161 @@ Array [
 }",
 ]
 `;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field any 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field min_approvals 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field teams 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"teams\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field users 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"users\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind BasicRule does not allow invalid field all 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind BasicRule does not allow invalid field any 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field all 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field min_approvals 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field teams 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"teams\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field users 1`] = `
+Array [
+  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"users\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for AndRule if it is less than 1 1`] = `
+Array [
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0].all[0].min_approvals\\" must be greater than or equal to 1] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0].all[0].min_approvals\\" must be greater than or equal to 1',
+      path: [Array],
+      type: 'number.min',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for AndRule if it is null 1`] = `
+Array [
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0].all[0].min_approvals\\" must be a number] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0].all[0].min_approvals\\" must be a number',
+      path: [Array],
+      type: 'number.base',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for BasicRule if it is less than 1 1`] = `
+Array [
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0].min_approvals\\" must be greater than or equal to 1] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0].min_approvals\\" must be greater than or equal to 1',
+      path: [Array],
+      type: 'number.min',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for BasicRule if it is null 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "ERROR:  Rule \\"condition\\" has invalid min_approvals",
+  "{
+  name: 'condition',
+  condition: 'condition',
+  check_type: 'diff',
+  min_approvals: null
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for OrRule if it is less than 1 1`] = `
+Array [
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0].any[0].min_approvals\\" must be greater than or equal to 1] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0].any[0].min_approvals\\" must be greater than or equal to 1',
+      path: [Array],
+      type: 'number.min',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for OrRule if it is null 1`] = `
+Array [
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0].any[0].min_approvals\\" must be a number] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0].any[0].min_approvals\\" must be a number',
+      path: [Array],
+      type: 'number.base',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;

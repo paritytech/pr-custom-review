@@ -439,3 +439,433 @@ Array [
   "",
 ]
 `;
+
+exports[`Rules Rule kind AndRule: Approved specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true },
+  { id: 2, user: 'userCoworker3', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Approved specifying both teams and users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true },
+  { id: 2, user: 'userCoworker3', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Approved specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Approved specifying only teams for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Approved specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Approved specifying only users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Has no approval specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker2' => { team: 'team1' },
+  'userCoworker3' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Has no approval specifying both teams and users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker2' => { team: 'team1' },
+  'userCoworker3' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Has no approval specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team1' } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Has no approval specifying only teams for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team1' } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Has no approval specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { team: null },
+  'userCoworker2' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Has no approval specifying only users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { team: null },
+  'userCoworker2' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Is missing approval specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(2) {
+  'userCoworker2' => { team: 'team2' },
+  'userCoworker3' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Is missing approval specifying both teams and users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(2) {
+  'userCoworker2' => { team: 'team2' },
+  'userCoworker3' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Is missing approval specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Is missing approval specifying only teams for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Is missing approval specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: null } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndRule: Is missing approval specifying only users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: null } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Approved specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true },
+  { id: 2, user: 'userCoworker3', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Approved specifying both teams and users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true },
+  { id: 2, user: 'userCoworker3', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Approved specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Approved specifying only teams for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Approved specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Approved specifying only users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Has no approval specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker2' => { team: 'team1' },
+  'userCoworker3' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Has no approval specifying both teams and users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker2' => { team: 'team1' },
+  'userCoworker3' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Has no approval specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team1' } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Has no approval specifying only teams for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team1' } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team1).",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Has no approval specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { team: null },
+  'userCoworker2' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Has no approval specifying only users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { team: null },
+  'userCoworker2' => { team: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
+  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Is missing approval specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Is missing approval specifying both teams and users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Is missing approval specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Is missing approval specifying only teams for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Is missing approval specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+]
+`;
+
+exports[`Rules Rule kind OrRule: Is missing approval specifying only users for diff 1`] = `
+Array [
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+]
+`;

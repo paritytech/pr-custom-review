@@ -8,7 +8,10 @@ This is a GitHub Action created for complex pull request approval scenarios whic
   - [High level flow chart](#high-level-flow-chart)
 - [Configuration](#configuration)
   - [Action configuration](#action-configuration)
-    - [Rules syntax](#rules-syntax)
+  - [Rules syntax](#rules-syntax)
+    - [Basic Rule syntax](#basic-rule-syntax)
+    - [AND Rule syntax](#and-rule-syntax)
+    - [OR Rule syntax](#or-rule-syntax)
   - [Workflow configuration](#workflow-configuration)
   - [GitHub repository configuration](#github-repository-configuration)
 - [Development](#development)
@@ -41,14 +44,34 @@ Configuration is done through a `pr-custom-review-config.yml` file placed in the
 
 If you don't want to use a configuration file, set `config-file` to an empty value as demonstrated in [Workflow configuration](#workflow-configuration).
 
-#### Rules syntax <a name="rules-syntax"></a>
+### Rules syntax <a name="rules-syntax"></a>
+
+Three kinds of rules are available:
+
+- Basic Rule, through which you specify **top-level** `users` and `teams` for
+  reaching `min_approvals`
+
+- AND Rule, through which you specify subcondition of `users` and `teams`, each
+  with its own `min_approvals`, and **all** of them (logical `AND`) should
+  reach their respective `min_approvals`
+
+- OR Rule, through which you specify subcondition of `users` and `teams`, each
+  with its own `min_approvals`, and **any** of them (logical `OR`) should reach
+  their respective `min_approvals`
+
+It's not possible to mix fields from different rules kinds. For instance, it's
+invalid to specify a **top-level** `min_approvals` for AND or OR rules: the
+criteria should be put in the subcondition instead.
+
+#### Basic Rule syntax <a name="basic-rule-syntax"></a>
 
 ```yaml
 rules:
-  - name: CHECK NAME     # Used for the status check description. Keep it short
+  - name: Rule name      # Used for the status check description. Keep it short
                          # as GitHub imposes a limit of 140 chars.
     condition: .*        # Javascript Regular Expression used to match the rule.
-                         # Do not include the slashes at the beginning or end.
+                         # Do not include RegExp delimiters (`/`) at the
+                         # beginning or end.
     check_type: diff     # Either "diff" or "changed_files".
     min_approvals: 2     # Minimum required approvals.
     users:
@@ -64,6 +87,53 @@ rules:
       - team1
       - team2
 ```
+
+#### AND Rule syntax <a name="and-rule-syntax"></a>
+
+AND Rules will only match if **all** subconditions listed in `all` are
+fulfilled.
+
+```yaml
+rules:
+  - name: Rule name
+    condition: .*
+    check_type: diff
+    all:
+      - min_approvals: 1
+        users:
+          - user1
+      - min_approvals: 1
+        users:
+          - user2
+        teams:
+          - team1
+```
+
+Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
+field.
+
+#### OR Rule syntax <a name="or-rule-syntax"></a>
+
+OR Rules will match if **any** subconditions listed in `any` are fulfilled.
+
+```yaml
+rules:
+  - name: Rule name
+    condition: .*
+    check_type: diff
+    any:
+      - min_approvals: 1
+        users:
+          - user1
+      - min_approvals: 1
+        users:
+          - user2
+        teams:
+          - team1
+```
+
+Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
+field.
 
 ### Workflow configuration <a name="workflow-configuration"></a>
 
