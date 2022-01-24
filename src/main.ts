@@ -90,9 +90,9 @@ const main = function () {
       repo: pr.base.repo.name,
       sha: pr.head.sha,
       state,
-      context: context.workflow,
+      context: "Check reviews",
       target_url: detailsUrl,
-      description: "Please check Details for more information",
+      description: "Please visit Details for more information",
     })
 
     logger.log(`Final state: ${state}`)
