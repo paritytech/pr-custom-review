@@ -176,15 +176,22 @@ export const runChecks = async function (
     return commitStateFailure
   }
   const { data } = configFileResponse
-  if (typeof data !== "object" || !("content" in data)) {
+  if (typeof data !== "object" || data === null) {
     logger.failure(
       `Data response for ${configFilePath} had unexpected type (expected object)`,
     )
     logger.log(configFileResponse.data)
     return commitStateFailure
   }
+  if (!("content" in data)) {
+    logger.failure(
+      `Did not find "content" key in the response for ${configFilePath}`,
+    )
+    logger.log(configFileResponse.data)
+    return commitStateFailure
+  }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const configFileContentsEnconded = data.content
+  const { content: configFileContentsEnconded } = data
   if (typeof configFileContentsEnconded !== "string") {
     logger.failure(
       `Content response for ${configFilePath} had unexpected type (expected string)`,
