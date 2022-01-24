@@ -20,3 +20,8 @@ export const rulesConfigurations: RulesConfigurations = {
     invalidFields: ["min_approvals", "teams", "users", "all"],
   },
 }
+
+export const variableNameToActionInputName = {
+  teamLeadsTeam: "team-leads-team",
+  locksReviewTeam: "locks-review-team",
+}

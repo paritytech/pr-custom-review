@@ -243,10 +243,11 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(2) {
   'userCoworker' => { team: 'team' },
-  'userCoworker2' => { team: 'team' }
+  'userCoworker2' => { team: 'team2' }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -258,10 +259,11 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(2) {
   'userCoworker' => { team: 'team' },
-  'userCoworker2' => { team: 'team' }
+  'userCoworker2' => { team: 'team2' }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -273,10 +275,11 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(2) {
   'userCoworker' => { team: 'team' },
-  'userCoworker2' => { team: 'team' }
+  'userCoworker2' => { team: 'team2' }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -288,10 +291,11 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(2) {
   'userCoworker' => { team: 'team' },
-  'userCoworker2' => { team: 'team' }
+  'userCoworker2' => { team: 'team2' }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -397,9 +401,9 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "No config file provided",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
-  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team' } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -409,9 +413,9 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "No config file provided",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
-  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team' } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -421,9 +425,9 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "No config file provided",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
-  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team' } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -433,9 +437,9 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "No config file provided",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
-  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team' } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2 (team: team).",
+  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;

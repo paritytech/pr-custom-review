@@ -14,7 +14,7 @@ import {
   requestedReviewersApiPath,
   reviewsApiPath,
   team,
-  teamApiPath,
+  team2,
   userCoworker3,
 } from "test/constants"
 import Logger from "test/logger"
@@ -145,6 +145,7 @@ describe("Rules", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -186,6 +187,7 @@ describe("Rules", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -243,6 +245,7 @@ describe("Rules", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -286,6 +289,7 @@ describe("Rules", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -363,6 +367,7 @@ describe("Rules", function () {
             await runChecks(basePR, octokit, logger, {
               configFilePath,
               locksReviewTeam: team,
+              teamLeadsTeam: team2,
             }),
           ).toBe(expected)
 
@@ -451,6 +456,7 @@ describe("Rules", function () {
             await runChecks(basePR, octokit, logger, {
               configFilePath,
               locksReviewTeam: team,
+              teamLeadsTeam: team2,
             }),
           ).toBe(expectedCheckOutcome)
 
@@ -543,6 +549,7 @@ describe("Rules", function () {
             await runChecks(basePR, octokit, logger, {
               configFilePath,
               locksReviewTeam: team,
+              teamLeadsTeam: team2,
             }),
           ).toBe(expectedCheckOutcome)
 
@@ -553,9 +560,13 @@ describe("Rules", function () {
 
     for (const diffSign of ["+", "-"]) {
       it(`${scenario} when lock line is modified (${diffSign})`, async function () {
-        setup({ diff: `${diffSign}🔒 deleting the lock line` })
-
-        nock(githubApi).get(teamApiPath).reply(200, coworkers)
+        setup({
+          diff: `${diffSign}🔒 deleting the lock line`,
+          teams: [
+            { name: team, members: [coworkers[0]] },
+            { name: team2, members: [coworkers[1]] },
+          ],
+        })
 
         switch (scenario) {
           case "Has no approval":
@@ -564,7 +575,8 @@ describe("Rules", function () {
               .post(requestedReviewersApiPath, function (body) {
                 expect(body).toMatchObject({
                   reviewers: [],
-                  team_reviewers: [team],
+                  team_reviewers:
+                    scenario === "Has no approval" ? [team, team2] : [team2],
                 })
                 return true
               })
@@ -577,6 +589,7 @@ describe("Rules", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath: "",
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 
@@ -584,9 +597,13 @@ describe("Rules", function () {
       })
 
       it(`${scenario} when line after lock is modified (${diffSign})`, async function () {
-        setup({ diff: `🔒 lock line\n${diffSign} modified` })
-
-        nock(githubApi).get(teamApiPath).reply(200, coworkers)
+        setup({
+          diff: `🔒 lock line\n${diffSign} modified`,
+          teams: [
+            { name: team, members: [coworkers[0]] },
+            { name: team2, members: [coworkers[1]] },
+          ],
+        })
 
         switch (scenario) {
           case "Has no approval":
@@ -595,7 +612,8 @@ describe("Rules", function () {
               .post(requestedReviewersApiPath, function (body) {
                 expect(body).toMatchObject({
                   reviewers: [],
-                  team_reviewers: [team],
+                  team_reviewers:
+                    scenario === "Has no approval" ? [team, team2] : [team2],
                 })
                 return true
               })
@@ -608,6 +626,7 @@ describe("Rules", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath: "",
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe(scenario === "Approved" ? "success" : "failure")
 

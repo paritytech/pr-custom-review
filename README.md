@@ -51,17 +51,17 @@ Three kinds of rules are available:
 - Basic Rule, through which you specify **top-level** `users` and `teams` for
   reaching `min_approvals`
 
-- AND Rule, through which you specify subcondition of `users` and `teams`, each
+- AND Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **all** of them (logical `AND`) should
   reach their respective `min_approvals`
 
-- OR Rule, through which you specify subcondition of `users` and `teams`, each
+- OR Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **any** of them (logical `OR`) should reach
   their respective `min_approvals`
 
 It's not possible to mix fields from different rules kinds. For instance, it's
 invalid to specify a **top-level** `min_approvals` for AND or OR rules: the
-criteria should be put in the subcondition instead.
+criteria should be put in the subconditions instead.
 
 #### Basic Rule syntax <a name="basic-rule-syntax"></a>
 
@@ -165,6 +165,9 @@ jobs:
 
           # The team which will handle the "locks touched" built-in rule.
           locks-review-team: my-custom-team
+
+          # The second team which will handle the "locks touched" built-in rule.
+          team-leads-team: my-custom-leads-team
 
           # Optional: Disable the configuration file and only use built-in checks
           # config-file:

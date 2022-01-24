@@ -11,10 +11,14 @@ import {
   githubWebsite,
   rulesExamples,
   team,
+  team2,
 } from "test/constants"
 import Logger from "test/logger"
 
-import { rulesConfigurations } from "src/constants"
+import {
+  rulesConfigurations,
+  variableNameToActionInputName,
+} from "src/constants"
 import { runChecks } from "src/core"
 
 describe("Configuration", function () {
@@ -61,6 +65,7 @@ describe("Configuration", function () {
         await runChecks(basePR, octokit, logger, {
           configFilePath,
           locksReviewTeam: team,
+          teamLeadsTeam: team2,
         }),
       ).toBe("failure")
 
@@ -87,22 +92,27 @@ describe("Configuration", function () {
       await runChecks(basePR, octokit, logger, {
         configFilePath,
         locksReviewTeam: team,
+        teamLeadsTeam: team2,
       }),
     ).toBe("failure")
 
     expect(logHistory).toMatchSnapshot()
   })
 
-  it("Configuration is invalid if locksReviewTeam is empty or missing", async function () {
-    expect(
-      await runChecks(basePR, octokit, logger, {
-        configFilePath,
-        locksReviewTeam: "",
-      }),
-    ).toBe("failure")
+  for (const name in variableNameToActionInputName) {
+    it(`Configuration is invalid if ${name} is empty or missing`, async function () {
+      expect(
+        await runChecks(basePR, octokit, logger, {
+          configFilePath,
+          locksReviewTeam: team,
+          teamLeadsTeam: team2,
+          [name]: "",
+        }),
+      ).toBe("failure")
 
-    expect(logHistory).toMatchSnapshot()
-  })
+      expect(logHistory).toMatchSnapshot()
+    })
+  }
 
   for (const { kind, invalidFields } of Object.values(rulesConfigurations)) {
     const goodRule = rulesExamples[kind]
@@ -143,6 +153,7 @@ describe("Configuration", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe("failure")
 
@@ -182,6 +193,7 @@ describe("Configuration", function () {
           await runChecks(basePR, octokit, logger, {
             configFilePath,
             locksReviewTeam: team,
+            teamLeadsTeam: team2,
           }),
         ).toBe("failure")
 

@@ -2,13 +2,14 @@ import os from "os"
 import { inspect } from "util"
 
 // GitHub by default logs N lines when the job is starting.
-// N = 5 for pr-custom-review:
+// N = 6 for pr-custom-review:
 // 1. Run org/pr-custom-review@tag
 // 2.   with:
 // 3.     token: ***
 // 4.     config-file: ./.github/pr-custom-review-config.yml
 // 5.     locks-review-team: foo
-const githubLogsInitialLineCount = 5
+// 6.     team-leads-team: foo
+const githubLogsInitialLineCount = 6
 
 export interface LoggerInterface {
   doLog: (...args: any[]) => void
