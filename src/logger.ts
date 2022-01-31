@@ -6,9 +6,9 @@ import { inspect } from "util"
 // 1. Run org/pr-custom-review@tag
 // 2.   with:
 // 3.     token: ***
-// 4.     config-file: ./.github/pr-custom-review-config.yml
-// 5.     locks-review-team: foo
-// 6.     team-leads-team: foo
+// 4.     locks-review-team: foo
+// 5.     team-leads-team: foo
+// 6.     action-review-team: foo
 const githubLogsInitialLineCount = 6
 
 export interface LoggerInterface {

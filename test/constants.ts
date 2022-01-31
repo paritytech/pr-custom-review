@@ -1,3 +1,4 @@
+import { configFilePath } from "src/constants"
 import { AndRule, BasicRule, OrRule, PR } from "src/types"
 
 export const org = "org"
@@ -6,12 +7,12 @@ export const user = "user"
 
 export const team = "team"
 export const team2 = "team2"
+export const team3 = "team3"
 export const userCoworker = "userCoworker"
 export const userCoworker2 = "userCoworker2"
 export const userCoworker3 = "userCoworker3"
 export const coworkers = [userCoworker, userCoworker2]
 
-export const configFilePath = "pr-custom-review.yml"
 export const prNumber = 1
 export const condition = "condition"
 

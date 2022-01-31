@@ -6,6 +6,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
 
 - [How it works](#how-it-works)
   - [High level flow chart](#high-level-flow-chart)
+- [Built-in checks](#built-in-checks)
 - [Configuration](#configuration)
   - [Action configuration](#action-configuration)
   - [Rules syntax](#rules-syntax)
@@ -31,18 +32,32 @@ Upon receiving [pull_request](https://docs.github.com/en/actions/learn-github-ac
 
 If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status can be made a requirement through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
 
-This action has one built-in check which reacts to changes in lines of code containing the `🔒` emoji or any line directly below it. Any further checks should be enabled through [configuration](#action-configuration).
-
 ### High level flow chart
+
 ![High level flow chart](./img/pr-custom-review-flowchart.png)
+
+## Built-in checks <a name="built-in-checks"></a>
+
+This action has the following non-configurable built-in checks:
+
+- Lines which have a lock emoji (🔒) or any line directly below a lock emoji
+  require:
+  - 1 approval from [locks-review-team](#workflow-configuration)
+  - 1 approval from [team-leads-team](#workflow-configuration)
+
+- If the action's files are changed, 1 approval from
+  [action-review-team](#workflow-configuration) is required
+  - `.github/workflows/pr-custom-review.yml` 
+  - `.github/pr-custom-review.yml` 
+
+Customizable rules should be enabled through [configuration](#action-configuration).
 
 ## Configuration
 
 ### Action configuration <a name="action-configuration"></a>
 
-Configuration is done through a `pr-custom-review-config.yml` file placed in the `.github` directory. The default location can be overridden through [`step.with`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) as demonstrated in [Workflow configuration](#workflow-configuration).
-
-If you don't want to use a configuration file, set `config-file` to an empty value as demonstrated in [Workflow configuration](#workflow-configuration).
+The configuration file should be placed in `.github/pr-custom-review.yml`
+(related to [built-in checks](#built-in-checks)).
 
 ### Rules syntax <a name="rules-syntax"></a>
 
@@ -72,6 +87,7 @@ rules:
     condition: .*        # Javascript Regular Expression used to match the rule.
                          # Do not include RegExp delimiters (`/`) at the
                          # beginning or end.
+                         # "gm" modifiers will be added by the action.
     check_type: diff     # Either "diff" or "changed_files".
     min_approvals: 2     # Minimum required approvals.
     users:
@@ -137,6 +153,10 @@ field.
 
 ### Workflow configuration <a name="workflow-configuration"></a>
 
+The workflow configuration should be placed in
+`.github/workflows/pr-custom-review.yml` (related to
+[built-in checks](#built-in-checks)).
+
 ```yaml
 name: PR Custom Review Status    # The PR status will be created with this name.
 
@@ -169,11 +189,8 @@ jobs:
           # The second team which will handle the "locks touched" built-in rule.
           team-leads-team: my-custom-leads-team
 
-          # Optional: Disable the configuration file and only use built-in checks
-          # config-file:
-
-          # Optional: Overide the location for the configuration file
-          # config-file: ./.github/custom.yml
+          # The team which will handle the changes to the action's configuration.
+          action-review-team: my-action-review-team
 ```
 
 ### GitHub repository configuration  <a name="github-repository-configuration"></a>
