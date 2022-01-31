@@ -5,6 +5,7 @@ import {
   commitStateFailure,
   commitStateSuccess,
   configFilePath,
+  maxGithubApiFilesPerPage,
   rulesConfigurations,
   variableNameToActionInputName,
 } from "./constants"
@@ -130,23 +131,21 @@ export const runChecks = async function (
     }
   }
 
-  const changedFilesResponse = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
-    {
-      owner: pr.base.repo.owner.login,
-      repo: pr.base.repo.name,
-      pull_number: pr.number,
-    },
+  const changedFiles = new Set(
+    (
+      await octokit.paginate(
+        "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
+        {
+          owner: pr.base.repo.owner.login,
+          repo: pr.base.repo.name,
+          pull_number: pr.number,
+          per_page: maxGithubApiFilesPerPage,
+        },
+      )
+    ).map(function ({ filename }) {
+      return filename
+    }),
   )
-  if (changedFilesResponse.status !== 200) {
-    logger.failure(
-      `Failed to get the changed files from ${pr.html_url} (code ${changedFilesResponse.status})`,
-    )
-    logger.log(changedFilesResponse.data)
-    return commitStateFailure
-  }
-  const { data: changedFilesData } = changedFilesResponse
-  const changedFiles = new Set(changedFilesData.map(({ filename }) => filename))
   logger.log("Changed files", changedFiles)
 
   for (const actionReviewFile of actionReviewTeamFiles) {
