@@ -101,15 +101,12 @@ export const runChecks = async function (
     return commitStateFailure
   }
 
-  const diffResponse = (await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls/{pull_number}",
-    {
-      owner: pr.base.repo.owner.login,
-      repo: pr.base.repo.name,
-      pull_number: pr.number,
-      mediaType: { format: "diff" },
-    },
-  )) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>
+  const diffResponse = (await octokit.rest.pulls.get({
+    owner: pr.base.repo.owner.login,
+    repo: pr.base.repo.name,
+    pull_number: pr.number,
+    mediaType: { format: "diff" },
+  })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>
   if (diffResponse.status !== 200) {
     logger.failure(
       `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
