@@ -18,9 +18,10 @@ export const condition = "condition"
 
 export const githubApi = "https://api.github.com"
 export const githubWebsite = "https://github.com"
-export const reviewsApiPath = `/repos/${org}/${repo}/pulls/${prNumber}/reviews`
-export const changedFilesApiPath = `/repos/${org}/${repo}/pulls/${prNumber}/files?per_page=${maxGithubApiFilesPerPage}`
-export const requestedReviewersApiPath = `/repos/${org}/${repo}/pulls/${prNumber}/requested_reviewers`
+export const prApiPath = `/repos/${org}/${repo}/pulls/${prNumber}`
+export const reviewsApiPath = `${prApiPath}/reviews`
+export const changedFilesApiPath = `${prApiPath}/files?per_page=${maxGithubApiFilesPerPage}`
+export const requestedReviewersApiPath = `${prApiPath}/requested_reviewers`
 export const configFileContentsApiPath = `/repos/${org}/${repo}/contents/${encodeURIComponent(
   configFilePath,
 )}`
@@ -32,7 +33,6 @@ export const basePR: PR = {
   head: { sha: "foo" },
   user: { login: user },
   html_url: `${githubWebsite}${org}/${repo}/pull/${prNumber}`,
-  diff_url: `${githubWebsite}/${org}/${repo}/pull/${prNumber}.diff`,
 }
 
 export const rulesExamples: {

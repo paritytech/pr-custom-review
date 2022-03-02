@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest"
 import nock from "nock"
+import YAML from "yaml"
 
 import {
   basePR,
@@ -8,8 +9,8 @@ import {
   configFileContentsApiPath,
   coworkers,
   githubApi,
-  githubWebsite,
   org,
+  prApiPath,
   requestedReviewersApiPath,
   reviewsApiPath,
   team,
@@ -21,6 +22,7 @@ import Logger from "test/logger"
 
 import { actionReviewTeamFiles } from "src/constants"
 import { runChecks } from "src/core"
+import { BasicRule } from "src/types"
 
 describe("Rules", function () {
   let logger: Logger
@@ -45,23 +47,19 @@ describe("Rules", function () {
       users,
       diff,
       teams,
-      hasEmptyConfiguration,
+      rules,
       changedFiles,
     }: {
       users?: string[]
       diff?: string
       teams?: { name: string; members: string[] }[]
-      hasEmptyConfiguration?: boolean
+      rules?: BasicRule[]
       changedFiles?: string[]
     } = {}) {
       users ??= coworkers
       diff ??= condition
       teams ??= [{ name: team, members: users }]
       changedFiles ??= [condition]
-
-      nock(githubWebsite)
-        .get(basePR.diff_url.slice(githubWebsite.length))
-        .reply(200, diff)
 
       nock(githubApi)
         .get(reviewsApiPath)
@@ -103,10 +101,17 @@ describe("Rules", function () {
           }),
         )
 
-      if (hasEmptyConfiguration) {
+      nock(githubApi)
+        .get(prApiPath)
+        .matchHeader("accept", "application/vnd.github.v3.diff")
+        .reply(200, diff)
+
+      if (rules !== undefined) {
         nock(githubApi)
           .get(configFileContentsApiPath)
-          .reply(200, { content: Buffer.from("rules: []").toString("base64") })
+          .reply(200, {
+            content: Buffer.from(YAML.stringify({ rules })).toString("base64"),
+          })
       }
     }
 
@@ -573,6 +578,59 @@ describe("Rules", function () {
           expect(logHistory).toMatchSnapshot()
         })
       }
+
+      for (const [description, rule] of [
+        [
+          "condition: include",
+          { name: "Condition include", condition: { include: condition } },
+        ],
+        [
+          "condition: exclude",
+          { name: "Condition exclude", condition: { exclude: condition } },
+        ],
+        [
+          "condition: include & exclude",
+          {
+            name: "Condition include & exclude",
+            condition: { include: condition, exclude: condition },
+          },
+        ],
+      ] as const) {
+        it(`${scenario} with ${description} for ${checkType}`, async function () {
+          setup({
+            rules: [{ ...rule, min_approvals: 2, check_type: checkType }],
+          })
+
+          switch (scenario) {
+            case "Has no approval":
+            case "Is missing approval": {
+              nock(githubApi)
+                .post(requestedReviewersApiPath, function (body) {
+                  expect(body).toMatchObject({ reviewers: [coworkers[1]] })
+                  return true
+                })
+                .reply(201)
+              break
+            }
+          }
+
+          expect(
+            await runChecks(basePR, octokit, logger, {
+              locksReviewTeam: team,
+              teamLeadsTeam: team2,
+              actionReviewTeam: team3,
+            }),
+          ).toBe(
+            scenario === "Approved" ||
+              description === "condition: exclude" ||
+              description === "condition: include & exclude"
+              ? "success"
+              : "failure",
+          )
+
+          expect(logHistory).toMatchSnapshot()
+        })
+      }
     }
 
     for (const diffSign of ["+", "-"]) {
@@ -583,7 +641,7 @@ describe("Rules", function () {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
-          hasEmptyConfiguration: true,
+          rules: [],
         })
 
         switch (scenario) {
@@ -621,7 +679,7 @@ describe("Rules", function () {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
-          hasEmptyConfiguration: true,
+          rules: [],
         })
 
         switch (scenario) {
@@ -656,7 +714,7 @@ describe("Rules", function () {
     for (const actionReviewFile of actionReviewTeamFiles) {
       it(`${scenario} when ${actionReviewFile} is changed`, async function () {
         setup({
-          hasEmptyConfiguration: true,
+          rules: [],
           changedFiles: [actionReviewFile],
           teams: [{ name: team3, members: [coworkers[1]] }],
         })

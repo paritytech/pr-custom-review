@@ -18,9 +18,19 @@ const ruleCriteria = function ({
   }
 }
 
+const includeConditionSchema = Joi.string().required()
+const excludeConditionSchema = Joi.string().required()
 const ruleSchema = Joi.object<Rule>().keys({
   name: Joi.string().required(),
-  condition: Joi.string().required(),
+  condition: Joi.alternatives([
+    Joi.string().required(),
+    Joi.object().keys({ include: includeConditionSchema }),
+    Joi.object().keys({ exclude: excludeConditionSchema }),
+    Joi.object().keys({
+      include: includeConditionSchema,
+      exclude: excludeConditionSchema,
+    }),
+  ]).required(),
   check_type: Joi.string().valid("diff", "changed_files").required(),
   ...ruleCriteria({ isMinApprovalsOptional: true }),
   all: Joi.array()
