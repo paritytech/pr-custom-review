@@ -20,7 +20,10 @@ import {
 } from "test/constants"
 import Logger from "test/logger"
 
-import { actionReviewTeamFiles } from "src/constants"
+import {
+  actionReviewTeamFiles,
+  maxGithubApiTeamMembersPerPage,
+} from "src/constants"
 import { runChecks } from "src/core"
 import { BasicRule } from "src/types"
 
@@ -83,7 +86,9 @@ describe("Rules", function () {
       for (const { name, members } of teams) {
         teamMembers.set(name, members)
         nock(githubApi)
-          .get(`/orgs/${org}/teams/${name}/members`)
+          .get(
+            `/orgs/${org}/teams/${name}/members?per_page=${maxGithubApiTeamMembersPerPage}`,
+          )
           .reply(
             200,
             members.map(function (login, id) {

@@ -25,7 +25,6 @@ export const requestedReviewersApiPath = `${prApiPath}/requested_reviewers`
 export const configFileContentsApiPath = `/repos/${org}/${repo}/contents/${encodeURIComponent(
   configFilePath,
 )}`
-export const teamApiPath = `/orgs/${org}/teams/${team}/members`
 
 export const basePR: PR = {
   number: prNumber,
