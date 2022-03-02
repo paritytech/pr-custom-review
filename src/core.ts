@@ -8,6 +8,7 @@ import {
   commitStateSuccess,
   configFilePath,
   maxGithubApiFilesPerPage,
+  maxGithubApiTeamMembersPerPage,
   rulesConfigurations,
   variableNameToActionInputName,
 } from "./constants"
@@ -25,11 +26,16 @@ import {
 } from "./types"
 import { configurationSchema } from "./validation"
 
+type TeamsCache = Map<
+  /* Team slug */ string,
+  /* Usernames of team members */ string[]
+>
 const combineUsers = async function (
   pr: PR,
-  client: Octokit,
+  octokit: Octokit,
   presetUsers: string[],
   teams: string[],
+  teamsCache: TeamsCache,
 ) {
   const users: Map<string, RuleUserInfo> = new Map()
 
@@ -40,25 +46,32 @@ const combineUsers = async function (
   }
 
   for (const team of teams) {
-    const teamMembersResponse = await client.rest.teams.listMembersInOrg({
-      org: pr.base.repo.owner.login,
-      team_slug: team,
-    })
-    if (teamMembersResponse.status !== 200) {
-      throw new Error(`Failed to fetch team members from ${team}`)
+    let teamMembers = teamsCache.get(team)
+    if (teamMembers === undefined) {
+      teamMembers = await octokit.paginate(
+        octokit.rest.teams.listMembersInOrg,
+        {
+          org: pr.base.repo.owner.login,
+          team_slug: team,
+          per_page: maxGithubApiTeamMembersPerPage,
+        },
+        function (response) {
+          return response.data.map(function ({ login }) {
+            return login
+          })
+        },
+      )
+      teamsCache.set(team, teamMembers)
     }
 
-    for (const member of teamMembersResponse.data) {
-      if (member === null) {
-        continue
-      }
+    for (const teamMember of teamMembers) {
       if (
-        pr.user.login != member.login &&
+        pr.user.login != teamMember &&
         // We do not want to register a team for this user if their approval is
         // supposed to be requested individually
-        users.get(member.login) === undefined
+        users.get(teamMember) === undefined
       ) {
-        users.set(member.login, { team })
+        users.set(teamMember, { team })
       }
     }
   }
@@ -102,6 +115,10 @@ export const runChecks = async function (
     return commitStateFailure
   }
 
+  // Set up a teams cache so that teams used multiple times don't have to be
+  // requested more than once
+  const teamsCache: TeamsCache = new Map()
+
   const diffResponse = (await octokit.rest.pulls.get({
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,
@@ -125,7 +142,7 @@ export const runChecks = async function (
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
     for (const team of [locksReviewTeam, teamLeadsTeam]) {
-      const users = await combineUsers(pr, octokit, [], [team])
+      const users = await combineUsers(pr, octokit, [], [team], teamsCache)
       matchedRules.push({
         name: `LOCKS TOUCHED (team: ${team})`,
         min_approvals: 1,
@@ -155,7 +172,13 @@ export const runChecks = async function (
 
   for (const actionReviewFile of actionReviewTeamFiles) {
     if (changedFiles.has(actionReviewFile)) {
-      const users = await combineUsers(pr, octokit, [], [actionReviewTeam])
+      const users = await combineUsers(
+        pr,
+        octokit,
+        [],
+        [actionReviewTeam],
+        teamsCache,
+      )
       matchedRules.push({
         name: "Action files changed",
         min_approvals: 1,
@@ -231,6 +254,7 @@ export const runChecks = async function (
         octokit,
         subCondition.users ?? [],
         subCondition.teams ?? [],
+        teamsCache,
       )
       matchedRules.push({
         name: `${name}[${++conditionIndex}]`,
@@ -344,6 +368,7 @@ export const runChecks = async function (
         octokit,
         rule.users ?? [],
         rule.teams ?? [],
+        teamsCache,
       )
 
       matchedRules.push({
