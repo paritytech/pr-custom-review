@@ -8,6 +8,7 @@ export const commitStateSuccess: CommitState = "success"
 export const commitStateFailure: CommitState = "failure"
 
 export const maxGithubApiFilesPerPage = 100
+export const maxGithubApiTeamMembersPerPage = 100
 
 export const rulesConfigurations: RulesConfigurations = {
   basic: {
