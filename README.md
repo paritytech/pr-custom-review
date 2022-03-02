@@ -84,11 +84,34 @@ criteria should be put in the subconditions instead.
 rules:
   - name: Rule name      # Used for the status check description. Keep it short
                          # as GitHub imposes a limit of 140 chars.
-    condition: .*        # Javascript Regular Expression used to match the rule.
-                         # Do not include RegExp delimiters (`/`) at the
-                         # beginning or end.
-                         # "gm" modifiers will be added by the action.
+
     check_type: diff     # Either "diff" or "changed_files".
+
+
+    # Conditions take one of two forms: "include" or "include/exclude"
+    # - Conditions' values are Javascript Regular Expressions used to match the
+    #   either the diff (for check_type: diff) or changed files' paths (for
+    #   check_type: changed_files)
+    # - There is no need to include Javascript RegExp delimiters ('/') at the
+    #   beginning or end of the regular expressions (those slashes are
+    #   interpreted as literal slashes)
+    # - "gm" modifiers will be added by the action
+
+    # Condition: include form
+    condition: .*
+
+    # Condition: include/exclude form
+    # The structure should be one of the following:
+    # - Define "include" but not "exclude"
+    # - Define "exclude" but not "include" (include defaults to ".*")
+    # - Define both "include" and "exclude"
+    # Note that excludes are computed *after* includes!
+    # Example:
+    # condition:
+    #   include: ^foo      # Optional if exclude is provided
+    #   exclude: ^foo/bar  # Optional if include is provided
+
+
     min_approvals: 2     # Minimum required approvals.
     users:
     # GitHub users which should be requested for reviews.

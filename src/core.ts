@@ -1,4 +1,5 @@
 import { OctokitResponse } from "@octokit/types"
+import assert from "assert"
 import YAML from "yaml"
 
 import {
@@ -126,7 +127,7 @@ export const runChecks = async function (
   })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>
   if (diffResponse.status !== 200) {
     logger.failure(
-      `Failed to get the diff from ${pr.diff_url} (code ${diffResponse.status})`,
+      `Failed to get the diff from ${pr.html_url} (code ${diffResponse.status})`,
     )
     logger.log(diffResponse.data)
     return commitStateFailure
@@ -266,8 +267,6 @@ export const runChecks = async function (
   }
 
   for (const rule of config.rules) {
-    const condition: RegExp = new RegExp(rule.condition, "gm")
-
     // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
     for (const { kind, uniqueFields, invalidFields } of Object.values(
       rulesConfigurations,
@@ -286,26 +285,64 @@ export const runChecks = async function (
       }
     }
 
-    let matched = false
+    const includeCondition = (function () {
+      switch (typeof rule.condition) {
+        case "string": {
+          return new RegExp(rule.condition, "gm")
+        }
+        case "object": {
+          assert(rule.condition)
+          return new RegExp(
+            "include" in rule.condition ? rule.condition.include : ".*",
+            "gm",
+          )
+        }
+        default: {
+          throw new Error(
+            `Unexpected type "${typeof rule.condition}" for rule "${
+              rule.name
+            }"`,
+          )
+        }
+      }
+    })()
+
+    const excludeCondition =
+      typeof rule.condition === "object" &&
+      rule.condition !== null &&
+      "exclude" in rule.condition
+        ? new RegExp(rule.condition.exclude)
+        : undefined
+
+    let isMatched = false
     switch (rule.check_type) {
       case "changed_files": {
         changedFilesLoop: for (const file of changedFiles) {
-          if (condition.test(file)) {
+          isMatched =
+            includeCondition.test(file) && !excludeCondition?.test(file)
+          if (isMatched) {
             logger.log(
-              `Matched expression "${rule.condition}" of rule "${rule.name}" for the file ${file}`,
+              `Matched expression "${
+                typeof rule.condition === "string"
+                  ? rule.condition
+                  : JSON.stringify(rule.condition)
+              }" of rule "${rule.name}" for the file ${file}`,
             )
-            matched = true
             break changedFilesLoop
           }
         }
         break
       }
       case "diff": {
-        if (condition.test(diff)) {
+        isMatched = includeCondition.test(diff) && !excludeCondition?.test(diff)
+        if (isMatched) {
           logger.log(
-            `Matched expression "${rule.condition}" of rule "${rule.name}" on diff`,
+            `Matched expression "${
+              typeof rule.condition === "string"
+                ? rule.condition
+                : JSON.stringify(rule.condition)
+            }" of rule "${rule.name}" on diff`,
           )
-          matched = true
         }
         break
       }
@@ -315,7 +352,7 @@ export const runChecks = async function (
         return commitStateFailure
       }
     }
-    if (!matched) {
+    if (!isMatched) {
       continue
     }
 

@@ -8,7 +8,7 @@ import {
   condition,
   configFileContentsApiPath,
   githubApi,
-  githubWebsite,
+  prApiPath,
   rulesExamples,
   team,
   team2,
@@ -32,8 +32,9 @@ describe("Configuration", function () {
     logHistory = []
     logger = new Logger(logHistory)
     octokit = new Octokit()
-    nock(githubWebsite)
-      .get(basePR.diff_url.slice(githubWebsite.length))
+    nock(githubApi)
+      .get(prApiPath)
+      .matchHeader("accept", "application/vnd.github.v3.diff")
       .reply(200, condition)
     nock(githubApi)
       .get(changedFilesApiPath)
