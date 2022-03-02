@@ -88,22 +88,24 @@ rules:
     check_type: diff     # Either "diff" or "changed_files".
 
 
-    # Conditions are either basic regular expressions or include/exclude
+    # Conditions take one of two forms: "include" or "include/exclude"
     # - Conditions' values are Javascript Regular Expressions used to match the
     #   either the diff (for check_type: diff) or changed files' paths (for
     #   check_type: changed_files)
-    # - Do not include RegExp delimiters (`/`) at the beginning or end of the
-    #   regular expressions
+    # - There is no need to include Javascript RegExp delimiters ('/') at the
+    #   beginning or end of the regular expressions (those slashes are
+    #   interpreted as literal slashes)
     # - "gm" modifiers will be added by the action
 
-    # Condition: basic regular expression form (works as "include")
+    # Condition: include form
     condition: .*
 
     # Condition: include/exclude form
-    # It can either be:
-    # - Include but no exclude
-    # - Exclude but no include (include defaults to ".*")
-    # - Both include and exclude
+    # The structure should be one of the following:
+    # - Define "include" but not "exclude"
+    # - Define "exclude" but not "include" (include defaults to ".*")
+    # - Define both "include" and "exclude"
+    # Note that excludes are computed *after* includes!
     # Example:
     # condition:
     #   include: ^foo      # Optional if exclude is provided
