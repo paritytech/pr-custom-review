@@ -23,7 +23,7 @@ const excludeConditionSchema = Joi.string().required()
 const ruleSchema = Joi.object<Rule>().keys({
   name: Joi.string().required(),
   condition: Joi.alternatives([
-    Joi.string().required(),
+    includeConditionSchema,
     Joi.object().keys({ include: includeConditionSchema }),
     Joi.object().keys({ exclude: excludeConditionSchema }),
     Joi.object().keys({
