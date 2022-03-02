@@ -152,6 +152,52 @@ Array [
 ]
 `;
 
+exports[`Rules Approved with condition: exclude for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Approved with condition: exclude for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Approved with condition: include & exclude for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Approved with condition: include & exclude for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Approved with condition: include for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Approved with condition: include for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
 exports[`Rules Has no approval on rule including both teams and users for changed_files 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
@@ -350,6 +396,52 @@ Array [
 ]
 `;
 
+exports[`Rules Has no approval with condition: exclude for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Has no approval with condition: exclude for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Has no approval with condition: include & exclude for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Has no approval with condition: include & exclude for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Has no approval with condition: include for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "ERROR:  The following problems were found:",
+  "Rule Condition include requires at least 2 approvals, but only 0 were given",
+  "",
+]
+`;
+
+exports[`Rules Has no approval with condition: include for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "ERROR:  The following problems were found:",
+  "Rule Condition include requires at least 2 approvals, but only 0 were given",
+  "",
+]
+`;
+
 exports[`Rules Is missing approval on rule including both teams and users for changed_files 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
@@ -516,6 +608,52 @@ Array [
   "usersToAskForReview Map(1) { 'userCoworker2' => { team: 'team2' } }",
   "ERROR:  The following problems were found:",
   "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Is missing approval with condition: exclude for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Is missing approval with condition: exclude for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Is missing approval with condition: include & exclude for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Is missing approval with condition: include & exclude for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+]
+`;
+
+exports[`Rules Is missing approval with condition: include for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "ERROR:  The following problems were found:",
+  "Rule Condition include requires at least 2 approvals, but only 1 were given",
+  "",
+]
+`;
+
+exports[`Rules Is missing approval with condition: include for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "ERROR:  The following problems were found:",
+  "Rule Condition include requires at least 2 approvals, but only 1 were given",
   "",
 ]
 `;
