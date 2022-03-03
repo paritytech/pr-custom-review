@@ -57,7 +57,12 @@ Customizable rules should be enabled through [configuration](#action-configurati
 ### Action configuration <a name="action-configuration"></a>
 
 The configuration file should be placed in `.github/pr-custom-review.yml`
-(related to [built-in checks](#built-in-checks)).
+(related to [built-in checks](#built-in-checks)). This should be done in separate PR
+before placing pr-custom-review action's workflow file. Otherwise action will not be
+able to detect it in PR's base branch and action will fail with error:
+```
+ERROR:  RequestError [HttpError]: Not Found
+```
 
 ### Rules syntax <a name="rules-syntax"></a>
 
