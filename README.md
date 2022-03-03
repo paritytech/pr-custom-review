@@ -2,7 +2,7 @@
 
 This is a GitHub Action created for complex pull request approval scenarios which are not currently supported by GitHub's [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules). It might extend or even completely replace the [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging) setting.
 
-# TOC
+## TOC
 
 - [How it works](#how-it-works)
   - [High level flow chart](#high-level-flow-chart)
@@ -47,8 +47,8 @@ This action has the following non-configurable built-in checks:
 
 - If the action's files are changed, 1 approval from
   [action-review-team](#workflow-configuration) is required
-  - `.github/workflows/pr-custom-review.yml` 
-  - `.github/pr-custom-review.yml` 
+  - `.github/workflows/pr-custom-review.yml`
+  - `.github/pr-custom-review.yml`
 
 Customizable rules should be enabled through [configuration](#action-configuration).
 
@@ -239,16 +239,11 @@ to download dependencies first.
 #### Build steps <a name="build-steps"></a>
 
 1. Install the dependencies
-
-`npm install`
-
+    `npm install`
 2. Build
-
-`npm run build`
-
+    `npm run build`
 3. Package
-
-`npm run package`
+    `npm run package`
 
 See the next sections for [trying it out](#trial) or [releasing](#release).
 
@@ -266,13 +261,12 @@ next time the action is ran.
 #### Trial steps <a name="trial-steps"></a>
 
 1. [Build](#build) the changes and push them to some branch
-2. Change the workflow's step from `paritytech/pr-custom-review@branch` to your
-  branch:
+2. Change the workflow's step from `paritytech/pr-custom-review@branch` to your branch:
 
-```diff
--uses: paritytech/pr-custom-review@branch
-+uses: user/fork@branch
-```
+    ```diff
+    -uses: paritytech/pr-custom-review@branch
+    +uses: user/fork@branch
+    ```
 
 3. Re-run the action and note the changes were automatically applied
 
@@ -293,10 +287,10 @@ installed.
 1. [Build](#build) the changes and push them to some tag
 2. Use the new tag in your workflows:
 
-```diff
--uses: paritytech/pr-custom-review@1
-+uses: paritytech/pr-custom-review@2
-```
+    ```diff
+    -uses: paritytech/pr-custom-review@1
+    +uses: paritytech/pr-custom-review@2
+    ```
 
 ### Testing
 
