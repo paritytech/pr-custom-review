@@ -294,11 +294,18 @@ installed.
 
 ### Deployment
 
-Create a token with `workflow`, `read:org`, `user` scopes.
+1. Create a token with `workflow`, `read:org`, `user` scopes.
 
-![Token scopes](./img/token-scopes.png)
+    ![Token scopes](./img/token-scopes.png)
 
-and save it into the repo or orga secrets.
+    and save it into the repo or orga secrets.
+
+    Use this token in `with: token:` of the Action definition.
+
+2. one should [add the config](https://github.com/paritytech/substrate/pull/10968) to the repository, without it in `master` the Action will not work.
+3. [add](https://github.com/paritytech/substrate/pull/10951/files) the Action definition.
+4. add the team that reviews these config files, default review team and those who review 🔒. Don't forget to protect the latter with a comment line and a 🔒 there.
+5. PR Custom Review should request a review from aforementioned groups.
 
 ### Testing
 
