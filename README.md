@@ -292,6 +292,14 @@ installed.
     +uses: paritytech/pr-custom-review@2
     ```
 
+### Deployment
+
+Create a token with `workflow`, `read:org`, `user` scopes.
+
+![Token scopes](./img/token-scopes.png)
+
+and save it into the repo or orga secrets.
+
 ### Testing
 
 Run `npm run test`.
