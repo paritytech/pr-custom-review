@@ -462,30 +462,11 @@ export const runChecks = async function (
         }
 
         if (approvedBy.size < rule.min_approvals) {
-          const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
-          for (const [username, { teams }] of rule.users) {
-            if (approvedBy.has(username)) {
-              continue
-            }
-            const prevUser = usersToAskForReview.get(username)
-            if (
-              prevUser === undefined ||
-              // If the team is null, this user was not asked as part of a
-              // team, but individually. They should always be registered with
-              // "team: null" that case to be sure the review will be
-              // requested individually, even if they were previously
-              // registered as part of a team.
-              teams === null
-            ) {
-              usersToAskForReview.set(username, { teams })
-            } else if (prevUser.teams) {
-              for (const team of teams) {
-                prevUser.teams.add(team)
-              }
-            } else {
-              prevUser.teams = teams
-            }
-          }
+          const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
+            Array.from(rule.users.entries()).filter(function ([username]) {
+              return !approvedBy.has(username)
+            }),
+          )
           const problem = `Rule "${rule.name}" needs at least ${
             rule.min_approvals
           } approvals, but ${
