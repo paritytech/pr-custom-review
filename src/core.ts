@@ -72,7 +72,11 @@ const combineUsers = async function (
         // supposed to be requested individually
         userInfo?.teams !== null
       ) {
-        users.set(teamMember, { teams: [...(userInfo?.teams ?? []), team] })
+        if (userInfo === undefined) {
+          users.set(teamMember, { teams: new Set([team]) })
+        } else {
+          userInfo.teams.add(team)
+        }
       }
     }
   }
@@ -465,7 +469,6 @@ export const runChecks = async function (
             }
             const prevUser = usersToAskForReview.get(username)
             if (
-              // Avoid registering the same user twice
               prevUser === undefined ||
               // If the team is null, this user was not asked as part of a
               // team, but individually. They should always be registered with
@@ -475,6 +478,12 @@ export const runChecks = async function (
               teams === null
             ) {
               usersToAskForReview.set(username, { teams })
+            } else if (prevUser.teams) {
+              for (const team of teams) {
+                prevUser.teams.add(team)
+              }
+            } else {
+              prevUser.teams = teams
             }
           }
           const problem = `Rule "${rule.name}" needs at least ${
@@ -485,7 +494,7 @@ export const runChecks = async function (
             usersToAskForReview.entries(),
           )
             .map(function ([username, { teams }]) {
-              return `${username}${teams ? ` (team${teams.length === 1 ? "" : "s"}: ${teams.join(",")})` : ""}`
+              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
             })
             .join(", ")}.`
           outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
@@ -521,7 +530,6 @@ export const runChecks = async function (
           for (const [username, userInfo] of outcome.usersToAskForReview) {
             const prevUser = pendingUsersToAskForReview.get(username)
             if (
-              // Avoid registering the same user twice
               prevUser === undefined ||
               // If the team is null, this user was not asked as part of a
               // team, but individually. They should always be registered with
@@ -533,6 +541,12 @@ export const runChecks = async function (
               pendingUsersToAskForReview.set(username, {
                 teams: userInfo.teams,
               })
+            } else if (prevUser.teams) {
+              for (const team of userInfo.teams) {
+                prevUser.teams.add(team)
+              }
+            } else {
+              prevUser.teams = userInfo.teams
             }
           }
         } else {
@@ -547,7 +561,6 @@ export const runChecks = async function (
       for (const [username, userInfo] of pendingUsersToAskForReview) {
         const prevUser = usersToAskForReview.get(username)
         if (
-          // Avoid registering the same user twice
           prevUser === undefined ||
           // If the team is null, this user was not asked as part of a
           // team, but individually. They should always be registered with
@@ -557,6 +570,12 @@ export const runChecks = async function (
           userInfo.teams === null
         ) {
           usersToAskForReview.set(username, { teams: userInfo.teams })
+        } else if (prevUser.teams) {
+          for (const team of userInfo.teams) {
+            prevUser.teams.add(team)
+          }
+        } else {
+          prevUser.teams = userInfo.teams
         }
       }
     }
