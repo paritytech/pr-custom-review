@@ -41,7 +41,7 @@ const combineUsers = async function (
 
   for (const user of presetUsers) {
     if (pr.user.login != user) {
-      users.set(user, { team: null })
+      users.set(user, { teams: null })
     }
   }
 
@@ -65,13 +65,18 @@ const combineUsers = async function (
     }
 
     for (const teamMember of teamMembers) {
+      const userInfo = users.get(teamMember)
       if (
         pr.user.login != teamMember &&
         // We do not want to register a team for this user if their approval is
         // supposed to be requested individually
-        users.get(teamMember) === undefined
+        userInfo?.teams !== null
       ) {
-        users.set(teamMember, { team })
+        if (userInfo === undefined) {
+          users.set(teamMember, { teams: new Set([team]) })
+        } else {
+          userInfo.teams.add(team)
+        }
       }
     }
   }
@@ -456,40 +461,21 @@ export const runChecks = async function (
           }
         }
 
-        const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
-
         if (approvedBy.size < rule.min_approvals) {
-          const missingApprovals: {
-            username: string
-            team: string | null
-          }[] = []
-          for (const [username, { team }] of rule.users) {
-            if (!approvedBy.has(username)) {
-              missingApprovals.push({ username, team })
-              const prevUser = usersToAskForReview.get(username)
-              if (
-                // Avoid registering the same user twice
-                prevUser === undefined ||
-                // If the team is null, this user was not asked as part of a
-                // team, but individually. They should always be registered with
-                // "team: null" that case to be sure the review will be
-                // requested individually, even if they were previously
-                // registered as part of a team.
-                team === null
-              ) {
-                usersToAskForReview.set(username, { team })
-              }
-            }
-          }
+          const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
+            Array.from(rule.users.entries()).filter(function ([username]) {
+              return !approvedBy.has(username)
+            }),
+          )
           const problem = `Rule "${rule.name}" needs at least ${
             rule.min_approvals
           } approvals, but ${
             approvedBy.size
-          } were matched. The following users have not approved yet: ${missingApprovals
-            .map(function (user) {
-              return `${
-                user.username
-              }${user.team ? ` (team: ${user.team})` : ""}`
+          } were matched. The following users have not approved yet: ${Array.from(
+            usersToAskForReview.entries(),
+          )
+            .map(function ([username, { teams }]) {
+              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
             })
             .join(", ")}.`
           outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
@@ -525,16 +511,23 @@ export const runChecks = async function (
           for (const [username, userInfo] of outcome.usersToAskForReview) {
             const prevUser = pendingUsersToAskForReview.get(username)
             if (
-              // Avoid registering the same user twice
               prevUser === undefined ||
               // If the team is null, this user was not asked as part of a
               // team, but individually. They should always be registered with
               // "team: null" that case to be sure the review will be
               // requested individually, even if they were previously
               // registered as part of a team.
-              userInfo.team === null
+              userInfo.teams === null
             ) {
-              pendingUsersToAskForReview.set(username, { team: userInfo.team })
+              pendingUsersToAskForReview.set(username, {
+                teams: userInfo.teams,
+              })
+            } else if (prevUser.teams) {
+              for (const team of userInfo.teams) {
+                prevUser.teams.add(team)
+              }
+            } else {
+              prevUser.teams = userInfo.teams
             }
           }
         } else {
@@ -549,16 +542,21 @@ export const runChecks = async function (
       for (const [username, userInfo] of pendingUsersToAskForReview) {
         const prevUser = usersToAskForReview.get(username)
         if (
-          // Avoid registering the same user twice
           prevUser === undefined ||
           // If the team is null, this user was not asked as part of a
           // team, but individually. They should always be registered with
           // "team: null" that case to be sure the review will be
           // requested individually, even if they were previously
           // registered as part of a team.
-          userInfo.team === null
+          userInfo.teams === null
         ) {
-          usersToAskForReview.set(username, { team: userInfo.team })
+          usersToAskForReview.set(username, { teams: userInfo.teams })
+        } else if (prevUser.teams) {
+          for (const team of userInfo.teams) {
+            prevUser.teams.add(team)
+          }
+        } else {
+          prevUser.teams = userInfo.teams
         }
       }
     }
@@ -567,11 +565,13 @@ export const runChecks = async function (
       logger.log("usersToAskForReview", usersToAskForReview)
       const teams: Set<string> = new Set()
       const users: Set<string> = new Set()
-      for (const [user, { team }] of usersToAskForReview) {
-        if (team === null) {
+      for (const [user, userInfo] of usersToAskForReview) {
+        if (userInfo.teams === null) {
           users.add(user)
         } else {
-          teams.add(team)
+          for (const team of userInfo.teams) {
+            teams.add(team)
+          }
         }
       }
       await octokit.request(

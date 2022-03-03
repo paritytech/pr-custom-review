@@ -447,7 +447,9 @@ describe("Rules", function () {
                     expect(body).toMatchObject({
                       reviewers: [],
                       team_reviewers:
-                        scenario === "Is missing approval" ? [team2] : [team1],
+                        scenario === "Is missing approval"
+                          ? [team2]
+                          : [team1, team2],
                     })
                     return true
                   })
@@ -464,7 +466,9 @@ describe("Rules", function () {
                     expect(body).toMatchObject({
                       reviewers: [],
                       team_reviewers:
-                        scenario === "Is missing approval" ? [team2] : [team1],
+                        scenario === "Is missing approval"
+                          ? [team2]
+                          : [team1, team2],
                     })
                     return true
                   })
@@ -540,7 +544,9 @@ describe("Rules", function () {
                     expect(body).toMatchObject({
                       reviewers: [userCoworker3],
                       team_reviewers:
-                        scenario === "Is missing approval" ? [team2] : [team1],
+                        scenario === "Is missing approval"
+                          ? [team2]
+                          : [team1, team2],
                     })
                     return true
                   })
@@ -557,7 +563,9 @@ describe("Rules", function () {
                     expect(body).toMatchObject({
                       reviewers: [userCoworker3],
                       team_reviewers:
-                        scenario === "Is missing approval" ? [team2] : [team1],
+                        scenario === "Is missing approval"
+                          ? [team2]
+                          : [team1, team2],
                     })
                     return true
                   })

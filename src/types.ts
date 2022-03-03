@@ -76,7 +76,7 @@ export type Configuration = {
   rules: Rule[]
 }
 
-export type RuleUserInfo = { team: string | null }
+export type RuleUserInfo = { teams: Set<string> | null }
 
 export type MatchedRule = {
   name: string
