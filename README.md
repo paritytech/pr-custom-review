@@ -57,9 +57,8 @@ Customizable rules should be enabled through [configuration](#action-configurati
 ### Action configuration <a name="action-configuration"></a>
 
 The configuration file should be placed in `.github/pr-custom-review.yml`
-(related to [built-in checks](#built-in-checks)). This should be done in separate PR
-before placing pr-custom-review action's workflow file. Otherwise action will not be
-able to detect it in PR's base branch and action will fail with error:
+
+The configuration file is always read from the repository's default branch. For this reason it's recommended to commit the configuration file **before** the action's workflow file is added, otherwise the action will fail with `RequestError [HttpError]: Not Found` because the configuration does not yet exist in the default branch.
 ```
 ERROR:  RequestError [HttpError]: Not Found
 ```
