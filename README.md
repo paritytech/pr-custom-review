@@ -22,6 +22,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
     - [Trial steps](#trial-steps)
   - [Release](#release)
     - [Release steps](#release-steps)
+- [Deployment](#deployment)
 
 ## How it works <a name="how-it-works"></a>
 
@@ -299,20 +300,42 @@ installed.
     +uses: paritytech/pr-custom-review@2
     ```
 
-### Deployment
+## Deployment <a name="deployment"></a>
 
-1. Create a token with `workflow`, `read:org`, `user` scopes.
+1. Create the teams to be used as inputs of the action
+
+    The explanation for each team is available in
+    [Workflow configuration](#workflow-configuration) and
+    [action.yml](./action.yml)
+
+2. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+  to be used as the `token` input of the action
 
     ![Token scopes](./img/token-scopes.png)
 
-    and save it into the repo or orga secrets.
+3. Set up the Personal Access Token as a workflow secret
 
-    Use this token in `with: token:` of the Action definition.
+    As of this writing, the secret setup can be done in
+    `https://github.com/organizations/${ORG}/settings/secrets/actions`.
+    For further context see
+    [Creating encrypted secrets for an organization](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-organization)
+    and
+    [Using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow).
 
-2. one should [add the config](https://github.com/paritytech/substrate/pull/10968) to the repository, without it in `master` the Action will not work.
-3. [add](https://github.com/paritytech/substrate/pull/10951/files) the Action definition.
-4. add the team that reviews these config files, default review team and those who review 🔒. Don't forget to protect the latter with a comment line and a 🔒 there.
-5. PR Custom Review should request a review from aforementioned groups.
+4. Add the [configuration file](#configuration-file) to the repository's
+  default branch, e.g. https://github.com/paritytech/substrate/pull/10968/files.
+  This should be done in a separate PR prior to adding the workflow
+  configuration in the next step.
+
+5. Add the [workflow configuration](#workflow-configuration), e.g.
+  https://github.com/paritytech/substrate/pull/10951/files
+
+    - Team inputs should use the teams created on Step 1
+    - `token` input should use the Personal Access Token generated on Step 2
+
+6. Trigger one of the events defined in the
+  [workflow configuration](#workflow-configuration) or
+  [run the workflow manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
 
 ### Testing
 
