@@ -311,6 +311,9 @@ installed.
 2. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
   to be used as the `token` input of the action
 
+    The rationale for each scope is described in
+    [Workflow configuration](#workflow-configuration).
+
     ![Token scopes](./img/token-scopes.png)
 
 3. Set up the Personal Access Token as a workflow secret
