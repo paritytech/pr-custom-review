@@ -310,7 +310,10 @@ installed.
 
     The explanation for each team is available in
     [Workflow configuration](#workflow-configuration) and
-    [action.yml](./action.yml)
+    [action.yml](./action.yml).
+
+    Note that for public repositories all the input teams should be public,
+    otherwise the action will not be able to request their review.
 
 2. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
   to be used as the `token` input of the action
