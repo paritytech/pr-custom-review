@@ -323,7 +323,7 @@ installed.
     [Using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow).
 
 4. Add the [configuration file](#configuration-file) to the repository's
-  default branch, e.g. https://github.com/paritytech/substrate/pull/10968/files.
+  default branch, e.g. <https://github.com/paritytech/substrate/pull/10968/files>.
   This should be done in a separate PR prior to adding the workflow
   configuration in the next step.
 
