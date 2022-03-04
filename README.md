@@ -31,7 +31,7 @@ Upon receiving [pull_request](https://docs.github.com/en/actions/learn-github-ac
 - `diff` which matches a rule based on the PR's diff content
 - `changed_files` which matches a rule based on paths/files changed in the PR
 
-If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status can be made required through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
+If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status should be made required through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
 
 ### High level flow chart
 
