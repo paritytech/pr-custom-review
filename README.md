@@ -8,7 +8,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
   - [High level flow chart](#high-level-flow-chart)
 - [Built-in checks](#built-in-checks)
 - [Configuration](#configuration)
-  - [Action configuration](#action-configuration)
+  - [Configuration file](#configuration-file)
   - [Rules syntax](#rules-syntax)
     - [Basic Rule syntax](#basic-rule-syntax)
     - [AND Rule syntax](#and-rule-syntax)
@@ -30,7 +30,7 @@ Upon receiving [pull_request](https://docs.github.com/en/actions/learn-github-ac
 - `diff` which matches a rule based on the PR's diff content
 - `changed_files` which matches a rule based on paths/files changed in the PR
 
-If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status can be made a requirement through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
+If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status can be made required through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
 
 ### High level flow chart
 
@@ -54,11 +54,16 @@ Customizable rules should be enabled through [configuration](#action-configurati
 
 ## Configuration
 
-### Action configuration <a name="action-configuration"></a>
+### Configuration file <a name="configuration-file"></a>
 
 The configuration file should be placed in `.github/pr-custom-review.yml`
+(related to [built-in checks](#built-in-checks)).
 
-The configuration file is always read from the repository's default branch. For this reason it's recommended to commit the configuration file **before** the action's workflow file is added, otherwise the action will fail with `RequestError [HttpError]: Not Found` because the configuration does not yet exist in the default branch.
+The configuration file is always read from the repository's default branch. For
+this reason it's recommended to commit the configuration file **before** the
+action's workflow file is added, otherwise the action will fail with
+`RequestError [HttpError]: Not Found` because the configuration does not yet
+exist in the default branch.
 
 ### Rules syntax <a name="rules-syntax"></a>
 
@@ -203,8 +208,10 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
-          # A token with read-only organization permission is required for
-          # requesting reviews from teams.
+          # The token needs the following permissions
+          # - `read:org` for being able to request reviews from teams
+          # - `workflow` for being able to request the workflow's job
+          #    information; used to track lines in the job's output
           token: ${{ secrets.GITHUB_TOKEN }}
 
           # The team which will handle the "locks touched" built-in rule.
