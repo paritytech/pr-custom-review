@@ -328,7 +328,7 @@ installed.
   configuration in the next step.
 
 5. Add the [workflow configuration](#workflow-configuration), e.g.
-  https://github.com/paritytech/substrate/pull/10951/files
+  <https://github.com/paritytech/substrate/pull/10951/files>
 
     - Team inputs should use the teams created on Step 1
     - `token` input should use the Personal Access Token generated on Step 2
