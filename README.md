@@ -209,11 +209,11 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
-          # The token needs the following permissions
+          # The token needs the following scopes:
           # - `read:org` for being able to request reviews from teams
           # - `workflow` for being able to request the workflow's job
           #    information; used to track lines in the job's output
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REVIEWS_TOKEN }}
 
           # The team which will handle the "locks touched" built-in rule.
           locks-review-team: my-custom-team
