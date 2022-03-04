@@ -312,8 +312,14 @@ installed.
     [Workflow configuration](#workflow-configuration) and
     [action.yml](./action.yml).
 
-    Note that for public repositories all the input teams should be public,
+    Note that for public repositories all the used teams should be public,
     otherwise the action will not be able to request their review.
+
+    Note that the repository where the action is used should be added to the
+    teams' repositories
+    (`https://github.com/orgs/${ORG}/teams/${TEAM}/repositories`) with at least
+    Read access, as per
+    [Requesting a pull request review](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review).
 
 2. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
   to be used as the `token` input of the action
