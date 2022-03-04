@@ -215,8 +215,12 @@ jobs:
           #    information; used to track lines in the job's output
           token: ${{ secrets.REVIEWS_TOKEN }}
 
-          # The team which will handle the "locks touched" built-in rule.
-          locks-review-team: my-custom-team
+          # locks-review-team defines the team which will handle the "locks
+          # touched" built-in rule. We recommend protecting this input with
+          # "🔒" so that it won't be changed unless someone from
+          # locks-review-team approves it.
+          # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
+          locks-review-team: custom-locks-team
 
           # The second team which will handle the "locks touched" built-in rule.
           team-leads-team: my-custom-leads-team
