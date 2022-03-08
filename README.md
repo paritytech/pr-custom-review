@@ -294,18 +294,23 @@ installed.
 
 ### Deployment
 
-1. Create a token with `workflow`, `read:org`, `user` scopes.
-
-    ![Token scopes](./img/token-scopes.png)
-
+1. Create a token with `workflow`, `read:org` (needed to access organization teams information)  scopes.
+    <details>
+      <summary>Screenshot</summary>
+        ![Token scopes](./img/token-scopes.png)
+    </details>
     and save it into the repo or orga secrets.
 
     Use this token in `with: token:` of the Action definition.
 
-2. one should [add the config](https://github.com/paritytech/substrate/pull/10968) to the repository, without it in `master` the Action will not work.
-3. [add](https://github.com/paritytech/substrate/pull/10951/files) the Action definition.
-4. add the team that reviews these config files, default review team and those who review 🔒. Don't forget to protect the latter with a comment line and a 🔒 there.
-5. PR Custom Review should request a review from aforementioned groups.
+2. [Add the config file](https://github.com/paritytech/substrate/pull/10968) to the repository before main Action workflow file,
+and merge it into branches PR's to which require special review. Without it Action will not work.
+3. [Add](https://github.com/paritytech/substrate/pull/10951/files) the Action definition `.github/workflows/pr-custom-review.yml` file.
+It is recommended to protect lines specifying reviewing teams by adding comment containing 🔒 symbol right above respective line.
+4. Setup branch protection rules as per [GitHub repository configuration](#github-repository-configuration)
+5. That's it. PR Custom Review GitHub Action will start to evaluate PR's according to built-in and specified in the
+[Action configuration](#action-configuration) file rules. Will request reviews from respective users/teams and will monitor whether
+the required number of approvals has been reached.
 
 ### Testing
 
