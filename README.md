@@ -2,13 +2,13 @@
 
 This is a GitHub Action created for complex pull request approval scenarios which are not currently supported by GitHub's [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules). It might extend or even completely replace the [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging) setting.
 
-# TOC
+## TOC
 
 - [How it works](#how-it-works)
   - [High level flow chart](#high-level-flow-chart)
 - [Built-in checks](#built-in-checks)
 - [Configuration](#configuration)
-  - [Action configuration](#action-configuration)
+  - [Configuration file](#configuration-file)
   - [Rules syntax](#rules-syntax)
     - [Basic Rule syntax](#basic-rule-syntax)
     - [AND Rule syntax](#and-rule-syntax)
@@ -22,6 +22,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
     - [Trial steps](#trial-steps)
   - [Release](#release)
     - [Release steps](#release-steps)
+- [Deployment](#deployment)
 
 ## How it works <a name="how-it-works"></a>
 
@@ -30,7 +31,7 @@ Upon receiving [pull_request](https://docs.github.com/en/actions/learn-github-ac
 - `diff` which matches a rule based on the PR's diff content
 - `changed_files` which matches a rule based on paths/files changed in the PR
 
-If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status can be made a requirement through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
+If a given rule is matched and its approval count is not met, then reviews will be requested from the missing users/teams for that rule and a failed commit status will be set for the PR; this status should be made required through branch protection rules in order to block the PR from being merged until all conditions are passing (see [GitHub repository configuration](#github-repository-configuration)).
 
 ### High level flow chart
 
@@ -47,18 +48,23 @@ This action has the following non-configurable built-in checks:
 
 - If the action's files are changed, 1 approval from
   [action-review-team](#workflow-configuration) is required
-  - `.github/workflows/pr-custom-review.yml` 
-  - `.github/pr-custom-review.yml` 
+  - `.github/workflows/pr-custom-review.yml`
+  - `.github/pr-custom-review.yml`
 
 Customizable rules should be enabled through [configuration](#action-configuration).
 
 ## Configuration
 
-### Action configuration <a name="action-configuration"></a>
+### Configuration file <a name="configuration-file"></a>
 
 The configuration file should be placed in `.github/pr-custom-review.yml`
+(related to [built-in checks](#built-in-checks)).
 
-The configuration file is always read from the repository's default branch. For this reason it's recommended to commit the configuration file **before** the action's workflow file is added, otherwise the action will fail with `RequestError [HttpError]: Not Found` because the configuration does not yet exist in the default branch.
+The configuration file is always read from the repository's default branch. For
+this reason it's recommended to commit the configuration file **before** the
+action's workflow file is added, otherwise the action will fail with
+`RequestError [HttpError]: Not Found` because the configuration does not yet
+exist in the default branch.
 
 ### Rules syntax <a name="rules-syntax"></a>
 
@@ -203,12 +209,18 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
-          # A token with read-only organization permission is required for
-          # requesting reviews from teams.
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # The token needs the following scopes:
+          # - `read:org` for being able to request reviews from teams
+          # - `workflow` for being able to request the workflow's job
+          #    information; used to track lines in the job's output
+          token: ${{ secrets.REVIEWS_TOKEN }}
 
-          # The team which will handle the "locks touched" built-in rule.
-          locks-review-team: my-custom-team
+          # locks-review-team defines the team which will handle the "locks
+          # touched" built-in rule. We recommend protecting this input with
+          # "🔒" so that it won't be changed unless someone from
+          # locks-review-team approves it.
+          # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
+          locks-review-team: custom-locks-team
 
           # The second team which will handle the "locks touched" built-in rule.
           team-leads-team: my-custom-leads-team
@@ -239,16 +251,11 @@ to download dependencies first.
 #### Build steps <a name="build-steps"></a>
 
 1. Install the dependencies
-
-`npm install`
-
+    `npm install`
 2. Build
-
-`npm run build`
-
+    `npm run build`
 3. Package
-
-`npm run package`
+    `npm run package`
 
 See the next sections for [trying it out](#trial) or [releasing](#release).
 
@@ -266,13 +273,12 @@ next time the action is ran.
 #### Trial steps <a name="trial-steps"></a>
 
 1. [Build](#build) the changes and push them to some branch
-2. Change the workflow's step from `paritytech/pr-custom-review@branch` to your
-  branch:
+2. Change the workflow's step from `paritytech/pr-custom-review@branch` to your branch:
 
-```diff
--uses: paritytech/pr-custom-review@branch
-+uses: user/fork@branch
-```
+    ```diff
+    -uses: paritytech/pr-custom-review@branch
+    +uses: user/fork@branch
+    ```
 
 3. Re-run the action and note the changes were automatically applied
 
@@ -293,10 +299,64 @@ installed.
 1. [Build](#build) the changes and push them to some tag
 2. Use the new tag in your workflows:
 
-```diff
--uses: paritytech/pr-custom-review@1
-+uses: paritytech/pr-custom-review@2
-```
+    ```diff
+    -uses: paritytech/pr-custom-review@1
+    +uses: paritytech/pr-custom-review@2
+    ```
+
+## Deployment <a name="deployment"></a>
+
+1. Create the teams to be used as inputs of the action
+
+    The explanation for each team is available in
+    [Workflow configuration](#workflow-configuration) and
+    [action.yml](./action.yml).
+
+    For public repositories all the used teams should be public,
+    otherwise the action will not be able to request their review.
+
+    The repository where the action is used should be added to the
+    teams' repositories
+    (`https://github.com/orgs/${ORG}/teams/${TEAM}/repositories`) with at least
+    Read access, as per
+    [Requesting a pull request review](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review).
+
+2. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+  to be used as the `token` input of the action
+
+    The rationale for each scope is described in
+    [Workflow configuration](#workflow-configuration).
+
+    ![Token scopes](./img/token-scopes.png)
+
+3. Set up the Personal Access Token as a workflow secret
+
+    As of this writing, the secret setup can be done in
+    `https://github.com/organizations/${ORG}/settings/secrets/actions`.
+    For further context see
+    [Creating encrypted secrets for an organization](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-organization)
+    and
+    [Using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow).
+
+4. Add the [configuration file](#configuration-file) to the repository's
+  default branch, as demonstrated in
+  <https://github.com/paritytech/substrate/pull/10968/files>.
+  This should be done in a separate PR which should be merged before adding the
+  workflow configuration in the next step.
+
+5. Add the [workflow configuration](#workflow-configuration), as demonstrated in
+  <https://github.com/paritytech/substrate/pull/10951/files>
+
+    - Team inputs should use the teams created on Step 1
+    - `token` input should use the Personal Access Token generated on Step 2
+
+6. Trigger one of the events defined in the
+  [workflow configuration](#workflow-configuration) or
+  [run the workflow manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+
+7. Set the commit statuses' names generated from the triggered events to be
+  required, as explained in the
+  ["GitHub repository configuration" section](#github-repository-configuration)
 
 ### Testing
 
