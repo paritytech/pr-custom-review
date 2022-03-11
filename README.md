@@ -312,10 +312,10 @@ installed.
     [Workflow configuration](#workflow-configuration) and
     [action.yml](./action.yml).
 
-    Note that for public repositories all the used teams should be public,
+    For public repositories all the used teams should be public,
     otherwise the action will not be able to request their review.
 
-    Note that the repository where the action is used should be added to the
+    The repository where the action is used should be added to the
     teams' repositories
     (`https://github.com/orgs/${ORG}/teams/${TEAM}/repositories`) with at least
     Read access, as per
@@ -339,11 +339,12 @@ installed.
     [Using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow).
 
 4. Add the [configuration file](#configuration-file) to the repository's
-  default branch, e.g. <https://github.com/paritytech/substrate/pull/10968/files>.
-  This should be done in a separate PR prior to adding the workflow
-  configuration in the next step.
+  default branch, as demonstrated in
+  <https://github.com/paritytech/substrate/pull/10968/files>.
+  This should be done in a separate PR which should be merged before adding the
+  workflow configuration in the next step.
 
-5. Add the [workflow configuration](#workflow-configuration), e.g.
+5. Add the [workflow configuration](#workflow-configuration), as demonstrated in
   <https://github.com/paritytech/substrate/pull/10951/files>
 
     - Team inputs should use the teams created on Step 1
@@ -352,6 +353,10 @@ installed.
 6. Trigger one of the events defined in the
   [workflow configuration](#workflow-configuration) or
   [run the workflow manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+
+7. Set the statuses' names generated from the triggered events to be required,
+  as explained in the
+  ["GitHub repository configuration" section](#github-repository-configuration)
 
 ### Testing
 
