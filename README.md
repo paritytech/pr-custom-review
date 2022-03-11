@@ -354,8 +354,8 @@ installed.
   [workflow configuration](#workflow-configuration) or
   [run the workflow manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
 
-7. Set the statuses' names generated from the triggered events to be required,
-  as explained in the
+7. Set the commit statuses' names generated from the triggered events to be
+  required, as explained in the
   ["GitHub repository configuration" section](#github-repository-configuration)
 
 ### Testing
