@@ -16,4 +16,4 @@
 - 🔒️ed lines are reviewed by 2 of {@joepetrowski, @shawntabrizi, @rphmeier, @bkchr}
 - PRs are reviewed by 2 of @paritytech/core-devs
 - The following files are reviewed by 2 of {@joepetrowski, @shawntabrizi, @rphmeier, @bkchr}
-  - `polkadot-parachains/**/src/*.rs`, except weights files
+  - `polkadot-parachains/**/src/*.rs`
