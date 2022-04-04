@@ -11,15 +11,11 @@ import {
   inputs,
   prApiPath,
   rulesExamples,
-  team,
-  team2,
-  team3,
 } from "test/constants"
 import Logger from "test/logger"
 
 import { rulesConfigurations } from "src/constants"
 import { runChecks } from "src/core"
-import { Rule } from "src/types"
 
 const setup = function ({ rules }: { rules?: Array<Record<string, unknown>> }) {
   nock(githubApi)

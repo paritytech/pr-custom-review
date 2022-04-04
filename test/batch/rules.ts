@@ -26,7 +26,7 @@ import {
   maxGithubApiTeamMembersPerPage,
 } from "src/constants"
 import { runChecks } from "src/core"
-import { AndRule, OrRule, Rule } from "src/types"
+import { Rule } from "src/types"
 
 describe("Rules", function () {
   let logger: Logger
@@ -340,7 +340,7 @@ describe("Rules", function () {
             }
             default: {
               const exhaustivenessCheck: never = ruleKind
-              throw new Error(`Unhandled rule kind ${ruleKind}`)
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
             }
           }
 
@@ -420,7 +420,7 @@ describe("Rules", function () {
             }
             default: {
               const exhaustivenessCheck: never = ruleKind
-              throw new Error(`Unhandled rule kind ${ruleKind}`)
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
             }
           }
 
@@ -504,7 +504,7 @@ describe("Rules", function () {
             }
             default: {
               const exhaustivenessCheck: never = ruleKind
-              throw new Error(`Unhandled rule kind ${ruleKind}`)
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
             }
           }
 
