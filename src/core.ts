@@ -131,13 +131,11 @@ export const runChecks = async function (
   }
 
   const {
-    inputs: {
-      "locks-review-team": locksReviewTeam,
-      "team-leads-team": teamLeadsTeam,
-      "action-review-team": actionReviewTeam,
-    },
+    "locks-review-team": locksReviewTeam,
+    "team-leads-team": teamLeadsTeam,
+    "action-review-team": actionReviewTeam,
     rules,
-    prevent_review_requests: preventReviewRequests,
+    "prevent-review-request": preventReviewRequest,
   } = configValidationResult.value
 
   // Set up a teams cache so that teams used multiple times don't have to be
@@ -627,12 +625,12 @@ export const runChecks = async function (
       const users: Set<string> = new Set()
       for (const [user, userInfo] of usersToAskForReview) {
         if (userInfo.teams === null) {
-          if (!preventReviewRequests?.users?.includes(user)) {
+          if (!preventReviewRequest?.users?.includes(user)) {
             users.add(user)
           }
         } else {
           for (const team of userInfo.teams) {
-            if (!preventReviewRequests?.teams?.includes(team)) {
+            if (!preventReviewRequest?.teams?.includes(team)) {
               teams.add(team)
             }
           }

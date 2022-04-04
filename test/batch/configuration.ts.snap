@@ -5,11 +5,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -29,11 +27,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -53,11 +49,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -77,11 +71,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -101,11 +93,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -125,11 +115,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -149,11 +137,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -173,11 +159,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -197,11 +181,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -221,11 +203,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -245,11 +225,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -269,11 +247,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -293,11 +269,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -317,11 +291,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -341,11 +313,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -365,11 +335,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -389,11 +357,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -413,11 +379,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -437,11 +401,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -461,11 +423,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -485,11 +445,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -509,11 +467,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -533,11 +489,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -557,11 +511,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -581,11 +533,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [
@@ -605,11 +555,9 @@ Array [
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
-    inputs: {
-      'locks-review-team': 'team',
-      'team-leads-team': 'team2',
-      'action-review-team': 'team3'
-    },
+    'locks-review-team': 'team',
+    'team-leads-team': 'team2',
+    'action-review-team': 'team3',
     rules: [ [Object] ]
   },
   details: [

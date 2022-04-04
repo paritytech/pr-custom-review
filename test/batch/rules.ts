@@ -9,7 +9,7 @@ import {
   configFileContentsApiPath,
   coworkers,
   githubApi,
-  inputs,
+  defaultTeamsNames,
   org,
   prApiPath,
   requestedReviewersApiPath,
@@ -48,7 +48,7 @@ describe("Rules", function () {
     teams?: { name: string; members: string[] }[]
     changedFiles?: string[]
     scenario: "Approved" | "Is missing approval" | "Has no approval"
-    preventReviewRequests?: Configuration["prevent_review_requests"]
+    preventReviewRequest?: Configuration["prevent-review-request"]
     rules?: Configuration["rules"]
   }) {
     let {
@@ -58,7 +58,7 @@ describe("Rules", function () {
       rules,
       changedFiles,
       scenario,
-      preventReviewRequests,
+      preventReviewRequest,
     } = options
 
     users ??= coworkers
@@ -113,9 +113,9 @@ describe("Rules", function () {
       .reply(200, {
         content: Buffer.from(
           YAML.stringify({
-            inputs,
+            ...defaultTeamsNames,
             rules,
-            prevent_review_requests: preventReviewRequests,
+            "prevent-review-request": preventReviewRequest,
           }),
         ).toString("base64"),
       })
@@ -728,10 +728,12 @@ describe("Rules", function () {
       setup({
         scenario: "Has no approval",
         changedFiles: actionReviewTeamFiles,
-        teams: [{ name: inputs["action-review-team"], members: coworkers }],
-        preventReviewRequests: {
+        teams: [
+          { name: defaultTeamsNames["action-review-team"], members: coworkers },
+        ],
+        preventReviewRequest: {
           users: coworkers,
-          teams: Object.values(inputs),
+          teams: Object.values(defaultTeamsNames),
         },
       })
 

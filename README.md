@@ -70,18 +70,17 @@ exist in the default branch.
 ### Configuration syntax <a name="configuration-syntax"></a>
 
 ```yaml
-inputs:
-  # locks-review-team defines the team which will handle the "locks touched"
-  # built-in rule. We recommend protecting this input with "🔒" so that it
-  # won't be changed unless someone from locks-review-team approves it.
-  # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
-  locks-review-team: custom-locks-team
+# locks-review-team defines the team which will handle the "locks touched"
+# built-in rule. We recommend protecting this input with "🔒" so that it
+# won't be changed unless someone from locks-review-team approves it.
+# 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
+locks-review-team: custom-locks-team
 
-  # The second team which will handle the "locks touched" built-in rule.
-  team-leads-team: my-custom-leads-team
+# The second team which will handle the "locks touched" built-in rule.
+team-leads-team: my-custom-leads-team
 
-  # The team which will handle the changes to the action's configuration.
-  action-review-team: my-action-review-team
+# The team which will handle the changes to the action's configuration.
+action-review-team: my-action-review-team
 
 # This is an example of a basic rule which enforces one approval from anyone
 # More complex rule types are explained in-depth in the "Rules syntax" section
@@ -90,7 +89,7 @@ rules:
     min_approvals: 1
 
 # OPTIONAL: define teams or users whose reviews are not requested by the action
-prevent_review_requests:
+prevent_review_request:
   users:
     - user_name
   teams:
