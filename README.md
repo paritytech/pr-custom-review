@@ -69,7 +69,7 @@ exist in the default branch.
 
 ### Rules syntax <a name="rules-syntax"></a>
 
-Three kinds of rules are available:
+Four kinds of rules are available:
 
 - Basic Rule, through which you specify **top-level** `users` and `teams` for
   reaching `min_approvals`
@@ -77,6 +77,9 @@ Three kinds of rules are available:
 - AND Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **all** of them (logical `AND`) should
   reach their respective `min_approvals`
+
+- AND DISTINCT Rule, which works like AND Rule except that each approval needs
+  to come from a different user
 
 - OR Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **any** of them (logical `OR`) should reach
@@ -163,7 +166,7 @@ field.
 
 #### AND DISTINCT Rule syntax <a name="and-distinct-rule-syntax"></a>
 
-AND DISTINCT Rules work like [AND Rules](#and-rule-syntax) in the sense that all
+AND DISTINCT Rules works like [AND Rules](#and-rule-syntax) in the sense that all
 subconditions have to be fulfilled, except that each approval contributes at
 most **once** for a single subcondition, i.e. all approvals throughout all
 subconditions have to come from different users (hence the name DISTINCT).
