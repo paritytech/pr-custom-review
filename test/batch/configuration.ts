@@ -8,6 +8,7 @@ import {
   condition,
   configFileContentsApiPath,
   githubApi,
+  inputs,
   prApiPath,
   rulesExamples,
   team,
@@ -16,11 +17,19 @@ import {
 } from "test/constants"
 import Logger from "test/logger"
 
-import {
-  rulesConfigurations,
-  variableNameToActionInputName,
-} from "src/constants"
+import { rulesConfigurations } from "src/constants"
 import { runChecks } from "src/core"
+import { Rule } from "src/types"
+
+const setup = function ({ rules }: { rules?: Array<Record<string, unknown>> }) {
+  nock(githubApi)
+    .get(configFileContentsApiPath)
+    .reply(200, {
+      content: Buffer.from(YAML.stringify({ inputs, rules })).toString(
+        "base64",
+      ),
+    })
+}
 
 describe("Configuration", function () {
   let logger: Logger
@@ -40,80 +49,6 @@ describe("Configuration", function () {
       .get(changedFilesApiPath)
       .reply(200, [{ filename: condition }])
   })
-
-  for (const missingField of [
-    "name",
-    "condition",
-    "check_type",
-    "min_approvals",
-  ]) {
-    it(`Configuration is invalid if ${missingField} is missing`, async function () {
-      nock(githubApi)
-        .get(configFileContentsApiPath)
-        .reply(200, {
-          content: Buffer.from(
-            `
-            rules:
-              - ${missingField === "name" ? "" : `name: condition`}
-                ${missingField === "condition" ? "" : `condition: condition`}
-                ${missingField === "check_type" ? "" : `check_type: diff`}
-                ${missingField === "min_approvals" ? "" : `min_approvals: 1`}
-            `,
-          ).toString("base64"),
-        })
-
-      expect(
-        await runChecks(basePR, octokit, logger, {
-          locksReviewTeam: team,
-          teamLeadsTeam: team2,
-          actionReviewTeam: team3,
-        }),
-      ).toBe("failure")
-
-      expect(logHistory).toMatchSnapshot()
-    })
-  }
-
-  it("Configuration is invalid if min_approvals is less than 1", async function () {
-    nock(githubApi)
-      .get(configFileContentsApiPath)
-      .reply(200, {
-        content: Buffer.from(
-          `
-          rules:
-            - name: ${condition}
-              condition: ${condition}
-              check_type: diff
-              min_approvals: 0
-          `,
-        ).toString("base64"),
-      })
-
-    expect(
-      await runChecks(basePR, octokit, logger, {
-        locksReviewTeam: team,
-        teamLeadsTeam: team2,
-        actionReviewTeam: team3,
-      }),
-    ).toBe("failure")
-
-    expect(logHistory).toMatchSnapshot()
-  })
-
-  for (const name in variableNameToActionInputName) {
-    it(`Configuration is invalid if ${name} is empty or missing`, async function () {
-      expect(
-        await runChecks(basePR, octokit, logger, {
-          locksReviewTeam: team,
-          teamLeadsTeam: team2,
-          actionReviewTeam: team3,
-          [name]: "",
-        }),
-      ).toBe("failure")
-
-      expect(logHistory).toMatchSnapshot()
-    })
-  }
 
   for (const { kind, invalidFields } of Object.values(rulesConfigurations)) {
     const goodRule = rulesExamples[kind]
@@ -143,21 +78,9 @@ describe("Configuration", function () {
       it(`Rule kind ${kind} does not allow invalid field ${invalidField}`, async function () {
         const badRule = { ...goodRule, [invalidField]: invalidFieldValidValue }
 
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(YAML.stringify({ rules: [badRule] })).toString(
-              "base64",
-            ),
-          })
+        setup({ rules: [badRule] })
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe("failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe("failure")
 
         expect(logHistory).toMatchSnapshot()
       })
@@ -170,36 +93,24 @@ describe("Configuration", function () {
       [null, "null"],
     ]) {
       it(`min_approvals is invalid for ${kind} if it is ${description}`, async function () {
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(
-              YAML.stringify({
-                rules: [
-                  {
-                    ...exampleRule,
-                    ...("min_approvals" in exampleRule
-                      ? { min_approvals: invalidValue }
-                      : "all" in exampleRule
-                      ? { all: [{ min_approvals: invalidValue }] }
-                      : "any" in exampleRule
-                      ? { any: [{ min_approvals: invalidValue }] }
-                      : "all_distinct" in exampleRule
-                      ? { all_distinct: [{ min_approvals: invalidValue }] }
-                      : {}),
-                  },
-                ],
-              }),
-            ).toString("base64"),
-          })
+        setup({
+          rules: [
+            {
+              ...exampleRule,
+              ...("min_approvals" in exampleRule
+                ? { min_approvals: invalidValue }
+                : "all" in exampleRule
+                ? { all: [{ min_approvals: invalidValue }] }
+                : "any" in exampleRule
+                ? { any: [{ min_approvals: invalidValue }] }
+                : "all_distinct" in exampleRule
+                ? { all_distinct: [{ min_approvals: invalidValue }] }
+                : {}),
+            },
+          ],
+        })
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe("failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe("failure")
 
         expect(logHistory).toMatchSnapshot()
       })

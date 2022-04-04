@@ -84,6 +84,7 @@ export type RulesConfigurations = {
 
 export type Configuration = {
   rules: Rule[]
+  inputs: Inputs
 }
 
 export type RuleUserInfo = {
@@ -116,4 +117,10 @@ export class RuleFailure {
     public problem: string,
     public usersToAskForReview: Map<string, RuleUserInfo>,
   ) {}
+}
+
+export type Inputs = {
+  "locks-review-team": string
+  "team-leads-team": string
+  "action-review-team": string
 }

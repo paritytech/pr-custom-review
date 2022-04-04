@@ -5,6 +5,7 @@ import {
   AndRule,
   BasicRule,
   Configuration,
+  Inputs,
   OrRule,
   RuleCriteria,
 } from "./types"
@@ -77,5 +78,10 @@ const ruleSchema = Joi.alternatives([
 ])
 
 export const configurationSchema = Joi.object<Configuration>().keys({
+  inputs: Joi.object<Inputs>().keys({
+    "locks-review-team": Joi.string().required(),
+    "team-leads-team": Joi.string().required(),
+    "action-review-team": Joi.string().required(),
+  }),
   rules: Joi.array().items(ruleSchema).required(),
 })

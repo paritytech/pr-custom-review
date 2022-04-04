@@ -9,7 +9,6 @@ import {
   configFilePath,
   maxGithubApiFilesPerPage,
   maxGithubApiTeamMembersPerPage,
-  variableNameToActionInputName,
 } from "./constants"
 import { LoggerInterface } from "./logger"
 import {
@@ -95,34 +94,65 @@ export const runChecks = async function (
   pr: PR,
   octokit: Octokit,
   logger: LoggerInterface,
-  {
-    actionReviewTeam,
-    locksReviewTeam,
-    teamLeadsTeam,
-  }: {
-    actionReviewTeam: string
-    locksReviewTeam: string
-    teamLeadsTeam: string
-  },
 ) {
-  if (locksReviewTeam.length === 0) {
+  const configFileResponse = await octokit.rest.repos.getContent({
+    owner: pr.base.repo.owner.login,
+    repo: pr.base.repo.name,
+    path: configFilePath,
+  })
+  if (configFileResponse.status !== 200) {
     logger.failure(
-      `Locks Review Team (action input: ${variableNameToActionInputName.locksReviewTeam}) should be provided`,
+      `Failed to get the contents of ${configFilePath} (code ${configFileResponse.status})`,
     )
+    logger.log(configFileResponse.data)
     return commitStateFailure
   }
-  if (teamLeadsTeam.length === 0) {
+  const { data } = configFileResponse
+  if (typeof data !== "object" || data === null) {
     logger.failure(
-      `Team Leads Team (action input: ${variableNameToActionInputName.teamLeadsTeam}) should be provided`,
+      `Data response for ${configFilePath} had unexpected type (expected object)`,
     )
+    logger.log(configFileResponse.data)
     return commitStateFailure
   }
-  if (actionReviewTeam.length === 0) {
+  if (!("content" in data)) {
     logger.failure(
-      `Action Review Team (action input: ${variableNameToActionInputName.actionReviewTeam}) should be provided`,
+      `Did not find "content" key in the response for ${configFilePath}`,
     )
+    logger.log(configFileResponse.data)
     return commitStateFailure
   }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { content: configFileContentsEnconded } = data
+  if (typeof configFileContentsEnconded !== "string") {
+    logger.failure(
+      `Content response for ${configFilePath} had unexpected type (expected string)`,
+    )
+    logger.log(configFileResponse.data)
+    return commitStateFailure
+  }
+
+  const configFileContents = Buffer.from(
+    configFileContentsEnconded,
+    "base64",
+  ).toString("utf-8")
+  const configValidationResult = configurationSchema.validate(
+    YAML.parse(configFileContents),
+  )
+  if (configValidationResult.error) {
+    logger.failure("Configuration file is invalid")
+    logger.log(configValidationResult.error)
+    return commitStateFailure
+  }
+
+  const {
+    inputs: {
+      "locks-review-team": locksReviewTeam,
+      "team-leads-team": teamLeadsTeam,
+      "action-review-team": actionReviewTeam,
+    },
+    rules,
+  } = configValidationResult.value
 
   // Set up a teams cache so that teams used multiple times don't have to be
   // requested more than once
@@ -218,57 +248,6 @@ export const runChecks = async function (
     }
   }
 
-  const configFileResponse = await octokit.rest.repos.getContent({
-    owner: pr.base.repo.owner.login,
-    repo: pr.base.repo.name,
-    path: configFilePath,
-  })
-  if (configFileResponse.status !== 200) {
-    logger.failure(
-      `Failed to get the contents of ${configFilePath} (code ${configFileResponse.status})`,
-    )
-    logger.log(configFileResponse.data)
-    return commitStateFailure
-  }
-  const { data } = configFileResponse
-  if (typeof data !== "object" || data === null) {
-    logger.failure(
-      `Data response for ${configFilePath} had unexpected type (expected object)`,
-    )
-    logger.log(configFileResponse.data)
-    return commitStateFailure
-  }
-  if (!("content" in data)) {
-    logger.failure(
-      `Did not find "content" key in the response for ${configFilePath}`,
-    )
-    logger.log(configFileResponse.data)
-    return commitStateFailure
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { content: configFileContentsEnconded } = data
-  if (typeof configFileContentsEnconded !== "string") {
-    logger.failure(
-      `Content response for ${configFilePath} had unexpected type (expected string)`,
-    )
-    logger.log(configFileResponse.data)
-    return commitStateFailure
-  }
-
-  const configFileContents = Buffer.from(
-    configFileContentsEnconded,
-    "base64",
-  ).toString("utf-8")
-  const validationResult = configurationSchema.validate(
-    YAML.parse(configFileContents),
-  )
-  if (validationResult.error) {
-    logger.failure("Configuration file is invalid")
-    logger.log(validationResult.error)
-    return commitStateFailure
-  }
-  const config = validationResult.value
-
   const processComplexRule = async function (
     id: MatchedRule["id"],
     name: string,
@@ -327,7 +306,7 @@ export const runChecks = async function (
     }
   }
 
-  for (const rule of config.rules) {
+  for (const rule of rules) {
     const includeCondition = (function () {
       switch (typeof rule.condition) {
         case "string": {

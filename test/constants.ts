@@ -8,6 +8,12 @@ export const user = "user"
 export const team = "team"
 export const team2 = "team2"
 export const team3 = "team3"
+export const inputs = {
+  "locks-review-team": team,
+  "team-leads-team": team2,
+  "action-review-team": team3,
+}
+
 export const userCoworker = "userCoworker"
 export const userCoworker2 = "userCoworker2"
 export const userCoworker3 = "userCoworker3"

@@ -103,11 +103,7 @@ const main = function () {
     process.exit(0)
   }
 
-  runChecks(pr, octokit, logger, {
-    locksReviewTeam: getInput("locks-review-team"),
-    teamLeadsTeam: getInput("team-leads-team"),
-    actionReviewTeam: getInput("action-review-team"),
-  })
+  runChecks(pr, octokit, logger)
     .then(function (state) {
       finish(state)
     })

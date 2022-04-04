@@ -8,15 +8,6 @@ inputs:
   token:
     required: true
     description: 'Repository token'
-  locks-review-team:
-    required: true
-    description: 'The team which will be asked for review if locks are touched'
-  team-leads-team:
-    required: true
-    description: 'The team leads which will be asked for review if locks are touched'
-  action-review-team:
-    required: true
-    description: "The team which will be asked for review if the action's files are changed"
 runs:
   using: 'node16'
   main: 'dist/index.js'
