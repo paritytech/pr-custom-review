@@ -515,7 +515,7 @@ export const runChecks = async function (
               usersToAskForReview.entries(),
             )
               .map(function ([username, { teams }]) {
-                return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
+                return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
               })
               .join(", ")}.`
             outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
@@ -536,7 +536,7 @@ export const runChecks = async function (
             usersToAskForReview.entries(),
           )
             .map(function ([username, { teams }]) {
-              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
+              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
             })
             .join(", ")}.`
           outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
