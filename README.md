@@ -49,7 +49,6 @@ This action has the following non-configurable built-in checks:
 
 - If the action's files are changed, 1 approval from
   [action-review-team](#workflow-configuration) is required
-  - `.github/workflows/pr-custom-review.yml`
   - `.github/pr-custom-review.yml`
 
 Customizable rules should be enabled through [configuration](#action-configuration).
@@ -225,9 +224,7 @@ field.
 
 ### Workflow configuration <a name="workflow-configuration"></a>
 
-The workflow configuration should be placed in
-`.github/workflows/pr-custom-review.yml` (related to
-[built-in checks](#built-in-checks)).
+The workflow configuration should be placed in `.github/workflows`.
 
 ```yaml
 name: PR Custom Review Status    # The PR status will be created with this name.
@@ -256,19 +253,6 @@ jobs:
           # - `workflow` for being able to request the workflow's job
           #    information; used to track lines in the job's output
           token: ${{ secrets.REVIEWS_TOKEN }}
-
-          # locks-review-team defines the team which will handle the "locks
-          # touched" built-in rule. We recommend protecting this input with
-          # "🔒" so that it won't be changed unless someone from
-          # locks-review-team approves it.
-          # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
-          locks-review-team: custom-locks-team
-
-          # The second team which will handle the "locks touched" built-in rule.
-          team-leads-team: my-custom-leads-team
-
-          # The team which will handle the changes to the action's configuration.
-          action-review-team: my-action-review-team
 ```
 
 ### GitHub repository configuration  <a name="github-repository-configuration"></a>
@@ -389,7 +373,6 @@ installed.
 5. Add the [workflow configuration](#workflow-configuration), as demonstrated in
   <https://github.com/paritytech/substrate/pull/10951/files>
 
-    - Team inputs should use the teams created on Step 1
     - `token` input should use the Personal Access Token generated on Step 2
 
 6. Trigger one of the events defined in the
