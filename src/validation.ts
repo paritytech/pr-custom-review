@@ -6,7 +6,6 @@ import {
   BasicRule,
   Configuration,
   OrRule,
-  Rule,
   RuleCriteria,
 } from "./types"
 

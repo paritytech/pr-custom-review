@@ -9,7 +9,6 @@ import {
   configFilePath,
   maxGithubApiFilesPerPage,
   maxGithubApiTeamMembersPerPage,
-  rulesConfigurations,
   variableNameToActionInputName,
 } from "./constants"
 import { LoggerInterface } from "./logger"
@@ -545,7 +544,7 @@ export const runChecks = async function (
             failedSubconditions.push(
               typeof subCondition.name === "string"
                 ? `"${subCondition.name}"`
-                : `*[${i}]`,
+                : `at index ${i}`,
             )
           }
 
@@ -560,7 +559,7 @@ export const runChecks = async function (
             } DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition${
               failedSubconditions.length > 1 ? "s" : ""
             } ${failedSubconditions.join(
-              ", ",
+              " and ",
             )} failed. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
