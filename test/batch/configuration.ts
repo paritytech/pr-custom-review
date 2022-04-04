@@ -7,8 +7,8 @@ import {
   changedFilesApiPath,
   condition,
   configFileContentsApiPath,
-  githubApi,
   defaultTeamsNames,
+  githubApi,
   prApiPath,
   rulesExamples,
 } from "test/constants"
