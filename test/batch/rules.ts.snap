@@ -692,6 +692,236 @@ Array [
 ]
 `;
 
+exports[`Rules Rule kind AndDistinctRule: Approved specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true },
+  { id: 2, user: 'userCoworker3', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Approved specifying both teams and users for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true },
+  { id: 2, user: 'userCoworker3', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Approved specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Approved specifying only teams for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Approved specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Approved specifying only users for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {
+  { id: 0, user: 'userCoworker', isApproval: true },
+  { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Has no approval specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker3' => { teams: null },
+  'userCoworker2' => { teams: Set(2) { 'team1', 'team2' } }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 3 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 0 and at index 1 and at index 2 failed. The following users have not approved yet: userCoworker3, userCoworker2 (teams: team1,team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Has no approval specifying both teams and users for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker3' => { teams: null },
+  'userCoworker2' => { teams: Set(2) { 'team1', 'team2' } }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 3 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 0 and at index 1 and at index 2 failed. The following users have not approved yet: userCoworker3, userCoworker2 (teams: team1,team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team1', 'team2' } } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 0 and at index 1 failed. The following users have not approved yet: userCoworker2 (teams: team1,team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only teams for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team1', 'team2' } } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 0 and at index 1 failed. The following users have not approved yet: userCoworker2 (teams: team1,team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { teams: null },
+  'userCoworker2' => { teams: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 0 and at index 1 failed. The following users have not approved yet: userCoworker, userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only users for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { teams: null },
+  'userCoworker2' => { teams: null }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 0 and at index 1 failed. The following users have not approved yet: userCoworker, userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying both teams and users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(2) {
+  'userCoworker3' => { teams: null },
+  'userCoworker2' => { teams: Set(1) { 'team2' } }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 3 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 1 and at index 2 failed. The following users have not approved yet: userCoworker3, userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying both teams and users for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(2) {
+  'userCoworker3' => { teams: null },
+  'userCoworker2' => { teams: Set(1) { 'team2' } }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 3 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions at index 1 and at index 2 failed. The following users have not approved yet: userCoworker3, userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only teams for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition at index 1 failed. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only teams for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition at index 1 failed. The following users have not approved yet: userCoworker2 (team: team2).",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only users for changed_files 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition at index 1 failed. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
+exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only users for diff 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
+  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
+  "ERROR:  The following problems were found:",
+  "Rule \\"condition\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition at index 1 failed. The following users have not approved yet: userCoworker2.",
+  "",
+]
+`;
+
 exports[`Rules Rule kind AndRule: Approved specifying both teams and users for changed_files 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",

@@ -1,119 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Configuration Configuration is invalid if actionReviewTeam is empty or missing 1`] = `
-Array [
-  "ERROR:  Action Review Team (action input: action-review-team) should be provided",
-]
-`;
-
-exports[`Configuration Configuration is invalid if check_type is missing 1`] = `
-Array [
-  "Changed files Set(1) { 'condition' }",
-  "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
-  details: [
-    {
-      message: '\\"rules[0]\\" does not match any of the allowed types',
-      path: [Array],
-      type: 'alternatives.match',
-      context: [Object]
-    }
-  ]
-}",
-]
-`;
-
-exports[`Configuration Configuration is invalid if condition is missing 1`] = `
-Array [
-  "Changed files Set(1) { 'condition' }",
-  "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
-  details: [
-    {
-      message: '\\"rules[0]\\" does not match any of the allowed types',
-      path: [Array],
-      type: 'alternatives.match',
-      context: [Object]
-    }
-  ]
-}",
-]
-`;
-
-exports[`Configuration Configuration is invalid if locksReviewTeam is empty or missing 1`] = `
-Array [
-  "ERROR:  Locks Review Team (action input: locks-review-team) should be provided",
-]
-`;
-
-exports[`Configuration Configuration is invalid if min_approvals is less than 1 1`] = `
-Array [
-  "Changed files Set(1) { 'condition' }",
-  "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
-  details: [
-    {
-      message: '\\"rules[0]\\" does not match any of the allowed types',
-      path: [Array],
-      type: 'alternatives.match',
-      context: [Object]
-    }
-  ]
-}",
-]
-`;
-
-exports[`Configuration Configuration is invalid if min_approvals is missing 1`] = `
-Array [
-  "Changed files Set(1) { 'condition' }",
-  "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
-  details: [
-    {
-      message: '\\"rules[0]\\" does not match any of the allowed types',
-      path: [Array],
-      type: 'alternatives.match',
-      context: [Object]
-    }
-  ]
-}",
-]
-`;
-
-exports[`Configuration Configuration is invalid if name is missing 1`] = `
-Array [
-  "Changed files Set(1) { 'condition' }",
-  "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
-  details: [
-    {
-      message: '\\"rules[0]\\" does not match any of the allowed types',
-      path: [Array],
-      type: 'alternatives.match',
-      context: [Object]
-    }
-  ]
-}",
-]
-`;
-
-exports[`Configuration Configuration is invalid if teamLeadsTeam is empty or missing 1`] = `
-Array [
-  "ERROR:  Team Leads Team (action input: team-leads-team) should be provided",
-]
-`;
-
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field all 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -128,10 +26,16 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field any 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -146,10 +50,16 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field min_approvals 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -164,10 +74,16 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field teams 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -182,10 +98,16 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field users 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -200,10 +122,16 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field all_distinct 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -218,10 +146,16 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field any 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -236,10 +170,16 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field min_approvals 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -254,10 +194,16 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field teams 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -272,10 +218,16 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field users 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -290,10 +242,16 @@ Array [
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field all 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -308,10 +266,16 @@ Array [
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field all_distinct 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -326,10 +290,16 @@ Array [
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field any 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -344,10 +314,16 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field all 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -362,10 +338,16 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field all_distinct 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -380,10 +362,16 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field min_approvals 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -398,10 +386,16 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field teams 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -416,10 +410,16 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field users 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -434,10 +434,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndDistinctRule if it is less than 1 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -452,10 +458,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndDistinctRule if it is null 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -470,10 +482,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndRule if it is less than 1 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -488,10 +506,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndRule if it is null 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -506,10 +530,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for BasicRule if it is less than 1 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -524,10 +554,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for BasicRule if it is null 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -542,10 +578,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for OrRule if it is less than 1 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
@@ -560,10 +602,16 @@ Array [
 
 exports[`Configuration min_approvals is invalid for OrRule if it is null 1`] = `
 Array [
-  "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
-  _original: { rules: [ [Object] ] },
+  _original: {
+    inputs: {
+      'locks-review-team': 'team',
+      'team-leads-team': 'team2',
+      'action-review-team': 'team3'
+    },
+    rules: [ [Object] ]
+  },
   details: [
     {
       message: '\\"rules[0]\\" does not match any of the allowed types',
