@@ -14,17 +14,22 @@ export const rulesConfigurations: RulesConfigurations = {
   basic: {
     kind: "BasicRule",
     uniqueFields: ["min_approvals", "teams", "users"],
-    invalidFields: ["any", "all"],
+    invalidFields: ["any", "all", "all_distinct"],
   },
   and: {
     kind: "AndRule",
     uniqueFields: ["all"],
-    invalidFields: ["min_approvals", "teams", "users", "any"],
+    invalidFields: ["min_approvals", "teams", "users", "any", "all_distinct"],
   },
   or: {
     kind: "OrRule",
     uniqueFields: ["any"],
-    invalidFields: ["min_approvals", "teams", "users", "all"],
+    invalidFields: ["min_approvals", "teams", "users", "all", "all_distinct"],
+  },
+  and_distinct: {
+    kind: "AndDistinctRule",
+    uniqueFields: ["all_distinct"],
+    invalidFields: ["min_approvals", "teams", "users", "all", "any"],
   },
 }
 

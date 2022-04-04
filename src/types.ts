@@ -37,6 +37,7 @@ export type BaseRule = {
 
 export type RuleCriteria = {
   min_approvals: number
+  name?: string
   users?: Array<string> | null
   teams?: Array<string> | null
 }
@@ -51,24 +52,33 @@ export type AndRule = BaseRule & {
   all: RuleCriteria[]
 }
 
-export type RuleKind = "BasicRule" | "OrRule" | "AndRule"
-export type Rule = BasicRule | OrRule | AndRule
+export type AndDistinctRule = BaseRule & {
+  all_distinct: RuleCriteria[]
+}
+
+export type RuleKind = "BasicRule" | "OrRule" | "AndRule" | "AndDistinctRule"
+export type Rule = BasicRule | OrRule | AndRule | AndDistinctRule
 
 export type RulesConfigurations = {
   basic: {
     kind: "BasicRule"
     uniqueFields: ["min_approvals", "teams", "users"]
-    invalidFields: ["any", "all"]
+    invalidFields: ["any", "all", "all_distinct"]
   }
   and: {
     kind: "AndRule"
     uniqueFields: ["all"]
-    invalidFields: ["min_approvals", "teams", "users", "any"]
+    invalidFields: ["min_approvals", "teams", "users", "any", "all_distinct"]
   }
   or: {
     kind: "OrRule"
     uniqueFields: ["any"]
-    invalidFields: ["min_approvals", "teams", "users", "all"]
+    invalidFields: ["min_approvals", "teams", "users", "all", "all_distinct"]
+  }
+  and_distinct: {
+    kind: "AndDistinctRule"
+    uniqueFields: ["all_distinct"]
+    invalidFields: ["min_approvals", "teams", "users", "all", "any"]
   }
 }
 
@@ -76,15 +86,26 @@ export type Configuration = {
   rules: Rule[]
 }
 
-export type RuleUserInfo = { teams: Set<string> | null }
-
-export type MatchedRule = {
-  name: string
-  min_approvals: number
-  users: Map<string, RuleUserInfo>
-  kind: RuleKind
-  id: number
+export type RuleUserInfo = {
+  teams: Set<string> | null
+  teamsHistory?: Set<string>
 }
+
+type MatchedRuleBase = {
+  name: string
+  users: Map<string, RuleUserInfo>
+  id: number
+  kind: RuleKind
+  min_approvals: number
+}
+export type MatchedRule =
+  | (MatchedRuleBase & {
+      kind: "AndRule" | "OrRule" | "BasicRule"
+    })
+  | (MatchedRuleBase & {
+      kind: "AndDistinctRule"
+      subConditions: RuleCriteria[]
+    })
 
 export class RuleSuccess {
   constructor(public rule: MatchedRule) {}

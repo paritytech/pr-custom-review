@@ -9,7 +9,6 @@ import {
   configFilePath,
   maxGithubApiFilesPerPage,
   maxGithubApiTeamMembersPerPage,
-  rulesConfigurations,
   variableNameToActionInputName,
 } from "./constants"
 import { LoggerInterface } from "./logger"
@@ -27,8 +26,8 @@ import {
 import { configurationSchema } from "./validation"
 
 type TeamsCache = Map<
-  /* Team slug */ string,
-  /* Usernames of team members */ string[]
+  string /* Team slug */,
+  string[] /* Usernames of team members */
 >
 const combineUsers = async function (
   pr: PR,
@@ -41,12 +40,13 @@ const combineUsers = async function (
 
   for (const user of presetUsers) {
     if (pr.user.login != user) {
-      users.set(user, { teams: null })
+      users.set(user, { ...users.get(user), teams: null })
     }
   }
 
   for (const team of teams) {
     let teamMembers = teamsCache.get(team)
+
     if (teamMembers === undefined) {
       teamMembers = await octokit.paginate(
         octokit.rest.teams.listMembersInOrg,
@@ -65,18 +65,22 @@ const combineUsers = async function (
     }
 
     for (const teamMember of teamMembers) {
-      const userInfo = users.get(teamMember)
+      let userInfo = users.get(teamMember)
+      if (userInfo === undefined) {
+        userInfo = { teams: new Set([team]), teamsHistory: new Set([team]) }
+        users.set(teamMember, userInfo)
+      } else if (userInfo.teamsHistory === undefined) {
+        userInfo.teamsHistory = new Set([team])
+      } else {
+        userInfo.teamsHistory.add(team)
+      }
       if (
         pr.user.login != teamMember &&
         // We do not want to register a team for this user if their approval is
         // supposed to be requested individually
-        userInfo?.teams !== null
+        userInfo.teams !== null
       ) {
-        if (userInfo === undefined) {
-          users.set(teamMember, { teams: new Set([team]) })
-        } else {
-          userInfo.teams.add(team)
-        }
+        userInfo.teams.add(team)
       }
     }
   }
@@ -146,16 +150,35 @@ export const runChecks = async function (
   const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/
   if (lockExpression.test(diff)) {
     logger.log("Diff has changes to 🔒 lines or lines following 🔒")
-    for (const team of [locksReviewTeam, teamLeadsTeam]) {
-      const users = await combineUsers(pr, octokit, [], [team], teamsCache)
-      matchedRules.push({
-        name: `LOCKS TOUCHED (team: ${team})`,
+    const users = await combineUsers(
+      pr,
+      octokit,
+      [],
+      [locksReviewTeam, teamLeadsTeam],
+      teamsCache,
+    )
+    const subConditions = [
+      {
         min_approvals: 1,
-        kind: "AndRule",
-        users,
-        id: ++nextMatchedRuleId,
-      })
-    }
+        teams: [locksReviewTeam],
+        name: `Locks Reviewers Approvals (team ${locksReviewTeam})`,
+      },
+      {
+        min_approvals: 1,
+        teams: [teamLeadsTeam],
+        name: `Team Leads Approvals (team ${teamLeadsTeam})`,
+      },
+    ]
+    matchedRules.push({
+      name: "Locks touched",
+      kind: "AndDistinctRule",
+      users,
+      id: ++nextMatchedRuleId,
+      min_approvals: subConditions
+        .map(({ min_approvals }) => min_approvals)
+        .reduce((acc, val) => acc + val, 0),
+      subConditions,
+    })
   }
 
   const changedFiles = new Set(
@@ -252,44 +275,59 @@ export const runChecks = async function (
     kind: RuleKind,
     subConditions: RuleCriteria[],
   ) {
-    let conditionIndex = -1
-    for (const subCondition of subConditions) {
-      const users = await combineUsers(
-        pr,
-        octokit,
-        subCondition.users ?? [],
-        subCondition.teams ?? [],
-        teamsCache,
-      )
-      matchedRules.push({
-        name: `${name}[${++conditionIndex}]`,
-        min_approvals: subCondition.min_approvals,
-        users,
-        kind,
-        id,
-      })
+    switch (kind) {
+      case "AndDistinctRule": {
+        const users = await combineUsers(
+          pr,
+          octokit,
+          subConditions.map(({ users }) => users ?? []).flat(),
+          subConditions.map(({ teams }) => teams ?? []).flat(),
+          teamsCache,
+        )
+        matchedRules.push({
+          name: name,
+          users,
+          kind,
+          id,
+          subConditions,
+          min_approvals: subConditions
+            .map(({ min_approvals }) => min_approvals)
+            .reduce((acc, val) => acc + val, 0),
+        })
+        break
+      }
+      case "BasicRule":
+      case "OrRule":
+      case "AndRule": {
+        let conditionIndex = -1
+        for (const subCondition of subConditions) {
+          const users = await combineUsers(
+            pr,
+            octokit,
+            subCondition.users ?? [],
+            subCondition.teams ?? [],
+            teamsCache,
+          )
+          matchedRules.push({
+            name: `${name}[${++conditionIndex}]`,
+            min_approvals: subCondition.min_approvals,
+            users,
+            kind,
+            id,
+          })
+        }
+        break
+      }
+      default: {
+        const exhaustivenessCheck: never = kind
+        const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`
+        logger.failure(failureMessage)
+        throw new Error(failureMessage)
+      }
     }
   }
 
   for (const rule of config.rules) {
-    // Validate that rules which are matched to a "kind" do not have fields of other "kinds"
-    for (const { kind, uniqueFields, invalidFields } of Object.values(
-      rulesConfigurations,
-    )) {
-      for (const field of uniqueFields) {
-        if (field in rule) {
-          for (const invalidField of invalidFields) {
-            if (invalidField in rule) {
-              logger.failure(
-                `Rule "${rule.name}" was expected to be of kind "${kind}" because it had the field "${field}", but it also has the field "${invalidField}", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.`,
-              )
-              return commitStateFailure
-            }
-          }
-        }
-      }
-    }
-
     const includeCondition = (function () {
       switch (typeof rule.condition) {
         case "string": {
@@ -397,6 +435,13 @@ export const runChecks = async function (
         "OrRule",
         rule.any,
       )
+    } else if (/* AndDistinctRule */ "all_distinct" in rule) {
+      await processComplexRule(
+        ++nextMatchedRuleId,
+        rule.name,
+        "AndDistinctRule",
+        rule.all_distinct,
+      )
     } else {
       const unmatchedRule = rule as BaseRule
       throw new Error(
@@ -461,7 +506,72 @@ export const runChecks = async function (
           }
         }
 
-        if (approvedBy.size < rule.min_approvals) {
+        if (rule.kind === "AndDistinctRule") {
+          const ruleApprovedBy: Set<string> = new Set()
+
+          const failedSubconditions: Array<number | string> = []
+          toNextSubcondition: for (
+            let i = 0;
+            i < rule.subConditions.length;
+            i++
+          ) {
+            const subCondition = rule.subConditions[i]
+            let approvalCount = 0
+            for (const user of subCondition.users ?? []) {
+              if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
+                ruleApprovedBy.add(user)
+                approvalCount++
+                if (approvalCount === subCondition.min_approvals) {
+                  continue toNextSubcondition
+                }
+              }
+            }
+            for (const team of subCondition.teams ?? []) {
+              for (const [user, userInfo] of rule.users) {
+                if (
+                  approvedBy.has(user) &&
+                  !ruleApprovedBy.has(user) &&
+                  userInfo?.teamsHistory?.has(team)
+                ) {
+                  ruleApprovedBy.add(user)
+                  approvalCount++
+                  if (approvalCount === subCondition.min_approvals) {
+                    continue toNextSubcondition
+                  }
+                }
+              }
+            }
+            failedSubconditions.push(
+              typeof subCondition.name === "string"
+                ? `"${subCondition.name}"`
+                : `at index ${i}`,
+            )
+          }
+
+          if (failedSubconditions.length) {
+            const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
+              Array.from(rule.users.entries()).filter(function ([username]) {
+                return !approvedBy.has(username)
+              }),
+            )
+            const problem = `Rule "${rule.name}" needs in total ${
+              rule.min_approvals
+            } DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition${
+              failedSubconditions.length > 1 ? "s" : ""
+            } ${failedSubconditions.join(
+              " and ",
+            )} failed. The following users have not approved yet: ${Array.from(
+              usersToAskForReview.entries(),
+            )
+              .map(function ([username, { teams }]) {
+                return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
+              })
+              .join(", ")}.`
+            outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
+          } else {
+            outcomes.push(new RuleSuccess(rule))
+          }
+        } else if (approvedBy.size < rule.min_approvals) {
           const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
             Array.from(rule.users.entries()).filter(function ([username]) {
               return !approvedBy.has(username)
@@ -512,11 +622,11 @@ export const runChecks = async function (
             const prevUser = pendingUsersToAskForReview.get(username)
             if (
               prevUser === undefined ||
-              // If the team is null, this user was not asked as part of a
-              // team, but individually. They should always be registered with
-              // "team: null" that case to be sure the review will be
-              // requested individually, even if they were previously
-              // registered as part of a team.
+              // If the team is null, this user was not asked as part of a team,
+              // but individually. They should always be registered with "team:
+              // null" that case to be sure the review will be requested
+              // individually, even if they were previously registered as part
+              // of a team.
               userInfo.teams === null
             ) {
               pendingUsersToAskForReview.set(username, {
@@ -543,11 +653,10 @@ export const runChecks = async function (
         const prevUser = usersToAskForReview.get(username)
         if (
           prevUser === undefined ||
-          // If the team is null, this user was not asked as part of a
-          // team, but individually. They should always be registered with
-          // "team: null" that case to be sure the review will be
-          // requested individually, even if they were previously
-          // registered as part of a team.
+          // If the team is null, this user was not asked as part of a team, but
+          // individually. They should always be registered with "team: null" in
+          // that case to be sure the review will be requested individually,
+          // even if they were previously registered as part of a team.
           userInfo.teams === null
         ) {
           usersToAskForReview.set(username, { teams: userInfo.teams })

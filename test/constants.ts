@@ -1,5 +1,5 @@
 import { configFilePath, maxGithubApiFilesPerPage } from "src/constants"
-import { AndRule, BasicRule, OrRule, PR } from "src/types"
+import { AndDistinctRule, AndRule, BasicRule, OrRule, PR } from "src/types"
 
 export const org = "org"
 export const repo = "repo"
@@ -38,6 +38,7 @@ export const rulesExamples: {
   BasicRule: BasicRule
   AndRule: AndRule
   OrRule: OrRule
+  AndDistinctRule: AndDistinctRule
 } = {
   BasicRule: {
     name: condition,
@@ -56,5 +57,11 @@ export const rulesExamples: {
     condition: condition,
     check_type: "diff",
     any: [],
+  },
+  AndDistinctRule: {
+    name: condition,
+    condition: condition,
+    check_type: "diff",
+    all_distinct: [],
   },
 }

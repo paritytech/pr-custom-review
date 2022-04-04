@@ -1,26 +1,49 @@
 import Joi from "joi"
 
-import { Configuration, Rule, RuleCriteria } from "./types"
+import {
+  AndDistinctRule,
+  AndRule,
+  BasicRule,
+  Configuration,
+  OrRule,
+  RuleCriteria,
+} from "./types"
 
-const ruleCriteria = function ({
-  isMinApprovalsOptional,
+const ruleCriterion = function ({
+  isMinApprovalsAllowed,
+  isNameOptional,
 }: {
-  isMinApprovalsOptional: boolean
+  isMinApprovalsAllowed: boolean
+  isNameOptional: boolean
 }) {
-  let minApprovals = Joi.number().min(1)
-  if (isMinApprovalsOptional) {
-    minApprovals = minApprovals.optional().allow(null)
+  let name = Joi.string()
+  if (isNameOptional) {
+    name = name.optional().allow(null)
+  } else {
+    name = name.required()
   }
+
   return {
-    min_approvals: minApprovals,
+    name,
     users: Joi.array().items(Joi.string()).optional().allow(null),
     teams: Joi.array().items(Joi.string()).optional().allow(null),
+    ...(isMinApprovalsAllowed
+      ? { min_approvals: Joi.number().min(1).required() }
+      : {}),
   }
 }
 
+const ruleCriterionArraySchema = Joi.array()
+  .items(
+    Joi.object<RuleCriteria>().keys(
+      ruleCriterion({ isMinApprovalsAllowed: true, isNameOptional: true }),
+    ),
+  )
+  .required()
+
 const includeConditionSchema = Joi.string().required()
 const excludeConditionSchema = Joi.string().required()
-const ruleSchema = Joi.object<Rule>().keys({
+const commonRuleSchema = {
   name: Joi.string().required(),
   condition: Joi.alternatives([
     includeConditionSchema,
@@ -32,24 +55,26 @@ const ruleSchema = Joi.object<Rule>().keys({
     }),
   ]).required(),
   check_type: Joi.string().valid("diff", "changed_files").required(),
-  ...ruleCriteria({ isMinApprovalsOptional: true }),
-  all: Joi.array()
-    .items(
-      Joi.object<RuleCriteria>().keys(
-        ruleCriteria({ isMinApprovalsOptional: false }),
-      ),
-    )
-    .optional()
-    .allow(null),
-  any: Joi.array()
-    .items(
-      Joi.object<RuleCriteria>().keys(
-        ruleCriteria({ isMinApprovalsOptional: false }),
-      ),
-    )
-    .optional()
-    .allow(null),
-})
+}
+
+const ruleSchema = Joi.alternatives([
+  Joi.object<BasicRule>().keys({
+    ...commonRuleSchema,
+    ...ruleCriterion({ isMinApprovalsAllowed: true, isNameOptional: false }),
+  }),
+  Joi.object<AndRule>().keys({
+    ...commonRuleSchema,
+    all: ruleCriterionArraySchema,
+  }),
+  Joi.object<OrRule>().keys({
+    ...commonRuleSchema,
+    any: ruleCriterionArraySchema,
+  }),
+  Joi.object<AndDistinctRule>().keys({
+    ...commonRuleSchema,
+    all_distinct: ruleCriterionArraySchema,
+  }),
+])
 
 export const configurationSchema = Joi.object<Configuration>().keys({
   rules: Joi.array().items(ruleSchema).required(),
