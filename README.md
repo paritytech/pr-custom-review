@@ -9,6 +9,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
 - [Built-in checks](#built-in-checks)
 - [Configuration](#configuration)
   - [Configuration file](#configuration-file)
+  - [Configuration syntax](#configuration-syntax)
   - [Rules syntax](#rules-syntax)
     - [Basic Rule syntax](#basic-rule-syntax)
     - [AND Rule syntax](#and-rule-syntax)
@@ -49,7 +50,6 @@ This action has the following non-configurable built-in checks:
 
 - If the action's files are changed, 1 approval from
   [action-review-team](#workflow-configuration) is required
-  - `.github/workflows/pr-custom-review.yml`
   - `.github/pr-custom-review.yml`
 
 Customizable rules should be enabled through [configuration](#action-configuration).
@@ -67,9 +67,32 @@ action's workflow file is added, otherwise the action will fail with
 `RequestError [HttpError]: Not Found` because the configuration does not yet
 exist in the default branch.
 
+### Configuration syntax <a name="configuration-syntax"></a>
+
+```yaml
+inputs:
+  # locks-review-team defines the team which will handle the "locks touched"
+  # built-in rule. We recommend protecting this input with "🔒" so that it
+  # won't be changed unless someone from locks-review-team approves it.
+  # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
+  locks-review-team: custom-locks-team
+
+  # The second team which will handle the "locks touched" built-in rule.
+  team-leads-team: my-custom-leads-team
+
+  # The team which will handle the changes to the action's configuration.
+  action-review-team: my-action-review-team
+
+# This is an example of a basic rule which enforces one approval from anyone
+# More complex rule types are explained in-depth in the "Rules syntax" section
+rules:
+  - name: A single approval
+    min_approvals: 1
+```
+
 ### Rules syntax <a name="rules-syntax"></a>
 
-Three kinds of rules are available:
+Four kinds of rules are available:
 
 - Basic Rule, through which you specify **top-level** `users` and `teams` for
   reaching `min_approvals`
@@ -77,6 +100,9 @@ Three kinds of rules are available:
 - AND Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **all** of them (logical `AND`) should
   reach their respective `min_approvals`
+
+- AND DISTINCT Rule, which works like AND Rule except that each approval needs
+  to come from a different user
 
 - OR Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **any** of them (logical `OR`) should reach
@@ -225,9 +251,7 @@ field.
 
 ### Workflow configuration <a name="workflow-configuration"></a>
 
-The workflow configuration should be placed in
-`.github/workflows/pr-custom-review.yml` (related to
-[built-in checks](#built-in-checks)).
+The workflow configuration should be placed in `.github/workflows`.
 
 ```yaml
 name: PR Custom Review Status    # The PR status will be created with this name.
@@ -256,19 +280,6 @@ jobs:
           # - `workflow` for being able to request the workflow's job
           #    information; used to track lines in the job's output
           token: ${{ secrets.REVIEWS_TOKEN }}
-
-          # locks-review-team defines the team which will handle the "locks
-          # touched" built-in rule. We recommend protecting this input with
-          # "🔒" so that it won't be changed unless someone from
-          # locks-review-team approves it.
-          # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
-          locks-review-team: custom-locks-team
-
-          # The second team which will handle the "locks touched" built-in rule.
-          team-leads-team: my-custom-leads-team
-
-          # The team which will handle the changes to the action's configuration.
-          action-review-team: my-action-review-team
 ```
 
 ### GitHub repository configuration  <a name="github-repository-configuration"></a>
@@ -389,7 +400,6 @@ installed.
 5. Add the [workflow configuration](#workflow-configuration), as demonstrated in
   <https://github.com/paritytech/substrate/pull/10951/files>
 
-    - Team inputs should use the teams created on Step 1
     - `token` input should use the Personal Access Token generated on Step 2
 
 6. Trigger one of the events defined in the

@@ -9,6 +9,7 @@ import {
   configFileContentsApiPath,
   coworkers,
   githubApi,
+  inputs,
   org,
   prApiPath,
   requestedReviewersApiPath,
@@ -63,6 +64,7 @@ describe("Rules", function () {
       diff ??= condition
       teams ??= [{ name: team, members: users }]
       changedFiles ??= [condition]
+      rules ??= []
 
       nock(githubApi)
         .get(reviewsApiPath)
@@ -111,35 +113,28 @@ describe("Rules", function () {
         .matchHeader("accept", "application/vnd.github.v3.diff")
         .reply(200, diff)
 
-      if (rules !== undefined) {
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(YAML.stringify({ rules })).toString("base64"),
-          })
-      }
+      nock(githubApi)
+        .get(configFileContentsApiPath)
+        .reply(200, {
+          content: Buffer.from(YAML.stringify({ inputs, rules })).toString(
+            "base64",
+          ),
+        })
     }
 
     for (const checkType of ["diff", "changed_files"] as const) {
       it(`${scenario} on rule including only users for ${checkType}`, async function () {
-        setup()
-
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(
-              `
-              rules:
-                - name: ${condition}
-                  condition: ${condition}
-                  check_type: ${checkType}
-                  min_approvals: ${coworkers.length}
-                  users:
-                    - ${coworkers[0]}
-                    - ${coworkers[1]}
-              `,
-            ).toString("base64"),
-          })
+        setup({
+          rules: [
+            {
+              name: condition,
+              condition,
+              check_type: checkType,
+              min_approvals: coworkers.length,
+              users: [coworkers[0], coworkers[1]],
+            },
+          ],
+        })
 
         switch (scenario) {
           case "Has no approval": {
@@ -168,35 +163,25 @@ describe("Rules", function () {
           }
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
 
       it(`${scenario} on rule including only teams for ${checkType}`, async function () {
-        setup()
-
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(
-              `
-              rules:
-                - name: ${condition}
-                  condition: ${condition}
-                  check_type: ${checkType}
-                  min_approvals: ${coworkers.length}
-                  teams:
-                    - ${team}
-              `,
-            ).toString("base64"),
-          })
+        setup({
+          rules: [
+            {
+              name: condition,
+              condition,
+              check_type: checkType,
+              min_approvals: coworkers.length,
+              teams: [team],
+            },
+          ],
+        })
 
         if (scenario !== "Approved") {
           nock(githubApi)
@@ -210,43 +195,31 @@ describe("Rules", function () {
             .reply(201)
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
 
       it(`${scenario} on rule including both teams and users for ${checkType}`, async function () {
-        setup(
-          scenario === "Is missing approval"
-            ? { users: coworkers.concat(userCoworker3) }
-            : undefined,
-        )
-
         const userAskedIndividually = coworkers[1]
 
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(
-              `
-              rules:
-                - name: ${condition}
-                  condition: ${condition}
-                  check_type: ${checkType}
-                  min_approvals: ${coworkers.length}
-                  users:
-                    - ${userAskedIndividually}
-                  teams:
-                    - ${team}
-              `,
-            ).toString("base64"),
-          })
+        setup({
+          rules: [
+            {
+              name: condition,
+              condition,
+              check_type: checkType,
+              min_approvals: coworkers.length,
+              users: [userAskedIndividually],
+              teams: [team],
+            },
+          ],
+          ...(scenario === "Is missing approval"
+            ? { users: coworkers.concat(userCoworker3) }
+            : {}),
+        })
 
         if (scenario !== "Approved") {
           nock(githubApi)
@@ -268,37 +241,27 @@ describe("Rules", function () {
             .reply(201)
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
 
       it(`${scenario} on rule not specifying users or teams`, async function () {
-        setup(
-          scenario === "Is missing approval"
+        setup({
+          rules: [
+            {
+              name: condition,
+              condition,
+              check_type: checkType,
+              min_approvals: coworkers.length,
+            },
+          ],
+          ...(scenario === "Is missing approval"
             ? { users: coworkers.concat(userCoworker3) }
-            : undefined,
-        )
-
-        nock(githubApi)
-          .get(configFileContentsApiPath)
-          .reply(200, {
-            content: Buffer.from(
-              `
-              rules:
-                - name: ${condition}
-                  condition: ${condition}
-                  check_type: ${checkType}
-                  min_approvals: ${coworkers.length}
-              `,
-            ).toString("base64"),
-          })
+            : {}),
+        })
 
         if (scenario !== "Approved") {
           nock(githubApi)
@@ -312,46 +275,36 @@ describe("Rules", function () {
             .reply(201)
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
 
       for (const [ruleKind, ruleField] of [
         ["AndRule", "all"],
+        ["AndDistinctRule", "all_distinct"],
         ["OrRule", "any"],
-      ]) {
+      ] as const) {
         it(`Rule kind ${ruleKind}: ${scenario} specifying only users for ${checkType}`, async function () {
-          setup()
-
-          nock(githubApi)
-            .get(configFileContentsApiPath)
-            .reply(200, {
-              content: Buffer.from(
-                `
-                rules:
-                  - name: ${condition}
-                    condition: ${condition}
-                    check_type: ${checkType}
-                    ${ruleField}:
-                      - min_approvals: 1
-                        users:
-                          - ${coworkers[0]}
-                      - min_approvals: 1
-                        users:
-                          - ${coworkers[1]}
-                `,
-              ).toString("base64"),
-            })
+          setup({
+            rules: [
+              {
+                name: condition,
+                condition,
+                check_type: checkType,
+                [ruleField]: [
+                  { min_approvals: 1, users: [coworkers[0]] },
+                  { min_approvals: 1, users: [coworkers[1]] },
+                ],
+              } as Rule,
+            ],
+          })
 
           let expected: "success" | "failure"
           switch (ruleKind) {
+            case "AndDistinctRule":
             case "AndRule": {
               if (scenario !== "Approved") {
                 nock(githubApi)
@@ -386,17 +339,12 @@ describe("Rules", function () {
               break
             }
             default: {
-              throw new Error(`Unhandled rule kind ${ruleKind}`)
+              const exhaustivenessCheck: never = ruleKind
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
             }
           }
 
-          expect(
-            await runChecks(basePR, octokit, logger, {
-              locksReviewTeam: team,
-              teamLeadsTeam: team2,
-              actionReviewTeam: team3,
-            }),
-          ).toBe(expected)
+          expect(await runChecks(basePR, octokit, logger)).toBe(expected)
 
           expect(logHistory).toMatchSnapshot()
         })
@@ -416,30 +364,22 @@ describe("Rules", function () {
               },
               { name: team2, members: [coworkers[1]] },
             ],
+            rules: [
+              {
+                name: condition,
+                condition,
+                check_type: checkType,
+                [ruleField]: [
+                  { min_approvals: 1, teams: [team1] },
+                  { min_approvals: 1, teams: [team2] },
+                ],
+              } as Rule,
+            ],
           })
-
-          nock(githubApi)
-            .get(configFileContentsApiPath)
-            .reply(200, {
-              content: Buffer.from(
-                `
-                rules:
-                  - name: ${condition}
-                    condition: ${condition}
-                    check_type: ${checkType}
-                    ${ruleField}:
-                      - min_approvals: 1
-                        teams:
-                          - ${team1}
-                      - min_approvals: 1
-                        teams:
-                          - ${team2}
-                `,
-              ).toString("base64"),
-            })
 
           let expectedCheckOutcome: "success" | "failure"
           switch (ruleKind) {
+            case "AndDistinctRule":
             case "AndRule": {
               if (scenario !== "Approved") {
                 nock(githubApi)
@@ -479,17 +419,14 @@ describe("Rules", function () {
               break
             }
             default: {
-              throw new Error(`Unhandled rule kind ${ruleKind}`)
+              const exhaustivenessCheck: never = ruleKind
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
             }
           }
 
-          expect(
-            await runChecks(basePR, octokit, logger, {
-              locksReviewTeam: team,
-              teamLeadsTeam: team2,
-              actionReviewTeam: team3,
-            }),
-          ).toBe(expectedCheckOutcome)
+          expect(await runChecks(basePR, octokit, logger)).toBe(
+            expectedCheckOutcome,
+          )
 
           expect(logHistory).toMatchSnapshot()
         })
@@ -510,33 +447,23 @@ describe("Rules", function () {
               },
               { name: team2, members: [coworkers[1]] },
             ],
+            rules: [
+              {
+                name: condition,
+                condition,
+                check_type: checkType,
+                [ruleField]: [
+                  { min_approvals: 1, teams: [team1] },
+                  { min_approvals: 1, teams: [team2] },
+                  { min_approvals: 1, users: [userCoworker3] },
+                ],
+              } as Rule,
+            ],
           })
-
-          nock(githubApi)
-            .get(configFileContentsApiPath)
-            .reply(200, {
-              content: Buffer.from(
-                `
-                rules:
-                  - name: ${condition}
-                    condition: ${condition}
-                    check_type: ${checkType}
-                    ${ruleField}:
-                      - min_approvals: 1
-                        teams:
-                          - ${team1}
-                      - min_approvals: 1
-                        teams:
-                          - ${team2}
-                      - min_approvals: 1
-                        users:
-                          - ${userCoworker3}
-                `,
-              ).toString("base64"),
-            })
 
           let expectedCheckOutcome: "success" | "failure"
           switch (ruleKind) {
+            case "AndDistinctRule":
             case "AndRule": {
               if (scenario !== "Approved") {
                 nock(githubApi)
@@ -576,17 +503,14 @@ describe("Rules", function () {
               break
             }
             default: {
-              throw new Error(`Unhandled rule kind ${ruleKind}`)
+              const exhaustivenessCheck: never = ruleKind
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
             }
           }
 
-          expect(
-            await runChecks(basePR, octokit, logger, {
-              locksReviewTeam: team,
-              teamLeadsTeam: team2,
-              actionReviewTeam: team3,
-            }),
-          ).toBe(expectedCheckOutcome)
+          expect(await runChecks(basePR, octokit, logger)).toBe(
+            expectedCheckOutcome,
+          )
 
           expect(logHistory).toMatchSnapshot()
         })
@@ -627,13 +551,7 @@ describe("Rules", function () {
             }
           }
 
-          expect(
-            await runChecks(basePR, octokit, logger, {
-              locksReviewTeam: team,
-              teamLeadsTeam: team2,
-              actionReviewTeam: team3,
-            }),
-          ).toBe(
+          expect(await runChecks(basePR, octokit, logger)).toBe(
             scenario === "Approved" ||
               description === "condition: exclude" ||
               description === "condition: include & exclude"
@@ -654,7 +572,6 @@ describe("Rules", function () {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
-          rules: [],
         })
 
         switch (scenario) {
@@ -674,13 +591,9 @@ describe("Rules", function () {
           }
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
@@ -692,7 +605,6 @@ describe("Rules", function () {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
-          rules: [],
         })
 
         switch (scenario) {
@@ -712,13 +624,9 @@ describe("Rules", function () {
           }
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
@@ -727,7 +635,6 @@ describe("Rules", function () {
     for (const actionReviewFile of actionReviewTeamFiles) {
       it(`${scenario} when ${actionReviewFile} is changed`, async function () {
         setup({
-          rules: [],
           changedFiles: [actionReviewFile],
           teams: [{ name: team3, members: [coworkers[1]] }],
         })
@@ -748,13 +655,9 @@ describe("Rules", function () {
           }
         }
 
-        expect(
-          await runChecks(basePR, octokit, logger, {
-            locksReviewTeam: team,
-            teamLeadsTeam: team2,
-            actionReviewTeam: team3,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks(basePR, octokit, logger)).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        )
 
         expect(logHistory).toMatchSnapshot()
       })
@@ -796,13 +699,9 @@ describe("Rules", function () {
         }
       }
 
-      expect(
-        await runChecks(basePR, octokit, logger, {
-          locksReviewTeam: team,
-          teamLeadsTeam: team2,
-          actionReviewTeam: team3,
-        }),
-      ).toBe(scenario === "Approved" ? "success" : "failure")
+      expect(await runChecks(basePR, octokit, logger)).toBe(
+        scenario === "Approved" ? "success" : "failure",
+      )
 
       expect(logHistory).toMatchSnapshot()
     })

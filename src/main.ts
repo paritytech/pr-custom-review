@@ -32,55 +32,48 @@ const main = function () {
       } else {
         // Fetch the jobs so that we'll be able to detect this step and provide a
         // more accurate logging location
-        const jobsResponse = await octokit.rest.actions.listJobsForWorkflowRun({
+        const {
+          data: { jobs },
+        } = await octokit.rest.actions.listJobsForWorkflowRun({
           owner: pr.base.repo.owner.login,
           repo: pr.base.repo.name,
           run_id: context.runId,
         })
-        if (jobsResponse.status === 200) {
-          const {
-            data: { jobs },
-          } = jobsResponse
-          for (const job of jobs) {
-            if (job.name === jobName) {
-              let stepNumber: number | undefined = undefined
-              const actionRepository = process.env.GITHUB_ACTION_REPOSITORY
-              if (actionRepository === undefined) {
+        for (const job of jobs) {
+          if (job.name === jobName) {
+            let stepNumber: number | undefined = undefined
+            const actionRepository = process.env.GITHUB_ACTION_REPOSITORY
+            if (actionRepository === undefined) {
+              logger.warning(
+                "Action repository was not found in the environment",
+              )
+            } else {
+              const actionRepositoryMatch = actionRepository.match(/[^/]*$/)
+              if (actionRepositoryMatch === null) {
                 logger.warning(
-                  "Action repository was not found in the environment",
+                  `Action repository name could not be extracted from ${actionRepository}`,
                 )
               } else {
-                const actionRepositoryMatch = actionRepository.match(/[^/]*$/)
-                if (actionRepositoryMatch === null) {
+                const actionStep = job.steps?.find(function ({ name }) {
+                  return name === actionRepositoryMatch[0]
+                })
+                if (actionStep === undefined) {
                   logger.warning(
-                    `Action repository name could not be extracted from ${actionRepository}`,
+                    `Failed to find ${actionRepositoryMatch[0]} in the job's steps`,
+                    job.steps,
                   )
                 } else {
-                  const actionStep = job.steps?.find(function ({ name }) {
-                    return name === actionRepositoryMatch[0]
-                  })
-                  if (actionStep === undefined) {
-                    logger.warning(
-                      `Failed to find ${actionRepositoryMatch[0]} in the job's steps`,
-                      job.steps,
-                    )
-                  } else {
-                    stepNumber = actionStep.number
-                  }
+                  stepNumber = actionStep.number
                 }
               }
-              detailsUrl = `${job.html_url}${
-                stepNumber
-                  ? `#step:${stepNumber}:${logger.relevantStartingLine}`
-                  : ""
-              }`
-              break
             }
+            detailsUrl = `${job.html_url}${
+              stepNumber
+                ? `#step:${stepNumber}:${logger.relevantStartingLine}`
+                : ""
+            }`
+            break
           }
-        } else {
-          logger.failure(
-            `Failed to fetch jobs for workflow run ${context.runId} (code ${jobsResponse.status})`,
-          )
         }
       }
     }
@@ -103,11 +96,7 @@ const main = function () {
     process.exit(0)
   }
 
-  runChecks(pr, octokit, logger, {
-    locksReviewTeam: getInput("locks-review-team"),
-    teamLeadsTeam: getInput("team-leads-team"),
-    actionReviewTeam: getInput("action-review-team"),
-  })
+  runChecks(pr, octokit, logger)
     .then(function (state) {
       finish(state)
     })
