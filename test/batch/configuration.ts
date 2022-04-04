@@ -41,11 +41,11 @@ describe("Configuration", function () {
       .reply(200, [{ filename: condition }])
   })
 
-  for (const [missingField, value] of [
-    ["name", condition],
-    ["condition", condition],
-    ["check_type", "diff"],
-    ["min_approvals", 1],
+  for (const missingField of [
+    "name",
+    "condition",
+    "check_type",
+    "min_approvals",
   ]) {
     it(`Configuration is invalid if ${missingField} is missing`, async function () {
       nock(githubApi)
@@ -54,14 +54,10 @@ describe("Configuration", function () {
           content: Buffer.from(
             `
             rules:
-              - ${missingField === "name" ? "" : `name: ${value}`}
-                ${missingField === "condition" ? "" : `condition: ${value}`}
-                ${missingField === "check_type" ? "" : `check_type: ${value}`}
-                ${
-                  missingField === "min_approvals"
-                    ? ""
-                    : `min_approvals: ${value}`
-                }
+              - ${missingField === "name" ? "" : `name: condition`}
+                ${missingField === "condition" ? "" : `condition: condition`}
+                ${missingField === "check_type" ? "" : `check_type: diff`}
+                ${missingField === "min_approvals" ? "" : `min_approvals: 1`}
             `,
           ).toString("base64"),
         })
@@ -126,6 +122,7 @@ describe("Configuration", function () {
       const invalidFieldValidValue = (function () {
         switch (invalidField) {
           case "all":
+          case "all_distinct":
           case "teams":
           case "users":
           case "any": {
@@ -187,6 +184,8 @@ describe("Configuration", function () {
                       ? { all: [{ min_approvals: invalidValue }] }
                       : "any" in exampleRule
                       ? { any: [{ min_approvals: invalidValue }] }
+                      : "all_distinct" in exampleRule
+                      ? { all_distinct: [{ min_approvals: invalidValue }] }
                       : {}),
                   },
                 ],
