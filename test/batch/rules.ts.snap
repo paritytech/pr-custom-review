@@ -692,6 +692,34 @@ Array [
 ]
 `;
 
+exports[`Rules Reviews are not requested if prevent_review_requests is set for team 1`] = `
+Array [
+  "Changed files Set(1) { '.github/pr-custom-review.yml' }",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { teams: Set(1) { 'team3' } },
+  'userCoworker2' => { teams: Set(1) { 'team3' } }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team3), userCoworker2 (team: team3).",
+  "",
+]
+`;
+
+exports[`Rules Reviews are not requested if prevent_review_requests is set for user 1`] = `
+Array [
+  "Changed files Set(1) { '.github/pr-custom-review.yml' }",
+  "latestReviews [Map Iterator] {  }",
+  "usersToAskForReview Map(2) {
+  'userCoworker' => { teams: Set(1) { 'team3' } },
+  'userCoworker2' => { teams: Set(1) { 'team3' } }
+}",
+  "ERROR:  The following problems were found:",
+  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team3), userCoworker2 (team: team3).",
+  "",
+]
+`;
+
 exports[`Rules Rule kind AndDistinctRule: Approved specifying both teams and users for changed_files 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
