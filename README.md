@@ -12,6 +12,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
   - [Rules syntax](#rules-syntax)
     - [Basic Rule syntax](#basic-rule-syntax)
     - [AND Rule syntax](#and-rule-syntax)
+    - [AND DISTINCT Rule syntax](#and-distinct-rule-syntax)
     - [OR Rule syntax](#or-rule-syntax)
   - [Workflow configuration](#workflow-configuration)
   - [GitHub repository configuration](#github-repository-configuration)
@@ -137,7 +138,9 @@ rules:
 #### AND Rule syntax <a name="and-rule-syntax"></a>
 
 AND Rules will only match if **all** subconditions listed in `all` are
-fulfilled.
+fulfilled. Note that each subcondition is treated independently and therefore a
+single approval can count towards multiple subconditions; for an alternative,
+check [AND DISTINCT rules](#and-distinct-rule-syntax).
 
 ```yaml
 rules:
@@ -157,6 +160,45 @@ rules:
 
 Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
 field.
+
+#### AND DISTINCT Rule syntax <a name="and-distinct-rule-syntax"></a>
+
+AND DISTINCT Rules work like [AND Rules](#and-rule-syntax) in the sense that all
+subconditions have to be fulfilled, except that each approval contributes at
+most **once** for a single subcondition, i.e. all approvals throughout all
+subconditions have to come from different users (hence the name DISTINCT).
+
+```yaml
+rules:
+  - name: Rule name
+    condition: .*
+    check_type: diff
+    all_distinct:
+      - min_approvals: 1
+        teams:
+          - Team 1
+      - min_approvals: 1
+        teams:
+          - Team 2
+```
+
+The common use-case for this rule is requiring that approvals come from
+different teams even if one of the teams is a subset of another. Suppose the
+following structure:
+
+```
+── Team1 (one approval required)
+  └── User1
+── Team2 (one approval required)
+  ├── User1
+  └── User2
+```
+
+For AND Rules, if User1 would approve the pull request, since they belong to
+*both* Team1 and Team2, *both* subconditions would be fulfilled. By comparison,
+for AND DISTINCT Rules the second subcondition would not be fulfilled with
+User1's approval alone because his approval already counted towards the first
+subcondition.
 
 #### OR Rule syntax <a name="or-rule-syntax"></a>
 
