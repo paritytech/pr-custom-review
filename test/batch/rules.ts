@@ -25,7 +25,7 @@ import {
   maxGithubApiTeamMembersPerPage,
 } from "src/constants"
 import { runChecks } from "src/core"
-import { BasicRule } from "src/types"
+import { Rule } from "src/types"
 
 describe("Rules", function () {
   let logger: Logger
@@ -56,7 +56,7 @@ describe("Rules", function () {
       users?: string[]
       diff?: string
       teams?: { name: string; members: string[] }[]
-      rules?: BasicRule[]
+      rules?: Rule[]
       changedFiles?: string[]
     } = {}) {
       users ??= coworkers
@@ -759,6 +759,53 @@ describe("Rules", function () {
         expect(logHistory).toMatchSnapshot()
       })
     }
+
+    it(`${scenario} for AndDistinctRule when user belongs to multiple teams`, async function () {
+      setup({
+        rules: [
+          {
+            name: condition,
+            condition: condition,
+            check_type: "diff",
+            all_distinct: [
+              { min_approvals: 1, teams: [team] },
+              { min_approvals: 1, teams: [team2] },
+            ],
+          },
+        ],
+        teams: [
+          { name: team, members: [coworkers[0]] },
+          { name: team2, members: [coworkers[0], coworkers[1]] },
+        ],
+      })
+
+      switch (scenario) {
+        case "Has no approval":
+        case "Is missing approval": {
+          nock(githubApi)
+            .post(requestedReviewersApiPath, function (body) {
+              expect(body).toMatchObject({
+                reviewers: [],
+                team_reviewers:
+                  scenario === "Has no approval" ? [team, team2] : [team2],
+              })
+              return true
+            })
+            .reply(201)
+          break
+        }
+      }
+
+      expect(
+        await runChecks(basePR, octokit, logger, {
+          locksReviewTeam: team,
+          teamLeadsTeam: team2,
+          actionReviewTeam: team3,
+        }),
+      ).toBe(scenario === "Approved" ? "success" : "failure")
+
+      expect(logHistory).toMatchSnapshot()
+    })
   }
 
   afterEach(function () {
