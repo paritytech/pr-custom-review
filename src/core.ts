@@ -131,13 +131,11 @@ export const runChecks = async function (
   }
 
   const {
-    inputs: {
-      "locks-review-team": locksReviewTeam,
-      "team-leads-team": teamLeadsTeam,
-      "action-review-team": actionReviewTeam,
-    },
+    "locks-review-team": locksReviewTeam,
+    "team-leads-team": teamLeadsTeam,
+    "action-review-team": actionReviewTeam,
     rules,
-    prevent_review_requests: preventReviewRequests,
+    "prevent-review-request": preventReviewRequest,
   } = configValidationResult.value
 
   // Set up a teams cache so that teams used multiple times don't have to be
@@ -459,6 +457,7 @@ export const runChecks = async function (
 
         if (rule.kind === "AndDistinctRule") {
           const ruleApprovedBy: Set<string> = new Set()
+          const subconditionsUsersToAskForReview: Set<string> = new Set()
 
           const failedSubconditions: Array<number | string> = []
           toNextSubcondition: for (
@@ -466,9 +465,12 @@ export const runChecks = async function (
             i < rule.subConditions.length;
             i++
           ) {
+            const pendingUsersToAskForReview: Set<string> = new Set()
+
             const subCondition = rule.subConditions[i]
             let approvalCount = 0
             for (const user of subCondition.users ?? []) {
+              pendingUsersToAskForReview.add(user)
               if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
                 ruleApprovedBy.add(user)
                 approvalCount++
@@ -479,18 +481,20 @@ export const runChecks = async function (
             }
             for (const team of subCondition.teams ?? []) {
               for (const [user, userInfo] of rule.users) {
-                if (
-                  approvedBy.has(user) &&
-                  !ruleApprovedBy.has(user) &&
-                  userInfo?.teamsHistory?.has(team)
-                ) {
-                  ruleApprovedBy.add(user)
-                  approvalCount++
-                  if (approvalCount === subCondition.min_approvals) {
-                    continue toNextSubcondition
+                if (userInfo?.teamsHistory?.has(team)) {
+                  pendingUsersToAskForReview.add(user)
+                  if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
+                    ruleApprovedBy.add(user)
+                    approvalCount++
+                    if (approvalCount === subCondition.min_approvals) {
+                      continue toNextSubcondition
+                    }
                   }
                 }
               }
+            }
+            for (const user of pendingUsersToAskForReview) {
+              subconditionsUsersToAskForReview.add(user)
             }
             failedSubconditions.push(
               typeof subCondition.name === "string"
@@ -514,8 +518,11 @@ export const runChecks = async function (
             )} failed. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
+              .filter(function ([username]) {
+                return subconditionsUsersToAskForReview.has(username)
+              })
               .map(function ([username, { teams }]) {
-                return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
+                return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
               })
               .join(", ")}.`
             outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
@@ -536,7 +543,7 @@ export const runChecks = async function (
             usersToAskForReview.entries(),
           )
             .map(function ([username, { teams }]) {
-              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(",")})` : ""}`
+              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
             })
             .join(", ")}.`
           outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
@@ -627,12 +634,12 @@ export const runChecks = async function (
       const users: Set<string> = new Set()
       for (const [user, userInfo] of usersToAskForReview) {
         if (userInfo.teams === null) {
-          if (!preventReviewRequests?.users?.includes(user)) {
+          if (!preventReviewRequest?.users?.includes(user)) {
             users.add(user)
           }
         } else {
           for (const team of userInfo.teams) {
-            if (!preventReviewRequests?.teams?.includes(team)) {
+            if (!preventReviewRequest?.teams?.includes(team)) {
               teams.add(team)
             }
           }

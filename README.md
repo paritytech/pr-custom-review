@@ -70,18 +70,17 @@ exist in the default branch.
 ### Configuration syntax <a name="configuration-syntax"></a>
 
 ```yaml
-inputs:
-  # locks-review-team defines the team which will handle the "locks touched"
-  # built-in rule. We recommend protecting this input with "🔒" so that it
-  # won't be changed unless someone from locks-review-team approves it.
-  # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
-  locks-review-team: custom-locks-team
+# locks-review-team defines the team which will handle the "locks touched"
+# built-in rule. We recommend protecting this input with "🔒" so that it
+# won't be changed unless someone from locks-review-team approves it.
+# 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
+locks-review-team: custom-locks-team
 
-  # The second team which will handle the "locks touched" built-in rule.
-  team-leads-team: my-custom-leads-team
+# The second team which will handle the "locks touched" built-in rule.
+team-leads-team: my-custom-leads-team
 
-  # The team which will handle the changes to the action's configuration.
-  action-review-team: my-action-review-team
+# The team which will handle the changes to the action's configuration.
+action-review-team: my-action-review-team
 
 # This is an example of a basic rule which enforces one approval from anyone
 # More complex rule types are explained in-depth in the "Rules syntax" section
@@ -90,7 +89,7 @@ rules:
     min_approvals: 1
 
 # OPTIONAL: define teams or users whose reviews are not requested by the action
-prevent_review_requests:
+prevent_review_request:
   users:
     - user_name
   teams:
@@ -108,8 +107,9 @@ Four kinds of rules are available:
   with its own `min_approvals`, and **all** of them (logical `AND`) should
   reach their respective `min_approvals`
 
-- AND DISTINCT Rule, which works like AND Rule except that each approval needs
-  to come from a different user
+- AND DISTINCT Rule, which works like AND Rule except that each approval is
+  counted exclusively for a single subcondition (more details in the
+  [AND Distinct Rule section](#and-distinct-rule-syntax))
 
 - OR Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **any** of them (logical `OR`) should reach

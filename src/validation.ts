@@ -77,14 +77,12 @@ const ruleSchema = Joi.alternatives([
 ])
 
 export const configurationSchema = Joi.object<Configuration>().keys({
-  inputs: Joi.object<Configuration["inputs"]>().keys({
-    "locks-review-team": Joi.string().required(),
-    "team-leads-team": Joi.string().required(),
-    "action-review-team": Joi.string().required(),
-  }),
+  "locks-review-team": Joi.string().required(),
+  "team-leads-team": Joi.string().required(),
+  "action-review-team": Joi.string().required(),
   rules: Joi.array().items(ruleSchema).required(),
-  prevent_review_requests: Joi.object<
-    Configuration["prevent_review_requests"]
+  "prevent-review-request": Joi.object<
+    Configuration["prevent-review-request"]
   >()
     .keys({
       users: Joi.array().items(Joi.string()).optional().allow(null),

@@ -84,12 +84,10 @@ export type RulesConfigurations = {
 
 export type Configuration = {
   rules: Rule[]
-  inputs: {
-    "locks-review-team": string
-    "team-leads-team": string
-    "action-review-team": string
-  }
-  prevent_review_requests:
+  "locks-review-team": string
+  "team-leads-team": string
+  "action-review-team": string
+  "prevent-review-request":
     | {
         users: string[]
         teams: string[]

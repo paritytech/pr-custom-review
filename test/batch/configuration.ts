@@ -7,8 +7,8 @@ import {
   changedFilesApiPath,
   condition,
   configFileContentsApiPath,
+  defaultTeamsNames,
   githubApi,
-  inputs,
   prApiPath,
   rulesExamples,
 } from "test/constants"
@@ -21,9 +21,9 @@ const setup = function ({ rules }: { rules?: Array<Record<string, unknown>> }) {
   nock(githubApi)
     .get(configFileContentsApiPath)
     .reply(200, {
-      content: Buffer.from(YAML.stringify({ inputs, rules })).toString(
-        "base64",
-      ),
+      content: Buffer.from(
+        YAML.stringify({ ...defaultTeamsNames, rules }),
+      ).toString("base64"),
     })
 }
 
