@@ -107,8 +107,9 @@ Four kinds of rules are available:
   with its own `min_approvals`, and **all** of them (logical `AND`) should
   reach their respective `min_approvals`
 
-- AND DISTINCT Rule, which works like AND Rule except that each approval needs
-  to come from a different user
+- AND DISTINCT Rule, which works like AND Rule except that each approval is
+  counted exclusively for a single subcondition (more details in the
+  [AND Distinct Rule section](#and-distinct-rule-syntax))
 
 - OR Rule, through which you specify subconditions of `users` and `teams`, each
   with its own `min_approvals`, and **any** of them (logical `OR`) should reach
