@@ -152,6 +152,7 @@ export const runChecks = async function (
       "action-review-team": actionReviewTeam,
     },
     rules,
+    prevent_review_requests: preventReviewRequests,
   } = configValidationResult.value
 
   // Set up a teams cache so that teams used multiple times don't have to be
@@ -655,23 +656,29 @@ export const runChecks = async function (
       const users: Set<string> = new Set()
       for (const [user, userInfo] of usersToAskForReview) {
         if (userInfo.teams === null) {
-          users.add(user)
+          if (!preventReviewRequests?.users?.includes(user)) {
+            users.add(user)
+          }
         } else {
           for (const team of userInfo.teams) {
-            teams.add(team)
+            if (!preventReviewRequests?.teams?.includes(team)) {
+              teams.add(team)
+            }
           }
         }
       }
-      await octokit.request(
-        "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
-        {
-          owner: pr.base.repo.owner.login,
-          repo: pr.base.repo.name,
-          pull_number: pr.number,
-          reviewers: Array.from(users),
-          team_reviewers: Array.from(teams),
-        },
-      )
+      if (users.size || teams.size) {
+        await octokit.request(
+          "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
+          {
+            owner: pr.base.repo.owner.login,
+            repo: pr.base.repo.name,
+            pull_number: pr.number,
+            reviewers: Array.from(users),
+            team_reviewers: Array.from(teams),
+          },
+        )
+      }
     }
 
     if (highestMinApprovalsRule !== null) {

@@ -1,8 +1,7 @@
 import { CommitState, RulesConfigurations } from "./types"
 
 export const configFilePath = ".github/pr-custom-review.yml"
-export const workflowFilePath = ".github/workflows/pr-custom-review.yml"
-export const actionReviewTeamFiles = [configFilePath, workflowFilePath]
+export const actionReviewTeamFiles = [configFilePath]
 
 export const commitStateSuccess: CommitState = "success"
 export const commitStateFailure: CommitState = "failure"
