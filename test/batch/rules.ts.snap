@@ -342,8 +342,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team2' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions \\"Locks Reviewers Approvals (team team)\\", \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -358,8 +357,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team2' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions \\"Locks Reviewers Approvals (team team)\\", \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -374,8 +372,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team2' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions \\"Locks Reviewers Approvals (team team)\\", \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -390,8 +387,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team2' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team).",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subconditions \\"Locks Reviewers Approvals (team team)\\", \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -571,7 +567,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -583,7 +579,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -595,7 +591,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -607,7 +603,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"LOCKS TOUCHED (team: team2)\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition \\"Team Leads Approvals (team team2)\\" failed. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;

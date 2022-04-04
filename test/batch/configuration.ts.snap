@@ -10,13 +10,13 @@ exports[`Configuration Configuration is invalid if check_type is missing 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].check_type\\" is required] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].check_type\\" is required',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'any.required',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -28,13 +28,13 @@ exports[`Configuration Configuration is invalid if condition is missing 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].condition\\" is required] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].condition\\" is required',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'any.required',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -52,13 +52,13 @@ exports[`Configuration Configuration is invalid if min_approvals is less than 1 
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].min_approvals\\" must be greater than or equal to 1] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].min_approvals\\" must be greater than or equal to 1',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'number.min',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -70,13 +70,13 @@ exports[`Configuration Configuration is invalid if min_approvals is missing 1`] 
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].name\\" must be a string] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].name\\" must be a string',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'string.base',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -88,13 +88,13 @@ exports[`Configuration Configuration is invalid if name is missing 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].name\\" is required] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].name\\" is required',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'any.required',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -108,73 +108,363 @@ Array [
 ]
 `;
 
+exports[`Configuration Rule kind AndDistinctRule does not allow invalid field all 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind AndDistinctRule does not allow invalid field any 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind AndDistinctRule does not allow invalid field min_approvals 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind AndDistinctRule does not allow invalid field teams 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind AndDistinctRule does not allow invalid field users 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind AndRule does not allow invalid field all_distinct 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
 exports[`Configuration Rule kind AndRule does not allow invalid field any 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind AndRule does not allow invalid field min_approvals 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind AndRule does not allow invalid field teams 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"teams\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind AndRule does not allow invalid field users 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"users\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field all 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"all\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind BasicRule does not allow invalid field all_distinct 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field any 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind OrRule does not allow invalid field all 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"AndRule\\" because it had the field \\"all\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration Rule kind OrRule does not allow invalid field all_distinct 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind OrRule does not allow invalid field min_approvals 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"min_approvals\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind OrRule does not allow invalid field teams 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"teams\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
 exports[`Configuration Rule kind OrRule does not allow invalid field users 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "ERROR:  Rule \\"condition\\" was expected to be of kind \\"BasicRule\\" because it had the field \\"users\\", but it also has the field \\"any\\", which belongs to another kind. Mixing fields from different kinds of rules is not allowed.",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for AndDistinctRule if it is less than 1 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
+]
+`;
+
+exports[`Configuration min_approvals is invalid for AndDistinctRule if it is null 1`] = `
+Array [
+  "Changed files Set(1) { 'condition' }",
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
+}",
 ]
 `;
 
@@ -182,13 +472,13 @@ exports[`Configuration min_approvals is invalid for AndRule if it is less than 1
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].all[0].min_approvals\\" must be greater than or equal to 1] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].all[0].min_approvals\\" must be greater than or equal to 1',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'number.min',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -200,13 +490,13 @@ exports[`Configuration min_approvals is invalid for AndRule if it is null 1`] = 
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].all[0].min_approvals\\" must be a number] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].all[0].min_approvals\\" must be a number',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'number.base',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -218,13 +508,13 @@ exports[`Configuration min_approvals is invalid for BasicRule if it is less than
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].min_approvals\\" must be greater than or equal to 1] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].min_approvals\\" must be greater than or equal to 1',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'number.min',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -235,13 +525,17 @@ Array [
 exports[`Configuration min_approvals is invalid for BasicRule if it is null 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
-  "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
-  "ERROR:  Rule \\"condition\\" has invalid min_approvals",
-  "{
-  name: 'condition',
-  condition: 'condition',
-  check_type: 'diff',
-  min_approvals: null
+  "ERROR:  Configuration file is invalid",
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
+  _original: { rules: [ [Object] ] },
+  details: [
+    {
+      message: '\\"rules[0]\\" does not match any of the allowed types',
+      path: [Array],
+      type: 'alternatives.match',
+      context: [Object]
+    }
+  ]
 }",
 ]
 `;
@@ -250,13 +544,13 @@ exports[`Configuration min_approvals is invalid for OrRule if it is less than 1 
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].any[0].min_approvals\\" must be greater than or equal to 1] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].any[0].min_approvals\\" must be greater than or equal to 1',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'number.min',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
@@ -268,13 +562,13 @@ exports[`Configuration min_approvals is invalid for OrRule if it is null 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "ERROR:  Configuration file is invalid",
-  "[Error [ValidationError]: \\"rules[0].any[0].min_approvals\\" must be a number] {
+  "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: { rules: [ [Object] ] },
   details: [
     {
-      message: '\\"rules[0].any[0].min_approvals\\" must be a number',
+      message: '\\"rules[0]\\" does not match any of the allowed types',
       path: [Array],
-      type: 'number.base',
+      type: 'alternatives.match',
       context: [Object]
     }
   ]
