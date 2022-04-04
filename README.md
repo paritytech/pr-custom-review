@@ -9,6 +9,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
 - [Built-in checks](#built-in-checks)
 - [Configuration](#configuration)
   - [Configuration file](#configuration-file)
+  - [Configuration syntax](#configuration-syntax)
   - [Rules syntax](#rules-syntax)
     - [Basic Rule syntax](#basic-rule-syntax)
     - [AND Rule syntax](#and-rule-syntax)
@@ -65,6 +66,29 @@ this reason it's recommended to commit the configuration file **before** the
 action's workflow file is added, otherwise the action will fail with
 `RequestError [HttpError]: Not Found` because the configuration does not yet
 exist in the default branch.
+
+### Configuration syntax <a name="configuration-syntax"></a>
+
+```yaml
+inputs:
+  # locks-review-team defines the team which will handle the "locks touched"
+  # built-in rule. We recommend protecting this input with "🔒" so that it
+  # won't be changed unless someone from locks-review-team approves it.
+  # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
+  locks-review-team: custom-locks-team
+
+  # The second team which will handle the "locks touched" built-in rule.
+  team-leads-team: my-custom-leads-team
+
+  # The team which will handle the changes to the action's configuration.
+  action-review-team: my-action-review-team
+
+# This is an example of a basic rule which enforces one approval from anyone
+# More complex rule types are explained in-depth in the "Rules syntax" section
+rules:
+  - name: A single approval
+    min_approvals: 1
+```
 
 ### Rules syntax <a name="rules-syntax"></a>
 
