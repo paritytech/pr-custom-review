@@ -196,7 +196,7 @@ field.
 
 #### AND DISTINCT Rule syntax <a name="and-distinct-rule-syntax"></a>
 
-AND DISTINCT Rules works like [AND Rules](#and-rule-syntax) in the sense that all
+AND DISTINCT Rules work like [AND Rules](#and-rule-syntax) in the sense that all
 subconditions have to be fulfilled, except that each approval contributes at
 most **once** for a single subcondition, i.e. all approvals throughout all
 subconditions have to come from different users (hence the name DISTINCT).

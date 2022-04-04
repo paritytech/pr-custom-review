@@ -109,16 +109,6 @@ Array [
 ]
 `;
 
-exports[`Rules Approved when .github/workflows/pr-custom-review.yml is changed 1`] = `
-Array [
-  "Changed files Set(1) { '.github/workflows/pr-custom-review.yml' }",
-  "latestReviews [Map Iterator] {
-  { id: 0, user: 'userCoworker', isApproval: true },
-  { id: 1, user: 'userCoworker2', isApproval: true }
-}",
-]
-`;
-
 exports[`Rules Approved when line after lock is modified (+) 1`] = `
 Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
@@ -339,17 +329,6 @@ Array [
 exports[`Rules Has no approval when .github/pr-custom-review.yml is changed 1`] = `
 Array [
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
-  "latestReviews [Map Iterator] {  }",
-  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
-  "ERROR:  The following problems were found:",
-  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team3).",
-  "",
-]
-`;
-
-exports[`Rules Has no approval when .github/workflows/pr-custom-review.yml is changed 1`] = `
-Array [
-  "Changed files Set(1) { '.github/workflows/pr-custom-review.yml' }",
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
   "ERROR:  The following problems were found:",
@@ -579,17 +558,6 @@ Array [
 exports[`Rules Is missing approval when .github/pr-custom-review.yml is changed 1`] = `
 Array [
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
-  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
-  "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
-  "ERROR:  The following problems were found:",
-  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team3).",
-  "",
-]
-`;
-
-exports[`Rules Is missing approval when .github/workflows/pr-custom-review.yml is changed 1`] = `
-Array [
-  "Changed files Set(1) { '.github/workflows/pr-custom-review.yml' }",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
   "ERROR:  The following problems were found:",

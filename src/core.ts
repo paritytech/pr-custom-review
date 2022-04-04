@@ -100,30 +100,15 @@ export const runChecks = async function (
     repo: pr.base.repo.name,
     path: configFilePath,
   })
-  if (configFileResponse.status !== 200) {
-    logger.failure(
-      `Failed to get the contents of ${configFilePath} (code ${configFileResponse.status})`,
-    )
-    logger.log(configFileResponse.data)
-    return commitStateFailure
-  }
-  const { data } = configFileResponse
-  if (typeof data !== "object" || data === null) {
-    logger.failure(
-      `Data response for ${configFilePath} had unexpected type (expected object)`,
-    )
-    logger.log(configFileResponse.data)
-    return commitStateFailure
-  }
-  if (!("content" in data)) {
+  if (!("content" in configFileResponse.data)) {
     logger.failure(
       `Did not find "content" key in the response for ${configFilePath}`,
     )
     logger.log(configFileResponse.data)
     return commitStateFailure
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { content: configFileContentsEnconded } = data
+
+  const { content: configFileContentsEnconded } = configFileResponse.data
   if (typeof configFileContentsEnconded !== "string") {
     logger.failure(
       `Content response for ${configFilePath} had unexpected type (expected string)`,
@@ -165,13 +150,6 @@ export const runChecks = async function (
     pull_number: pr.number,
     mediaType: { format: "diff" },
   })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>
-  if (diffResponse.status !== 200) {
-    logger.failure(
-      `Failed to get the diff from ${pr.html_url} (code ${diffResponse.status})`,
-    )
-    logger.log(diffResponse.data)
-    return commitStateFailure
-  }
   const { data: diff } = diffResponse
 
   const matchedRules: MatchedRule[] = []
@@ -436,13 +414,6 @@ export const runChecks = async function (
       repo: pr.base.repo.name,
       pull_number: pr.number,
     })
-    if (reviewsResponse.status !== 200) {
-      logger.failure(
-        `Failed to fetch reviews from ${pr.html_url} (code ${reviewsResponse.status})`,
-      )
-      logger.log(reviewsResponse.data)
-      return commitStateFailure
-    }
     const { data: reviews } = reviewsResponse
 
     const latestReviews: Map<
