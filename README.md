@@ -88,6 +88,13 @@ inputs:
 rules:
   - name: A single approval
     min_approvals: 1
+
+# OPTIONAL: define teams or users whose reviews are not requested by the action
+prevent_review_requests:
+  users:
+    - user_name
+  teams:
+    - team_name
 ```
 
 ### Rules syntax <a name="rules-syntax"></a>
