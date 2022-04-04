@@ -457,6 +457,7 @@ export const runChecks = async function (
 
         if (rule.kind === "AndDistinctRule") {
           const ruleApprovedBy: Set<string> = new Set()
+          const subconditionsUsersToAskForReview: Set<string> = new Set()
 
           const failedSubconditions: Array<number | string> = []
           toNextSubcondition: for (
@@ -464,9 +465,12 @@ export const runChecks = async function (
             i < rule.subConditions.length;
             i++
           ) {
+            const pendingUsersToAskForReview: Set<string> = new Set()
+
             const subCondition = rule.subConditions[i]
             let approvalCount = 0
             for (const user of subCondition.users ?? []) {
+              pendingUsersToAskForReview.add(user)
               if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
                 ruleApprovedBy.add(user)
                 approvalCount++
@@ -477,18 +481,20 @@ export const runChecks = async function (
             }
             for (const team of subCondition.teams ?? []) {
               for (const [user, userInfo] of rule.users) {
-                if (
-                  approvedBy.has(user) &&
-                  !ruleApprovedBy.has(user) &&
-                  userInfo?.teamsHistory?.has(team)
-                ) {
-                  ruleApprovedBy.add(user)
-                  approvalCount++
-                  if (approvalCount === subCondition.min_approvals) {
-                    continue toNextSubcondition
+                if (userInfo?.teamsHistory?.has(team)) {
+                  pendingUsersToAskForReview.add(user)
+                  if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
+                    ruleApprovedBy.add(user)
+                    approvalCount++
+                    if (approvalCount === subCondition.min_approvals) {
+                      continue toNextSubcondition
+                    }
                   }
                 }
               }
+            }
+            for (const user of pendingUsersToAskForReview) {
+              subconditionsUsersToAskForReview.add(user)
             }
             failedSubconditions.push(
               typeof subCondition.name === "string"
@@ -512,6 +518,9 @@ export const runChecks = async function (
             )} failed. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
+              .filter(function ([username]) {
+                return subconditionsUsersToAskForReview.has(username)
+              })
               .map(function ([username, { teams }]) {
                 return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
               })
