@@ -623,11 +623,11 @@ export const runChecks = async function (
             const prevUser = pendingUsersToAskForReview.get(username)
             if (
               prevUser === undefined ||
-              // If the team is null, this user was not asked as part of a
-              // team, but individually. They should always be registered with
-              // "team: null" that case to be sure the review will be
-              // requested individually, even if they were previously
-              // registered as part of a team.
+              // If the team is null, this user was not asked as part of a team,
+              // but individually. They should always be registered with "team:
+              // null" that case to be sure the review will be requested
+              // individually, even if they were previously registered as part
+              // of a team.
               userInfo.teams === null
             ) {
               pendingUsersToAskForReview.set(username, {
@@ -654,11 +654,10 @@ export const runChecks = async function (
         const prevUser = usersToAskForReview.get(username)
         if (
           prevUser === undefined ||
-          // If the team is null, this user was not asked as part of a
-          // team, but individually. They should always be registered with
-          // "team: null" that case to be sure the review will be
-          // requested individually, even if they were previously
-          // registered as part of a team.
+          // If the team is null, this user was not asked as part of a team, but
+          // individually. They should always be registered with "team: null" in
+          // that case to be sure the review will be requested individually,
+          // even if they were previously registered as part of a team.
           userInfo.teams === null
         ) {
           usersToAskForReview.set(username, { teams: userInfo.teams })
