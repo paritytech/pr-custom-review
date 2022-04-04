@@ -26,7 +26,7 @@ import {
   maxGithubApiTeamMembersPerPage,
 } from "src/constants"
 import { runChecks } from "src/core"
-import { Rule } from "src/types"
+import { Configuration, Rule } from "src/types"
 
 describe("Rules", function () {
   let logger: Logger
@@ -42,89 +42,94 @@ describe("Rules", function () {
     teamMembers = new Map()
   })
 
-  for (const scenario of [
-    "Approved",
-    "Is missing approval",
-    "Has no approval",
-  ] as const) {
-    const setup = function ({
+  const setup = function (options: {
+    users?: string[]
+    diff?: string
+    teams?: { name: string; members: string[] }[]
+    changedFiles?: string[]
+    scenario: "Approved" | "Is missing approval" | "Has no approval"
+    preventReviewRequests?: Configuration["prevent_review_requests"]
+    rules?: Configuration["rules"]
+  }) {
+    let {
       users,
       diff,
       teams,
       rules,
       changedFiles,
-    }: {
-      users?: string[]
-      diff?: string
-      teams?: { name: string; members: string[] }[]
-      rules?: Rule[]
-      changedFiles?: string[]
-    } = {}) {
-      users ??= coworkers
-      diff ??= condition
-      teams ??= [{ name: team, members: users }]
-      changedFiles ??= [condition]
-      rules ??= []
+      scenario,
+      preventReviewRequests,
+    } = options
 
+    users ??= coworkers
+    diff ??= condition
+    teams ??= [{ name: team, members: users }]
+    changedFiles ??= [condition]
+    rules ??= []
+
+    nock(githubApi)
+      .get(reviewsApiPath)
+      .reply(
+        200,
+        scenario === "Approved"
+          ? users.map(function (login, id) {
+              return { id, user: { id, login }, state: "APPROVED" }
+            })
+          : scenario === "Is missing approval"
+          ? [{ id: 1, user: { id: 1, login: coworkers[0] }, state: "APPROVED" }]
+          : [],
+      )
+
+    for (const { name, members } of teams) {
+      teamMembers.set(name, members)
       nock(githubApi)
-        .get(reviewsApiPath)
-        .reply(
-          200,
-          scenario === "Approved"
-            ? users.map(function (login, id) {
-                return { id, user: { id, login }, state: "APPROVED" }
-              })
-            : scenario === "Is missing approval"
-            ? [
-                {
-                  id: 1,
-                  user: { id: 1, login: coworkers[0] },
-                  state: "APPROVED",
-                },
-              ]
-            : [],
+        .get(
+          `/orgs/${org}/teams/${name}/members?per_page=${maxGithubApiTeamMembersPerPage}`,
         )
-
-      for (const { name, members } of teams) {
-        teamMembers.set(name, members)
-        nock(githubApi)
-          .get(
-            `/orgs/${org}/teams/${name}/members?per_page=${maxGithubApiTeamMembersPerPage}`,
-          )
-          .reply(
-            200,
-            members.map(function (login, id) {
-              return { id, login }
-            }),
-          )
-      }
-
-      nock(githubApi)
-        .get(changedFilesApiPath)
         .reply(
           200,
-          changedFiles.map(function (filename) {
-            return { filename }
+          members.map(function (login, id) {
+            return { id, login }
           }),
         )
-
-      nock(githubApi)
-        .get(prApiPath)
-        .matchHeader("accept", "application/vnd.github.v3.diff")
-        .reply(200, diff)
-
-      nock(githubApi)
-        .get(configFileContentsApiPath)
-        .reply(200, {
-          content: Buffer.from(YAML.stringify({ inputs, rules })).toString(
-            "base64",
-          ),
-        })
     }
 
+    nock(githubApi)
+      .get(changedFilesApiPath)
+      .reply(
+        200,
+        changedFiles.map(function (filename) {
+          return { filename }
+        }),
+      )
+
+    nock(githubApi)
+      .get(prApiPath)
+      .matchHeader("accept", "application/vnd.github.v3.diff")
+      .reply(200, diff)
+
+    nock(githubApi)
+      .get(configFileContentsApiPath)
+      .reply(200, {
+        content: Buffer.from(
+          YAML.stringify({
+            inputs,
+            rules,
+            prevent_review_requests: preventReviewRequests,
+          }),
+        ).toString("base64"),
+      })
+  }
+
+  for (const scenario of [
+    "Approved",
+    "Is missing approval",
+    "Has no approval",
+  ] as const) {
     for (const checkType of ["diff", "changed_files"] as const) {
       it(`${scenario} on rule including only users for ${checkType}`, async function () {
         setup({
+          scenario,
           rules: [
             {
               name: condition,
@@ -172,6 +177,7 @@ describe("Rules", function () {
 
       it(`${scenario} on rule including only teams for ${checkType}`, async function () {
         setup({
+          scenario,
           rules: [
             {
               name: condition,
@@ -206,6 +212,7 @@ describe("Rules", function () {
         const userAskedIndividually = coworkers[1]
 
         setup({
+          scenario,
           rules: [
             {
               name: condition,
@@ -250,6 +257,7 @@ describe("Rules", function () {
 
       it(`${scenario} on rule not specifying users or teams`, async function () {
         setup({
+          scenario,
           rules: [
             {
               name: condition,
@@ -289,6 +297,7 @@ describe("Rules", function () {
       ] as const) {
         it(`Rule kind ${ruleKind}: ${scenario} specifying only users for ${checkType}`, async function () {
           setup({
+            scenario,
             rules: [
               {
                 name: condition,
@@ -354,6 +363,7 @@ describe("Rules", function () {
           const team2 = "team2"
 
           setup({
+            scenario,
             teams: [
               {
                 name: team1,
@@ -436,6 +446,7 @@ describe("Rules", function () {
           const team2 = "team2"
 
           setup({
+            scenario,
             users: coworkers.concat(userCoworker3),
             teams: [
               {
@@ -535,6 +546,7 @@ describe("Rules", function () {
       ] as const) {
         it(`${scenario} with ${description} for ${checkType}`, async function () {
           setup({
+            scenario,
             rules: [{ ...rule, min_approvals: 2, check_type: checkType }],
           })
 
@@ -567,6 +579,7 @@ describe("Rules", function () {
     for (const diffSign of ["+", "-"]) {
       it(`${scenario} when lock line is modified (${diffSign})`, async function () {
         setup({
+          scenario,
           diff: `${diffSign}🔒 deleting the lock line`,
           teams: [
             { name: team, members: [coworkers[0]] },
@@ -600,6 +613,7 @@ describe("Rules", function () {
 
       it(`${scenario} when line after lock is modified (${diffSign})`, async function () {
         setup({
+          scenario,
           diff: `🔒 lock line\n${diffSign} modified`,
           teams: [
             { name: team, members: [coworkers[0]] },
@@ -635,6 +649,7 @@ describe("Rules", function () {
     for (const actionReviewFile of actionReviewTeamFiles) {
       it(`${scenario} when ${actionReviewFile} is changed`, async function () {
         setup({
+          scenario,
           changedFiles: [actionReviewFile],
           teams: [{ name: team3, members: [coworkers[1]] }],
         })
@@ -665,6 +680,7 @@ describe("Rules", function () {
 
     it(`${scenario} for AndDistinctRule when user belongs to multiple teams`, async function () {
       setup({
+        scenario,
         rules: [
           {
             name: condition,
@@ -702,6 +718,24 @@ describe("Rules", function () {
       expect(await runChecks(basePR, octokit, logger)).toBe(
         scenario === "Approved" ? "success" : "failure",
       )
+
+      expect(logHistory).toMatchSnapshot()
+    })
+  }
+
+  for (const variant of ["user", "team"]) {
+    it(`Reviews are not requested if prevent_review_requests is set for ${variant}`, async function () {
+      setup({
+        scenario: "Has no approval",
+        changedFiles: actionReviewTeamFiles,
+        teams: [{ name: inputs["action-review-team"], members: coworkers }],
+        preventReviewRequests: {
+          users: coworkers,
+          teams: Object.values(inputs),
+        },
+      })
+
+      expect(await runChecks(basePR, octokit, logger)).toBe("failure")
 
       expect(logHistory).toMatchSnapshot()
     })

@@ -84,7 +84,18 @@ export type RulesConfigurations = {
 
 export type Configuration = {
   rules: Rule[]
-  inputs: Inputs
+  inputs: {
+    "locks-review-team": string
+    "team-leads-team": string
+    "action-review-team": string
+  }
+  prevent_review_requests:
+    | {
+        users: string[]
+        teams: string[]
+      }
+    | undefined
+    | null
 }
 
 export type RuleUserInfo = {
@@ -117,10 +128,4 @@ export class RuleFailure {
     public problem: string,
     public usersToAskForReview: Map<string, RuleUserInfo>,
   ) {}
-}
-
-export type Inputs = {
-  "locks-review-team": string
-  "team-leads-team": string
-  "action-review-team": string
 }
