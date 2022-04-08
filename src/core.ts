@@ -8,6 +8,7 @@ import {
   commitStateSuccess,
   configFilePath,
   maxGithubApiFilesPerPage,
+  maxGithubApiReviewsPerPage,
   maxGithubApiTeamMembersPerPage,
 } from "./constants"
 import { LoggerInterface } from "./logger"
@@ -407,12 +408,15 @@ export const runChecks = async function (
   }
 
   if (matchedRules.length !== 0) {
-    const reviewsResponse = await octokit.rest.pulls.listReviews({
-      owner: pr.base.repo.owner.login,
-      repo: pr.base.repo.name,
-      pull_number: pr.number,
-    })
-    const { data: reviews } = reviewsResponse
+    const reviews = await octokit.paginate(
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
+      {
+        owner: pr.base.repo.owner.login,
+        repo: pr.base.repo.name,
+        pull_number: pr.number,
+        per_page: maxGithubApiReviewsPerPage,
+      },
+    )
 
     const latestReviews: Map<
       number,

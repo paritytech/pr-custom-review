@@ -1,4 +1,8 @@
-import { configFilePath, maxGithubApiFilesPerPage } from "src/constants"
+import {
+  configFilePath,
+  maxGithubApiFilesPerPage,
+  maxGithubApiReviewsPerPage,
+} from "src/constants"
 import { AndDistinctRule, AndRule, BasicRule, OrRule, PR } from "src/types"
 
 export const org = "org"
@@ -25,7 +29,7 @@ export const condition = "condition"
 export const githubApi = "https://api.github.com"
 export const githubWebsite = "https://github.com"
 export const prApiPath = `/repos/${org}/${repo}/pulls/${prNumber}`
-export const reviewsApiPath = `${prApiPath}/reviews`
+export const reviewsApiPath = `${prApiPath}/reviews?per_page=${maxGithubApiReviewsPerPage}`
 export const changedFilesApiPath = `${prApiPath}/files?per_page=${maxGithubApiFilesPerPage}`
 export const requestedReviewersApiPath = `${prApiPath}/requested_reviewers`
 export const configFileContentsApiPath = `/repos/${org}/${repo}/contents/${encodeURIComponent(
