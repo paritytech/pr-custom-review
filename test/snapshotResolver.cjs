@@ -1,9 +1,9 @@
 module.exports = {
   testPathForConsistencyCheck: "test.ts",
-  resolveSnapshotPath: function (testPath, snapshotExtension) {
+  resolveSnapshotPath: (testPath, snapshotExtension) => {
     return `${testPath}${snapshotExtension}`
   },
-  resolveTestPath: function (snapshotFilePath, snapshotExtension) {
+  resolveTestPath: (snapshotFilePath, snapshotExtension) => {
     return snapshotFilePath.replace(snapshotExtension, "")
   },
 }

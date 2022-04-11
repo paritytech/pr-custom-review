@@ -11,9 +11,11 @@ import {
   maxGithubApiReviewsPerPage,
   maxGithubApiTeamMembersPerPage,
 } from "./constants"
-import { LoggerInterface } from "./logger"
+import { ActionData } from "./github/action/types"
 import {
   BaseRule,
+  CommitState,
+  Context,
   MatchedRule,
   Octokit,
   PR,
@@ -29,13 +31,13 @@ type TeamsCache = Map<
   string /* Team slug */,
   string[] /* Usernames of team members */
 >
-const combineUsers = async function (
+const combineUsers = async (
   pr: PR,
   octokit: Octokit,
   presetUsers: string[],
   teams: string[],
   teamsCache: TeamsCache,
-) {
+) => {
   const users: Map<string, RuleUserInfo> = new Map()
 
   for (const user of presetUsers) {
@@ -55,8 +57,8 @@ const combineUsers = async function (
           team_slug: team,
           per_page: maxGithubApiTeamMembersPerPage,
         },
-        function (response) {
-          return response.data.map(function ({ login }) {
+        (response) => {
+          return response.data.map(({ login }) => {
             return login
           })
         },
@@ -76,8 +78,10 @@ const combineUsers = async function (
       }
       if (
         pr.user.login != teamMember &&
-        // We do not want to register a team for this user if their approval is
-        // supposed to be requested individually
+        /*
+          We do not want to register a team for this user if their approval is
+          supposed to be requested individually
+        */
         userInfo.teams !== null
       ) {
         userInfo.teams.add(team)
@@ -88,33 +92,35 @@ const combineUsers = async function (
   return users
 }
 
-// This function should only depend on its inputs so that it can be tested
-// without inconveniences. If you need more external input then pass it as a
-// function argument.
-export const runChecks = async function (
-  pr: PR,
-  octokit: Octokit,
-  logger: LoggerInterface,
-) {
+/*
+  This function should only depend on its inputs so that it can be tested
+  without inconveniences. If you need more external input then pass it as a
+  function argument.
+*/
+export const runChecks = async ({
+  pr,
+  octokit,
+  logger,
+}: Context & { pr: PR }) => {
   const configFileResponse = await octokit.rest.repos.getContent({
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,
     path: configFilePath,
   })
   if (!("content" in configFileResponse.data)) {
-    logger.failure(
+    logger.fatal(
       `Did not find "content" key in the response for ${configFilePath}`,
     )
-    logger.log(configFileResponse.data)
+    logger.info(configFileResponse.data)
     return commitStateFailure
   }
 
   const { content: configFileContentsEnconded } = configFileResponse.data
   if (typeof configFileContentsEnconded !== "string") {
-    logger.failure(
+    logger.fatal(
       `Content response for ${configFilePath} had unexpected type (expected string)`,
     )
-    logger.log(configFileResponse.data)
+    logger.info(configFileResponse.data)
     return commitStateFailure
   }
 
@@ -122,12 +128,13 @@ export const runChecks = async function (
     configFileContentsEnconded,
     "base64",
   ).toString("utf-8")
+
   const configValidationResult = configurationSchema.validate(
     YAML.parse(configFileContents),
   )
   if (configValidationResult.error) {
-    logger.failure("Configuration file is invalid")
-    logger.log(configValidationResult.error)
+    logger.fatal("Configuration file is invalid")
+    logger.info(configValidationResult.error)
     return commitStateFailure
   }
 
@@ -139,8 +146,10 @@ export const runChecks = async function (
     "prevent-review-request": preventReviewRequest,
   } = configValidationResult.value
 
-  // Set up a teams cache so that teams used multiple times don't have to be
-  // requested more than once
+  /*
+    Set up a teams cache so that teams used multiple times don't have to be
+    requested more than once
+  */
   const teamsCache: TeamsCache = new Map()
 
   const diffResponse = (await octokit.rest.pulls.get({
@@ -157,7 +166,7 @@ export const runChecks = async function (
   // Built in condition to search files with changes to locked lines
   const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/
   if (lockExpression.test(diff)) {
-    logger.log("Diff has changes to 🔒 lines or lines following 🔒")
+    logger.info("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(
       pr,
       octokit,
@@ -183,8 +192,12 @@ export const runChecks = async function (
       users,
       id: ++nextMatchedRuleId,
       min_approvals: subConditions
-        .map(({ min_approvals }) => min_approvals)
-        .reduce((acc, val) => acc + val, 0),
+        .map(({ min_approvals }) => {
+          return min_approvals
+        })
+        .reduce((acc, val) => {
+          return acc + val
+        }, 0),
       subConditions,
     })
   }
@@ -200,11 +213,11 @@ export const runChecks = async function (
           per_page: maxGithubApiFilesPerPage,
         },
       )
-    ).map(function ({ filename }) {
+    ).map(({ filename }) => {
       return filename
     }),
   )
-  logger.log("Changed files", changedFiles)
+  logger.info("Changed files", changedFiles)
 
   for (const actionReviewFile of actionReviewTeamFiles) {
     if (changedFiles.has(actionReviewFile)) {
@@ -226,19 +239,27 @@ export const runChecks = async function (
     }
   }
 
-  const processComplexRule = async function (
+  const processComplexRule = async (
     id: MatchedRule["id"],
     name: string,
     kind: RuleKind,
     subConditions: RuleCriteria[],
-  ) {
+  ) => {
     switch (kind) {
       case "AndDistinctRule": {
         const users = await combineUsers(
           pr,
           octokit,
-          subConditions.map(({ users }) => users ?? []).flat(),
-          subConditions.map(({ teams }) => teams ?? []).flat(),
+          subConditions
+            .map(({ users: subconditionUsers }) => {
+              return subconditionUsers ?? []
+            })
+            .flat(),
+          subConditions
+            .map(({ teams }) => {
+              return teams ?? []
+            })
+            .flat(),
           teamsCache,
         )
         matchedRules.push({
@@ -248,8 +269,12 @@ export const runChecks = async function (
           id,
           subConditions,
           min_approvals: subConditions
-            .map(({ min_approvals }) => min_approvals)
-            .reduce((acc, val) => acc + val, 0),
+            .map(({ min_approvals }) => {
+              return min_approvals
+            })
+            .reduce((acc, val) => {
+              return acc + val
+            }, 0),
         })
         break
       }
@@ -277,15 +302,16 @@ export const runChecks = async function (
       }
       default: {
         const exhaustivenessCheck: never = kind
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`
-        logger.failure(failureMessage)
+        logger.fatal(failureMessage)
         throw new Error(failureMessage)
       }
     }
   }
 
   for (const rule of rules) {
-    const includeCondition = (function () {
+    const includeCondition = (() => {
       switch (typeof rule.condition) {
         case "string": {
           return new RegExp(rule.condition, "gm")
@@ -321,7 +347,7 @@ export const runChecks = async function (
           isMatched =
             includeCondition.test(file) && !excludeCondition?.test(file)
           if (isMatched) {
-            logger.log(
+            logger.info(
               `Matched expression "${
                 typeof rule.condition === "string"
                   ? rule.condition
@@ -336,7 +362,7 @@ export const runChecks = async function (
       case "diff": {
         isMatched = includeCondition.test(diff) && !excludeCondition?.test(diff)
         if (isMatched) {
-          logger.log(
+          logger.info(
             `Matched expression "${
               typeof rule.condition === "string"
                 ? rule.condition
@@ -348,7 +374,8 @@ export const runChecks = async function (
       }
       default: {
         const exhaustivenessCheck: never = rule.check_type
-        logger.failure(`Check type is not handled: ${exhaustivenessCheck}`)
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        logger.fatal(`Check type is not handled: ${exhaustivenessCheck}`)
         return commitStateFailure
       }
     }
@@ -358,8 +385,8 @@ export const runChecks = async function (
 
     if (/* BasicRule */ "min_approvals" in rule) {
       if (typeof rule.min_approvals !== "number") {
-        logger.failure(`Rule "${rule.name}" has invalid min_approvals`)
-        logger.log(rule)
+        logger.fatal(`Rule "${rule.name}" has invalid min_approvals`)
+        logger.info(rule)
         return commitStateFailure
       }
 
@@ -423,18 +450,9 @@ export const runChecks = async function (
       { id: number; user: string; isApproval: boolean }
     > = new Map()
     for (const review of reviews) {
-      // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
-
-      if (
-        // Comments do not affect the approval's status
-        review.state === "COMMENTED" ||
-        // The user might've been deleted
-        review.user === null ||
-        review.user === undefined
-      ) {
+      if (review.user === null || review.user === undefined) {
         continue
       }
-
       const prevReview = latestReviews.get(review.user.id)
       if (
         prevReview === undefined ||
@@ -448,12 +466,10 @@ export const runChecks = async function (
         })
       }
     }
-    logger.log("latestReviews", latestReviews.values())
+    logger.info("latestReviews", latestReviews.values())
 
-    const rulesOutcomes: Map<
-      MatchedRule["id"],
-      Array<RuleSuccess | RuleFailure>
-    > = new Map()
+    const rulesOutcomes: Map<MatchedRule["id"], (RuleSuccess | RuleFailure)[]> =
+      new Map()
 
     let highestMinApprovalsRule: MatchedRule | null = null
     for (const rule of matchedRules) {
@@ -506,7 +522,7 @@ export const runChecks = async function (
             outcomes.push(new RuleSuccess(rule))
           } else {
             const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
-              Array.from(rule.users.entries()).filter(function ([username]) {
+              Array.from(rule.users.entries()).filter(([username]) => {
                 return usersPendingApprovals.has(username)
               }),
             )
@@ -517,15 +533,21 @@ export const runChecks = async function (
             } were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
-              .map(function ([username, { teams }]) {
-                return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
+              .map(([username, { teams }]) => {
+                return `${username}${
+                  teams
+                    ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(
+                        teams,
+                      ).join(", ")})`
+                    : ""
+                }`
               })
               .join(", ")}.`
             outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
           }
         } else if (approvedBy.size < rule.min_approvals) {
           const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
-            Array.from(rule.users.entries()).filter(function ([username]) {
+            Array.from(rule.users.entries()).filter(([username]) => {
               return !approvedBy.has(username)
             }),
           )
@@ -536,8 +558,14 @@ export const runChecks = async function (
           } were matched. The following users have not approved yet: ${Array.from(
             usersToAskForReview.entries(),
           )
-            .map(function ([username, { teams }]) {
-              return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
+            .map(([username, { teams }]) => {
+              return `${username}${
+                teams
+                  ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(
+                      teams,
+                    ).join(", ")})`
+                  : ""
+              }`
             })
             .join(", ")}.`
           outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
@@ -567,6 +595,11 @@ export const runChecks = async function (
             case "OrRule": {
               continue toNextOutcomes
             }
+            case "AndRule":
+            case "AndDistinctRule": {
+              // Those rules require the outcomes of other rules to be decided
+              break
+            }
           }
         } else if (outcome instanceof RuleFailure) {
           pendingProblems.push(outcome.problem)
@@ -574,11 +607,13 @@ export const runChecks = async function (
             const prevUser = pendingUsersToAskForReview.get(username)
             if (
               prevUser === undefined ||
-              // If the team is null, this user was not asked as part of a team,
-              // but individually. They should always be registered with "team:
-              // null" that case to be sure the review will be requested
-              // individually, even if they were previously registered as part
-              // of a team.
+              /*
+                If the team is null, this user was not asked as part of a team,
+                but individually. They should always be registered with "team:
+                null" that case to be sure the review will be requested
+                individually, even if they were previously registered as part
+                of a team.
+              */
               userInfo.teams === null
             ) {
               pendingUsersToAskForReview.set(username, {
@@ -593,8 +628,8 @@ export const runChecks = async function (
             }
           }
         } else {
-          logger.failure("Unable to process unexpected rule outcome")
-          logger.log(outcome)
+          logger.fatal("Unable to process unexpected rule outcome")
+          logger.info(outcome)
           return commitStateFailure
         }
       }
@@ -605,10 +640,12 @@ export const runChecks = async function (
         const prevUser = usersToAskForReview.get(username)
         if (
           prevUser === undefined ||
-          // If the team is null, this user was not asked as part of a team, but
-          // individually. They should always be registered with "team: null" in
-          // that case to be sure the review will be requested individually,
-          // even if they were previously registered as part of a team.
+          /*
+            If the team is null, this user was not asked as part of a team, but
+            individually. They should always be registered with "team: null" in
+            that case to be sure the review will be requested individually,
+            even if they were previously registered as part of a team.
+          */
           userInfo.teams === null
         ) {
           usersToAskForReview.set(username, { teams: userInfo.teams })
@@ -623,7 +660,7 @@ export const runChecks = async function (
     }
 
     if (usersToAskForReview.size !== 0) {
-      logger.log("usersToAskForReview", usersToAskForReview)
+      logger.info("usersToAskForReview", usersToAskForReview)
       const teams: Set<string> = new Set()
       const users: Set<string> = new Set()
       for (const [user, userInfo] of usersToAskForReview) {
@@ -668,14 +705,95 @@ export const runChecks = async function (
     }
 
     if (problems.length !== 0) {
-      logger.failure("The following problems were found:")
+      logger.fatal("The following problems were found:")
       for (const problem of problems) {
-        logger.log(problem)
+        logger.info(problem)
       }
-      logger.log("")
+      logger.info("")
       return commitStateFailure
     }
   }
 
   return commitStateSuccess
+}
+
+export const getFinishProcessReviews = (
+  { octokit, logger }: Omit<Context, "finishProcessReviews">,
+  { jobName, detailsUrl, pr, runId, actionRepository }: ActionData,
+) => {
+  return async (state: CommitState) => {
+    // Fallback URL in case we are not able to detect the current job
+    if (state === "failure" && jobName !== undefined) {
+      /*
+          Fetch the jobs so that we'll be able to detect this step and provide a
+          more accurate logging location
+        */
+      const {
+        data: { jobs },
+      } = await octokit.rest.actions.listJobsForWorkflowRun({
+        owner: pr.base.repo.owner.login,
+        repo: pr.base.repo.name,
+        run_id: runId,
+      })
+      for (const job of jobs) {
+        if (job.name === jobName) {
+          let stepNumber: number | undefined = undefined
+          if (actionRepository !== undefined) {
+            const actionRepositoryMatch = actionRepository.match(/[^/]*$/)
+            if (actionRepositoryMatch === null) {
+              logger.warn(
+                `Action repository name could not be extracted from ${actionRepository}`,
+              )
+            } else {
+              const actionStep = job.steps?.find(({ name }) => {
+                return name === actionRepositoryMatch[0]
+              })
+              if (actionStep === undefined) {
+                logger.warn(
+                  `Failed to find ${actionRepositoryMatch[0]} in the job's steps`,
+                  job.steps,
+                )
+              } else {
+                stepNumber = actionStep.number
+              }
+            }
+          }
+          detailsUrl = `${job.html_url as string}${
+            stepNumber
+              ? `#step:${stepNumber}:${logger.relevantStartingLine}`
+              : ""
+          }`
+          break
+        }
+      }
+    }
+
+    await octokit.rest.repos.createCommitStatus({
+      owner: pr.base.repo.owner.login,
+      repo: pr.base.repo.name,
+      sha: pr.head.sha,
+      state,
+      context: "Check reviews",
+      target_url: detailsUrl,
+      description: "Please visit Details for more information",
+    })
+
+    logger.info(`Final state: ${state}`)
+  }
+}
+
+export const processReviews = async (ctx: Context, { pr }: ActionData) => {
+  const { finishProcessReviews, logger } = ctx
+  return runChecks({ ...ctx, pr })
+    .then((state) => {
+      if (finishProcessReviews) {
+        return finishProcessReviews(state)
+      }
+    })
+    .catch((error) => {
+      logger.fatal(error)
+      if (finishProcessReviews) {
+        return finishProcessReviews("failure")
+      }
+    })
 }

@@ -1,16 +1,16 @@
 # deps
 node_modules
 
-# TypeScript compilation directory
-build
+# Build artifacts
+build/*
+!build/package.json
 
-# ncc output directory used for the action release
-# normally the package would be ignored, but in this case it shouldn't because
-# it is committed for github tags in our release process
-# dist
+# Packaged build output
+dist/*
+!dist/package.json
 
-# npm
-npm-debug.log*
+# Environment files
+.env.cjs
 
 # jest
 coverage

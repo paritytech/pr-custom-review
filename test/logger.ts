@@ -1,44 +1,43 @@
 import { inspect } from "util"
 
-import { LoggerInterface } from "src/logger"
+import { ActionLoggerInterface } from "src/github/action/logger"
 
-export class Logger implements LoggerInterface {
+export class TestLogger implements ActionLoggerInterface {
+  relevantStartingLine = 0
   logHistory: string[]
 
   constructor(logHistory: string[]) {
     this.logHistory = logHistory
   }
 
-  doLog = (...args: any[]) => {
+  log(...args: any[]) {
     const message = args
-      .map(function (arg) {
+      .map((arg) => {
         return typeof arg === "string" ? arg : inspect(arg)
       })
       .join(" ")
     this.logHistory.push(message)
   }
 
-  public log = (...args: any[]) => {
+  info(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.doLog(...args)
+    this.log(...args)
   }
 
-  public error = (...args: any[]) => {
+  error(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.doLog("ERROR: ", ...args)
+    this.log("ERROR: ", ...args)
   }
 
-  public warning = (...args: any[]) => {
+  warn(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.doLog("WARNING: ", ...args)
+    this.log("WARNING: ", ...args)
   }
 
-  public failure = (...args: any[]) => {
+  fatal(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.error(...args)
   }
 
-  public markNextLineAsRelevantStartingLine = (_: number) => {}
+  markNextLineAsRelevantStartingLine = (_: number) => {}
 }
-
-export default Logger

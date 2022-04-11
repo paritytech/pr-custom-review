@@ -1,6 +1,15 @@
 # PR Custom Review
 
-This is a GitHub Action created for complex pull request approval scenarios which are not currently supported by GitHub's [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules). It might extend or even completely replace the [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging) setting.
+pr-custom-review is a tool for complex pull request approval scenarios
+which are not currently supported by GitHub's
+[Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules).
+It might extend or even completely replace the
+[Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging)
+setting.
+
+It can be set up either as a [GitHub Action](#github-action) or
+[GitLab Job](#gitlab-job). Check out the [release steps](#deployment) guide for
+more details on this.
 
 ## TOC
 
@@ -15,8 +24,10 @@ This is a GitHub Action created for complex pull request approval scenarios whic
     - [AND Rule syntax](#and-rule-syntax)
     - [AND DISTINCT Rule syntax](#and-distinct-rule-syntax)
     - [OR Rule syntax](#or-rule-syntax)
-  - [Workflow configuration](#workflow-configuration)
   - [GitHub repository configuration](#github-repository-configuration)
+- [GitHub Action](#github-action)
+  - [Workflow configuration](#workflow-configuration)
+- [Server](#server)
 - [Development](#development)
   - [Build](#build)
     - [Build steps](#build-steps)
@@ -256,12 +267,14 @@ rules:
 Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
 field.
 
+## GitHub Action <a name="github-action"></a>
+
 ### Workflow configuration <a name="workflow-configuration"></a>
 
 The workflow configuration should be placed in `.github/workflows`.
 
 ```yaml
-name: PR Custom Review Status    # The PR status will be created with this name.
+name: Assign reviewers           # The PR status will be created with this name.
 
 on:                              # The events which will trigger the action.
   pull_request:                  # A "pull_request" event of selected types will trigger the action.
@@ -282,11 +295,22 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
+          # Provide *EITHER* "token" or "checks-reviews-api"
+
+          # "token" is suitable only for private repositories because GitHub
+          # does not allow the token to be used for forks' pipelines. Providing
+          # this input makes the check run directly in the action.
           # The token needs the following scopes:
           # - `read:org` for being able to request reviews from teams
           # - `workflow` for being able to request the workflow's job
           #    information; used to track lines in the job's output
-          token: ${{ secrets.REVIEWS_TOKEN }}
+          token: ${{ secrets.PRCR_TOKEN }}
+
+          # "checks-reviews-api" is suitable for both public and private
+          # repositories. Providing this input makes the check run in the API
+          # and then the output is printed in the action.
+          # See the "Server" section for more details.
+          checks-reviews-api: https://pr-custom-review/api/v1/check_reviews
 ```
 
 ### GitHub repository configuration  <a name="github-repository-configuration"></a>
@@ -295,6 +319,22 @@ Although the action will work even without any additional [repository settings](
 [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
 
 ![Branch Protection Settings](./img/github-branch-protection.png)
+
+# Server <a name="server"></a>
+
+To work around the limitation imposed by GitHub of not being able to use the
+`token` on pull request from forks, it's possible to execute the checks in a
+server through the `checks-api-url` workflow input. The `checks-api-url`
+should be of the form `http://$SERVER_URL/api/v1/check_reviews`.
+
+The server's required variables are listed in
+[.env.example.cjs](./.env.example.cjs) and a Dockerfile provided in
+[src/server/Dockerfile](./src/server/Dockerfile). Run the following command
+**from the repository root** in order to build the server's image:
+
+`docker build --build-arg PORT=3000 --file src/server/Dockerfile .`
+
+Feel free to customize `$PORT` for whatever port you want.
 
 ## Development
 
@@ -311,11 +351,11 @@ to download dependencies first.
 #### Build steps <a name="build-steps"></a>
 
 1. Install the dependencies
-    `npm install`
+    `yarn install`
 2. Build
-    `npm run build`
+    `yarn build`
 3. Package
-    `npm run package`
+    `yarn package`
 
 See the next sections for [trying it out](#trial) or [releasing](#release).
 
@@ -419,8 +459,8 @@ installed.
 
 ### Testing
 
-Run `npm run test`.
+Run `yarn test`.
 
 Test logging is saved to [snapshots](./test/batch) (`.snap` files). If your
-code changes affect some snapshot then review the modifications and run `npm
-run test -- -u`.
+code changes affect some snapshot then review the modifications and run `yarn
+test -u`.

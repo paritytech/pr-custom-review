@@ -1,10 +1,26 @@
 import github from "@actions/github"
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
 
+import type { wasOctokitExtendedByApplication } from "src/github/octokit"
+
+import { ActionLoggerInterface } from "./github/action/logger"
+
 export type CommitState =
   RestEndpointMethodTypes["repos"]["createCommitStatus"]["parameters"]["state"]
 
 export type Octokit = ReturnType<typeof github.getOctokit>
+
+export type Context = {
+  logger: ActionLoggerInterface
+  octokit: Octokit
+  finishProcessReviews: ((state: CommitState) => Promise<void>) | null
+}
+
+export interface CommonLoggerInterface {
+  info: (...args: any[]) => void
+  warn: (...args: any[]) => void
+  error: (...args: any[]) => void
+}
 
 export type PR = {
   number: number
@@ -38,8 +54,8 @@ export type BaseRule = {
 export type RuleCriteria = {
   min_approvals: number
   name?: string
-  users?: Array<string> | null
-  teams?: Array<string> | null
+  users?: string[] | null
+  teams?: string[] | null
 }
 
 export type BasicRule = BaseRule & RuleCriteria
@@ -126,4 +142,8 @@ export class RuleFailure {
     public problem: string,
     public usersToAskForReview: Map<string, RuleUserInfo>,
   ) {}
+}
+
+export type ExtendedOctokit = Octokit & {
+  [wasOctokitExtendedByApplication]?: true
 }
