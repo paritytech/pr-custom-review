@@ -423,9 +423,18 @@ export const runChecks = async function (
       { id: number; user: string; isApproval: boolean }
     > = new Map()
     for (const review of reviews) {
-      if (review.user === null || review.user === undefined) {
+      // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
+
+      if (
+        // Comments do not affect the approval's status
+        review.state === "COMMENTED" ||
+        // The user might've been deleted
+        review.user === null ||
+        review.user === undefined
+      ) {
         continue
       }
+
       const prevReview = latestReviews.get(review.user.id)
       if (
         prevReview === undefined ||
