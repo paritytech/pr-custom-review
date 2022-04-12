@@ -472,13 +472,7 @@ export const runChecks = async function (
           const ruleApprovedBy: Set<string> = new Set()
           const subconditionsUsersToAskForReview: Set<string> = new Set()
 
-          toNextSubcondition: for (
-            let i = 0;
-            i < rule.subConditions.length;
-            i++
-          ) {
-            const subCondition = rule.subConditions[i]
-
+          toNextSubcondition: for (const subCondition of rule.subConditions) {
             const pendingUsersToAskForReview: Set<string> = new Set()
 
             for (const user of subCondition.users ?? []) {
