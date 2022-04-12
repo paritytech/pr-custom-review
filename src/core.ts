@@ -472,51 +472,51 @@ export const runChecks = async function (
           const ruleApprovedBy: Set<string> = new Set()
           const subconditionsUsersToAskForReview: Set<string> = new Set()
 
-          const failedSubconditions: Array<number | string> = []
           toNextSubcondition: for (
             let i = 0;
             i < rule.subConditions.length;
             i++
           ) {
+            const subCondition = rule.subConditions[i]
+
             const pendingUsersToAskForReview: Set<string> = new Set()
 
-            const subCondition = rule.subConditions[i]
-            let approvalCount = 0
             for (const user of subCondition.users ?? []) {
-              pendingUsersToAskForReview.add(user)
-              if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
+              if (approvedBy.has(user)) {
                 ruleApprovedBy.add(user)
-                approvalCount++
-                if (approvalCount === subCondition.min_approvals) {
-                  continue toNextSubcondition
+                if (ruleApprovedBy.size === rule.min_approvals) {
+                  subconditionsUsersToAskForReview.clear()
+                  break toNextSubcondition
                 }
+              } else {
+                pendingUsersToAskForReview.add(user)
               }
             }
+
             for (const team of subCondition.teams ?? []) {
               for (const [user, userInfo] of rule.users) {
                 if (userInfo?.teamsHistory?.has(team)) {
-                  pendingUsersToAskForReview.add(user)
-                  if (approvedBy.has(user) && !ruleApprovedBy.has(user)) {
+                  if (approvedBy.has(user)) {
                     ruleApprovedBy.add(user)
-                    approvalCount++
-                    if (approvalCount === subCondition.min_approvals) {
-                      continue toNextSubcondition
+                    if (ruleApprovedBy.size === rule.min_approvals) {
+                      subconditionsUsersToAskForReview.clear()
+                      break toNextSubcondition
                     }
+                  } else {
+                    pendingUsersToAskForReview.add(user)
                   }
                 }
               }
             }
+
             for (const user of pendingUsersToAskForReview) {
               subconditionsUsersToAskForReview.add(user)
             }
-            failedSubconditions.push(
-              typeof subCondition.name === "string"
-                ? `"${subCondition.name}"`
-                : `at index ${i}`,
-            )
           }
 
-          if (failedSubconditions.length) {
+          if (subconditionsUsersToAskForReview.size === 0) {
+            outcomes.push(new RuleSuccess(rule))
+          } else {
             const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
               Array.from(rule.users.entries()).filter(function ([username]) {
                 return !approvedBy.has(username)
@@ -524,11 +524,7 @@ export const runChecks = async function (
             )
             const problem = `Rule "${rule.name}" needs in total ${
               rule.min_approvals
-            } DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. Subcondition${
-              failedSubconditions.length > 1 ? "s" : ""
-            } ${failedSubconditions.join(
-              " and ",
-            )} failed. The following users have not approved yet: ${Array.from(
+            } DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
               .filter(function ([username]) {
@@ -539,8 +535,6 @@ export const runChecks = async function (
               })
               .join(", ")}.`
             outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
-          } else {
-            outcomes.push(new RuleSuccess(rule))
           }
         } else if (approvedBy.size < rule.min_approvals) {
           const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
