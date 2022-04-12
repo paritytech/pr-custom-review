@@ -470,20 +470,18 @@ export const runChecks = async function (
 
         if (rule.kind === "AndDistinctRule") {
           const ruleApprovedBy: Set<string> = new Set()
-          const subconditionsUsersToAskForReview: Set<string> = new Set()
+          const usersPendingApprovals: Set<string> = new Set()
 
           toNextSubcondition: for (const subCondition of rule.subConditions) {
-            const pendingUsersToAskForReview: Set<string> = new Set()
-
             for (const user of subCondition.users ?? []) {
               if (approvedBy.has(user)) {
                 ruleApprovedBy.add(user)
                 if (ruleApprovedBy.size === rule.min_approvals) {
-                  subconditionsUsersToAskForReview.clear()
+                  usersPendingApprovals.clear()
                   break toNextSubcondition
                 }
               } else {
-                pendingUsersToAskForReview.add(user)
+                usersPendingApprovals.add(user)
               }
             }
 
@@ -493,37 +491,32 @@ export const runChecks = async function (
                   if (approvedBy.has(user)) {
                     ruleApprovedBy.add(user)
                     if (ruleApprovedBy.size === rule.min_approvals) {
-                      subconditionsUsersToAskForReview.clear()
+                      usersPendingApprovals.clear()
                       break toNextSubcondition
                     }
                   } else {
-                    pendingUsersToAskForReview.add(user)
+                    usersPendingApprovals.add(user)
                   }
                 }
               }
             }
-
-            for (const user of pendingUsersToAskForReview) {
-              subconditionsUsersToAskForReview.add(user)
-            }
           }
 
-          if (subconditionsUsersToAskForReview.size === 0) {
+          if (usersPendingApprovals.size === 0) {
             outcomes.push(new RuleSuccess(rule))
           } else {
             const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
               Array.from(rule.users.entries()).filter(function ([username]) {
-                return !approvedBy.has(username)
+                return usersPendingApprovals.has(username)
               }),
             )
             const problem = `Rule "${rule.name}" needs in total ${
               rule.min_approvals
-            } DISTINCT approvals, meaning users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: ${Array.from(
+            } DISTINCT approvals, but ${
+              ruleApprovedBy.size
+            } were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
-              .filter(function ([username]) {
-                return subconditionsUsersToAskForReview.has(username)
-              })
               .map(function ([username, { teams }]) {
                 return `${username}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`
               })
