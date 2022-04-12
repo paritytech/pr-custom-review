@@ -472,13 +472,13 @@ export const runChecks = async function (
           const ruleApprovedBy: Set<string> = new Set()
           const usersPendingApprovals: Set<string> = new Set()
 
-          toNextSubcondition: for (const subCondition of rule.subConditions) {
+          subConditionsLoop: for (const subCondition of rule.subConditions) {
             for (const user of subCondition.users ?? []) {
               if (approvedBy.has(user)) {
                 ruleApprovedBy.add(user)
                 if (ruleApprovedBy.size === rule.min_approvals) {
                   usersPendingApprovals.clear()
-                  break toNextSubcondition
+                  break subConditionsLoop
                 }
               } else {
                 usersPendingApprovals.add(user)
@@ -492,7 +492,7 @@ export const runChecks = async function (
                     ruleApprovedBy.add(user)
                     if (ruleApprovedBy.size === rule.min_approvals) {
                       usersPendingApprovals.clear()
-                      break toNextSubcondition
+                      break subConditionsLoop
                     }
                   } else {
                     usersPendingApprovals.add(user)
