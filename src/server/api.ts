@@ -14,7 +14,7 @@ const getApiRoute = (version: ApiVersion, route: string) => {
   return `/api/${version}/${route}`
 }
 
-export const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews")
+const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews")
 
 export const setupApi = ({ octokit, logger }: ServerContext) => {
   const server = Fastify({ logger: logger.getFastifyLogger() })
@@ -61,9 +61,8 @@ export const setupApi = ({ octokit, logger }: ServerContext) => {
                 properties: { login: { type: "string" } },
                 required: ["login"],
               },
-              html_url: { type: "string" },
             },
-            required: ["number", "base", "head", "user", "html_url"],
+            required: ["number", "base", "head", "user"],
           },
         },
         required: ["detailsUrl", "runId", "pr"],

@@ -27,7 +27,6 @@ export const prNumber = 1
 export const condition = "condition"
 
 export const githubApi = "https://api.github.com"
-export const githubWebsite = "https://github.com"
 export const prApiPath = `/repos/${org}/${repo}/pulls/${prNumber}`
 export const reviewsApiPath = `${prApiPath}/reviews?per_page=${maxGithubApiReviewsPerPage}`
 export const changedFilesApiPath = `${prApiPath}/files?per_page=${maxGithubApiFilesPerPage}`
@@ -41,7 +40,6 @@ export const basePR: PR = {
   base: { repo: { name: repo, owner: { login: org } } },
   head: { sha: "foo" },
   user: { login: user },
-  html_url: `${githubWebsite}${org}/${repo}/pull/${prNumber}`,
 }
 
 export const rulesExamples: {

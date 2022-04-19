@@ -12,12 +12,11 @@ import {
   maxGithubApiTeamMembersPerPage,
 } from "./constants"
 import { ActionData } from "./github/action/types"
+import { CommitState } from "./github/types"
 import {
   BaseRule,
-  CommitState,
   Context,
   MatchedRule,
-  Octokit,
   PR,
   RuleCriteria,
   RuleFailure,
@@ -32,8 +31,8 @@ type TeamsCache = Map<
   string[] /* Usernames of team members */
 >
 const combineUsers = async (
+  { octokit }: Context,
   pr: PR,
-  octokit: Octokit,
   presetUsers: string[],
   teams: string[],
   teamsCache: TeamsCache,
@@ -97,11 +96,9 @@ const combineUsers = async (
   without inconveniences. If you need more external input then pass it as a
   function argument.
 */
-export const runChecks = async ({
-  pr,
-  octokit,
-  logger,
-}: Context & { pr: PR }) => {
+export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
+  const { octokit, logger } = ctx
+
   const configFileResponse = await octokit.rest.repos.getContent({
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,
@@ -168,8 +165,8 @@ export const runChecks = async ({
   if (lockExpression.test(diff)) {
     logger.info("Diff has changes to 🔒 lines or lines following 🔒")
     const users = await combineUsers(
+      ctx,
       pr,
-      octokit,
       [],
       [locksReviewTeam, teamLeadsTeam],
       teamsCache,
@@ -222,8 +219,8 @@ export const runChecks = async ({
   for (const actionReviewFile of actionReviewTeamFiles) {
     if (changedFiles.has(actionReviewFile)) {
       const users = await combineUsers(
+        ctx,
         pr,
-        octokit,
         [],
         [actionReviewTeam],
         teamsCache,
@@ -248,8 +245,8 @@ export const runChecks = async ({
     switch (kind) {
       case "AndDistinctRule": {
         const users = await combineUsers(
+          ctx,
           pr,
-          octokit,
           subConditions
             .map(({ users: subconditionUsers }) => {
               return subconditionUsers ?? []
@@ -284,8 +281,8 @@ export const runChecks = async ({
         let conditionIndex = -1
         for (const subCondition of subConditions) {
           const users = await combineUsers(
+            ctx,
             pr,
-            octokit,
             subCondition.users ?? [],
             subCondition.teams ?? [],
             teamsCache,
@@ -391,8 +388,8 @@ export const runChecks = async ({
       }
 
       const users = await combineUsers(
+        ctx,
         pr,
-        octokit,
         rule.users ?? [],
         rule.teams ?? [],
         teamsCache,

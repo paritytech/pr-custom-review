@@ -3,35 +3,40 @@ import { OctokitResponse } from "@octokit/plugin-paginate-rest/dist-types/types"
 import { RequestError } from "@octokit/request-error"
 import { Mutex } from "async-mutex"
 
-import { CommonLoggerInterface, ExtendedOctokit } from "src/types"
+import { CommonLoggerInterface } from "src/types"
 import { delayMilliseconds, Err, Ok } from "src/utils"
 
-export const restApiEndpoints = {
-  createCommitStatus: "POST /repos/{owner}/{repo}/statuses/{sha}",
-} as const
+const wasOctokitExtendedByApplication = Symbol()
+export type ExtendedOctokit<OctokitInstance extends Octokit> =
+  OctokitInstance & {
+    [wasOctokitExtendedByApplication]?: true
+  }
 
 // Funnel all GitHub requests through a Mutex in order to avoid rate limits
 const requestMutex = new Mutex()
 let requestDelay = Promise.resolve()
 
-export const wasOctokitExtendedByApplication = Symbol()
 const rateLimitRemainingHeader = "x-ratelimit-remaining"
 const rateLimitResetHeader = "x-ratelimit-reset"
 const retryAfterHeader = "retry-after"
-export const getOctokit = (
-  octokit: Octokit,
+export const getOctokit = <OctokitInstance extends Octokit>(
+  octokit: OctokitInstance,
   logger: CommonLoggerInterface,
   getAuthHeaders:
     | (() => { authorization: string } | Promise<{ authorization: string }>)
     | null,
-): ExtendedOctokit => {
+): ExtendedOctokit<OctokitInstance> => {
   /*
     Check that this Octokit instance has not been augmented before because
     side-effects of this function should not be stacked; e.g. registering
     request wrappers more than once will break the application
   */
-  if ((octokit as ExtendedOctokit)[wasOctokitExtendedByApplication]) {
-    return octokit as ExtendedOctokit
+  if (
+    (octokit as ExtendedOctokit<OctokitInstance>)[
+      wasOctokitExtendedByApplication
+    ]
+  ) {
+    return octokit as ExtendedOctokit<OctokitInstance>
   }
 
   octokit.hook.wrap("request", async (request, options) => {
@@ -191,7 +196,7 @@ export const getOctokit = (
     return result.value
   })
 
-  const extendedOctokit = octokit as ExtendedOctokit
+  const extendedOctokit = octokit as ExtendedOctokit<OctokitInstance>
   extendedOctokit[wasOctokitExtendedByApplication] = true
   return extendedOctokit
 }

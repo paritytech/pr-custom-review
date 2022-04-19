@@ -1,18 +1,12 @@
-import github from "@actions/github"
-import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
-
-import type { wasOctokitExtendedByApplication } from "src/github/octokit"
+import githubActions from "@actions/github"
 
 import { ActionLoggerInterface } from "./github/action/logger"
-
-export type CommitState =
-  RestEndpointMethodTypes["repos"]["createCommitStatus"]["parameters"]["state"]
-
-export type Octokit = ReturnType<typeof github.getOctokit>
+import { ExtendedOctokit } from "./github/octokit"
+import { CommitState } from "./github/types"
 
 export type Context = {
   logger: ActionLoggerInterface
-  octokit: Octokit
+  octokit: ExtendedOctokit<ReturnType<typeof githubActions.getOctokit>>
   finishProcessReviews: ((state: CommitState) => Promise<void>) | null
 }
 
@@ -38,7 +32,6 @@ export type PR = {
   user: {
     login: string
   }
-  html_url: string
 }
 
 export type BaseRule = {
@@ -142,8 +135,4 @@ export class RuleFailure {
     public problem: string,
     public usersToAskForReview: Map<string, RuleUserInfo>,
   ) {}
-}
-
-export type ExtendedOctokit = Octokit & {
-  [wasOctokitExtendedByApplication]?: true
 }

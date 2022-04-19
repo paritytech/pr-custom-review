@@ -1,8 +1,10 @@
-import { ExtendedOctokit } from "src/types"
+import { Octokit } from "@octokit/rest"
+
+import { ExtendedOctokit } from "src/github/octokit"
 
 import { ServerLogger } from "./logger"
 
 export type ServerContext = {
-  octokit: ExtendedOctokit
+  octokit: ExtendedOctokit<Octokit>
   logger: ServerLogger
 }
