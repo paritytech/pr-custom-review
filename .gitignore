@@ -14,3 +14,6 @@ dist/*
 
 # jest
 coverage
+
+# private keys
+*.pem
