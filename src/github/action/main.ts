@@ -67,9 +67,9 @@ const main = async () => {
   }
 
   // Otherwise, check it through the API
-  const apiUrl = getInput("checks-reviews-api", { required: true })
+  const checkReviewsApi = getInput("checks-reviews-api", { required: true })
   const logLines = (await (
-    await fetch(apiUrl, {
+    await fetch(checkReviewsApi, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(actionData),

@@ -327,8 +327,8 @@ To work around the limitation imposed by GitHub of not being able to use the
 server through the `checks-api-url` workflow input. The `checks-api-url`
 should be of the form `http://$SERVER_URL/api/v1/check_reviews`.
 
-The server's required variables are listed in
-[.env.example.cjs](./.env.example.cjs) and a Dockerfile provided in
+The server's required environment variables are listed in
+[.env.example.cjs](./.env.example.cjs) and a Dockerfile is provided in
 [src/server/Dockerfile](./src/server/Dockerfile). Run the following command
 **from the repository root** in order to build the server's image:
 
