@@ -48,8 +48,8 @@ export const setupApi = ({ octokit, logger }: ServerContext) => {
                     },
                     required: ["name", "owner"],
                   },
-                  required: ["repo"],
                 },
+                required: ["repo"],
               },
               head: {
                 type: "object",
@@ -65,8 +65,8 @@ export const setupApi = ({ octokit, logger }: ServerContext) => {
             },
             required: ["number", "base", "head", "user", "html_url"],
           },
-          required: ["detailsUrl", "runId", "pr"],
         },
+        required: ["detailsUrl", "runId", "pr"],
       },
     },
     handler: async (req, reply) => {
