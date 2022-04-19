@@ -9,16 +9,16 @@ import { ServerContext } from "./types"
 
 const main = async () => {
   const logFormat = (() => {
-    const logFormatVar = envVar("LOG_FORMAT")
-    switch (logFormatVar) {
+    const value = process.env.LOG_FORMAT
+    switch (value) {
       case undefined: {
         return null
       }
       case "json": {
-        return logFormatVar
+        return value
       }
       default: {
-        throw new Error(`Invalid $LOG_FORMAT: ${logFormatVar}`)
+        throw new Error(`Invalid $LOG_FORMAT: ${value}`)
       }
     }
   })()
@@ -71,9 +71,9 @@ const main = async () => {
     return { authorization: `token ${githubAccessToken}` }
   })
 
-  const serverContext: ServerContext = { logger, octokit }
+  const ctx: ServerContext = { logger, octokit }
 
-  const server = setup(serverContext)
+  const server = setup(ctx)
   await server.listen(serverPort)
 }
 
