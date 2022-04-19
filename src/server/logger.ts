@@ -18,13 +18,11 @@ enum LoggingLevel {
 }
 type LoggingLevels = keyof typeof LoggingLevel
 
-export type LogFormat = "json" | "none"
-
 export class ServerLogger implements CommonLoggerInterface {
   constructor(
     public options: {
       name: string
-      logFormat: LogFormat
+      logFormat: "json" | null
       minLogLevel: LoggingLevels
       impl: LoggingImplementation
       context?: Record<string, any>
@@ -111,7 +109,7 @@ export class ServerLogger implements CommonLoggerInterface {
         )
         break
       }
-      default: {
+      case null: {
         const tag = `${level.toUpperCase()} (${this.options.name}):`
         const normalizedContext = normalizeValue(this.options.context)
         loggingFunction(
@@ -124,6 +122,11 @@ export class ServerLogger implements CommonLoggerInterface {
           normalizeValue(item),
         )
         break
+      }
+      default: {
+        const exhaustivenessCheck: never = this.options.logFormat
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        throw new Error(`Not exhaustive: ${exhaustivenessCheck}`)
       }
     }
   }

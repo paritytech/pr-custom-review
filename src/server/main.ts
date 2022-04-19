@@ -11,12 +11,14 @@ const main = async () => {
   const logFormat = (() => {
     const logFormatVar = envVar("LOG_FORMAT")
     switch (logFormatVar) {
-      case "json":
-      case "none": {
+      case undefined: {
+        return null
+      }
+      case "json": {
         return logFormatVar
       }
       default: {
-        throw new Error(`Invalid LOG_FORMAT: ${logFormatVar}`)
+        throw new Error(`Invalid $LOG_FORMAT: ${logFormatVar}`)
       }
     }
   })()
