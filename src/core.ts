@@ -1,5 +1,6 @@
 import { OctokitResponse } from "@octokit/types"
 import assert from "assert"
+import Permutator from "iterative-permutation"
 import YAML from "yaml"
 
 import {
@@ -481,52 +482,214 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
         }
 
         if (rule.kind === "AndDistinctRule") {
-          const ruleApprovedBy: Set<string> = new Set()
-          const usersPendingApprovals: Set<string> = new Set()
+          const approvalGroups = rule.subconditions.map((subcondition) => {
+            const subconditionApprovedBy: Set<string> = new Set()
 
-          subconditionsLoop: for (const subcondition of rule.subconditions) {
             for (const user of subcondition.users ?? []) {
               if (approvedBy.has(user)) {
-                ruleApprovedBy.add(user)
-                if (ruleApprovedBy.size === rule.min_approvals) {
-                  usersPendingApprovals.clear()
-                  break subconditionsLoop
-                }
-              } else {
-                usersPendingApprovals.add(user)
+                subconditionApprovedBy.add(user)
               }
             }
 
             for (const team of subcondition.teams ?? []) {
               for (const [user, userInfo] of rule.users) {
-                if (userInfo?.teamsHistory?.has(team)) {
-                  if (approvedBy.has(user)) {
-                    ruleApprovedBy.add(user)
-                    if (ruleApprovedBy.size === rule.min_approvals) {
-                      usersPendingApprovals.clear()
-                      break subconditionsLoop
+                if (userInfo?.teamsHistory?.has(team) && approvedBy.has(user)) {
+                  subconditionApprovedBy.add(user)
+                }
+              }
+            }
+
+            return { subcondition, subconditionApprovedBy }
+          })
+
+          /*
+            Test every possible combination of every subcondition for each
+            approval group on each subcondition. This is needed when it would
+            be more favorable to use an approval for a different subcondition
+            other than the one it could be first matched for that approval.
+            Consider the following scenario:
+              - Ana has teams: Team2, Team1
+              - Bob has teams: Team2
+              - Ana and Bob have both approved
+            And suppose that we need 1 distinct approval for Team1 and another
+            for Team2. It might be the case that Ana's approval for Team2 is
+            registered first, which would make Bob's approval useless for a
+            suboptimal outcome.
+            The most favorable combination to clear the requirement is:
+              - Ana's approval is allocated to Team1
+              - Bob's approval is allocated to Team2
+            The case we want to avoid is:
+              - Ana's approval is allocated to Team2
+              - Bob's approval is useless because it can only be allocated to
+                Team1, which was already approved by Ana in this scenario
+            It is possible to avoid the bad case by brute-forcing every
+            available permutation of approvals' orders and picking the best one
+            found, with bailouts for when the overall target approval count is
+            reached.
+          */
+          type CombinationApprovedBy = Map<
+            /* subcondition Index */ number,
+            /* users which approved the subcondition */ Set<string>
+          >
+          let combinationApprovedByMostPeopleOverall: CombinationApprovedBy =
+            new Map()
+
+          for (let i = 0; i < approvalGroups.length; i++) {
+            const {
+              subcondition: referenceSubcondition,
+              subconditionApprovedBy: referenceSubconditionApprovedBy,
+            } = approvalGroups[i]
+
+            referenceSubconditionLoop: for (const userStartingCombination of referenceSubconditionApprovedBy) {
+              const combinationApprovedBy: CombinationApprovedBy = new Map([
+                [i, new Set([userStartingCombination])],
+              ])
+
+              /*
+                The least bad combination is the first one tried, since at least
+                it has one approval
+              */
+              if (combinationApprovedByMostPeopleOverall.size === 0) {
+                combinationApprovedByMostPeopleOverall = combinationApprovedBy
+              }
+
+              subconditionLoop: for (
+                let j = 0;
+                j < approvalGroups.length;
+                j++
+              ) {
+                /*
+                  Check if the subcondition's min_approvals target has already
+                  been filled by the initialization of combinationApprovedBy
+                */
+                if (
+                  j === i &&
+                  combinationApprovedBy.get(j)?.size ===
+                    referenceSubcondition.min_approvals
+                ) {
+                  continue
+                }
+
+                const { subcondition, subconditionApprovedBy } =
+                  approvalGroups[j]
+
+                const usersPermutator = new Permutator(
+                  Array.from(subconditionApprovedBy),
+                )
+                while (usersPermutator.hasNext()) {
+                  const usersPermutation = usersPermutator.next()
+
+                  let approvalCountAtStartOfPermutation = 0
+                  for (const users of combinationApprovedBy.values()) {
+                    approvalCountAtStartOfPermutation += users.size
+                  }
+
+                  usersPermutationLoop: for (const user of usersPermutation) {
+                    for (const usersWhoApprovedCombination of combinationApprovedBy.values()) {
+                      if (usersWhoApprovedCombination.has(user)) {
+                        continue usersPermutationLoop
+                      }
                     }
-                  } else {
-                    usersPendingApprovals.add(user)
+
+                    const combinationApprovedByUsers =
+                      combinationApprovedBy.get(j) ?? new Set([user])
+                    combinationApprovedByUsers.add(user)
+                    combinationApprovedBy.set(j, combinationApprovedByUsers)
+
+                    let approvalCountNow = 0
+                    for (const users of combinationApprovedBy.values()) {
+                      approvalCountNow += users.size
+                    }
+                    if (approvalCountNow === rule.min_approvals) {
+                      /*
+                        Bail out when combination which fulfills all
+                        subconditions is found
+                      */
+                      combinationApprovedByMostPeopleOverall =
+                        combinationApprovedBy
+                      break referenceSubconditionLoop
+                    }
+
+                    let approvalCountOfBestCombination = 0
+                    for (const users of combinationApprovedByMostPeopleOverall.values()) {
+                      approvalCountOfBestCombination += users.size
+                    }
+                    if (approvalCountNow > approvalCountOfBestCombination) {
+                      combinationApprovedByMostPeopleOverall =
+                        combinationApprovedBy
+                    }
+
+                    if (
+                      approvalCountNow - approvalCountAtStartOfPermutation ===
+                      subcondition.min_approvals
+                    ) {
+                      continue subconditionLoop
+                    }
                   }
                 }
               }
             }
           }
 
-          if (usersPendingApprovals.size === 0) {
+          let approvalCountOfBestCombination = 0
+          for (const users of combinationApprovedByMostPeopleOverall.values()) {
+            approvalCountOfBestCombination += users.size
+          }
+          if (approvalCountOfBestCombination > 0) {
+            logger.log({
+              ruleName: rule.name,
+              approvalCountOfBestCombination,
+              combinationApprovedByMostPeopleOverall: new Map(
+                Array.from(combinationApprovedByMostPeopleOverall).map(
+                  ([i, users]) => {
+                    return [
+                      rule.subconditions[i].name ??
+                        `subcondition at index ${i}`,
+                      users,
+                    ]
+                  },
+                ),
+              ),
+            })
+          }
+
+          if (approvalCountOfBestCombination === rule.min_approvals) {
             outcomes.push(new RuleSuccess(rule))
           } else {
+            const usersPendingApprovals: Set<string> = new Set()
+            for (let i = 0; i < rule.subconditions.length; i++) {
+              const subcondition = rule.subconditions[i]
+              const subconditionApprovedBy =
+                combinationApprovedByMostPeopleOverall.get(i) ?? new Set()
+              if (subconditionApprovedBy.size !== subcondition.min_approvals) {
+                for (const user of subcondition.users ?? []) {
+                  if (!approvedBy.has(user)) {
+                    usersPendingApprovals.add(user)
+                  }
+                }
+
+                for (const team of subcondition.teams ?? []) {
+                  for (const [user, userInfo] of rule.users) {
+                    if (
+                      userInfo?.teamsHistory?.has(team) &&
+                      !approvedBy.has(user)
+                    ) {
+                      usersPendingApprovals.add(user)
+                    }
+                  }
+                }
+              }
+            }
+
             const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
-              Array.from(rule.users.entries()).filter(([username]) => {
-                return usersPendingApprovals.has(username)
+              Array.from(rule.users.entries()).filter(([user]) => {
+                return usersPendingApprovals.has(user)
               }),
             )
+
             const problem = `Rule "${rule.name}" needs in total ${
               rule.min_approvals
-            } DISTINCT approvals, but ${
-              ruleApprovedBy.size
-            } were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: ${Array.from(
+            } DISTINCT approvals, but ${approvalCountOfBestCombination} were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: ${Array.from(
               usersToAskForReview.entries(),
             )
               .map(([username, { teams }]) => {
