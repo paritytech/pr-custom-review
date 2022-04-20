@@ -23,8 +23,8 @@ repositories.
     - [AND Rule syntax](#and-rule-syntax)
     - [AND DISTINCT Rule syntax](#and-distinct-rule-syntax)
     - [OR Rule syntax](#or-rule-syntax)
+  - [Workflow configuration](#workflow-configuration)
   - [GitHub repository configuration](#github-repository-configuration)
-- [Workflow configuration](#workflow-configuration)
 - [Server](#server)
 - [Development](#development)
   - [Build](#build)
@@ -266,14 +266,7 @@ rules:
 Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
 field.
 
-### GitHub repository configuration  <a name="github-repository-configuration"></a>
-
-Although the action will work even without any additional [repository settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features), for maximum enforcement effectiveness it is recommended to enable
-[Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
-
-![Branch Protection Settings](./img/github-branch-protection.png)
-
-## Workflow configuration <a name="workflow-configuration"></a>
+### Workflow configuration <a name="workflow-configuration"></a>
 
 The workflow configuration should be placed in `.github/workflows`.
 
@@ -318,6 +311,13 @@ jobs:
           # "Server" section for more details.
           checks-reviews-api: https://server/api/v1/check_reviews
 ```
+
+### GitHub repository configuration  <a name="github-repository-configuration"></a>
+
+Although the action will work even without any additional [repository settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features), for maximum enforcement effectiveness it is recommended to enable
+[Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
+
+![Branch Protection Settings](./img/github-branch-protection.png)
 
 # Server <a name="server"></a>
 
