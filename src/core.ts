@@ -171,7 +171,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       [locksReviewTeam, teamLeadsTeam],
       teamsCache,
     )
-    const subConditions = [
+    const subconditions = [
       {
         min_approvals: 1,
         teams: [locksReviewTeam],
@@ -188,10 +188,10 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       kind: "AndDistinctRule",
       users,
       id: ++nextMatchedRuleId,
-      min_approvals: subConditions.reduce((acc, { min_approvals }) => {
+      min_approvals: subconditions.reduce((acc, { min_approvals }) => {
         return acc + min_approvals
       }, 0),
-      subConditions,
+      subconditions,
     })
   }
 
@@ -236,19 +236,19 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     id: MatchedRule["id"],
     name: string,
     kind: RuleKind,
-    subConditions: RuleCriteria[],
+    subconditions: RuleCriteria[],
   ) => {
     switch (kind) {
       case "AndDistinctRule": {
         const users = await combineUsers(
           ctx,
           pr,
-          subConditions
+          subconditions
             .map(({ users: subconditionUsers }) => {
               return subconditionUsers ?? []
             })
             .flat(),
-          subConditions
+          subconditions
             .map(({ teams }) => {
               return teams ?? []
             })
@@ -260,8 +260,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           users,
           kind,
           id,
-          subConditions,
-          min_approvals: subConditions.reduce((acc, { min_approvals }) => {
+          subconditions,
+          min_approvals: subconditions.reduce((acc, { min_approvals }) => {
             return acc + min_approvals
           }, 0),
         })
@@ -271,17 +271,17 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       case "OrRule":
       case "AndRule": {
         let conditionIndex = -1
-        for (const subCondition of subConditions) {
+        for (const subcondition of subconditions) {
           const users = await combineUsers(
             ctx,
             pr,
-            subCondition.users ?? [],
-            subCondition.teams ?? [],
+            subcondition.users ?? [],
+            subcondition.teams ?? [],
             teamsCache,
           )
           matchedRules.push({
             name: `${name}[${++conditionIndex}]`,
-            min_approvals: subCondition.min_approvals,
+            min_approvals: subcondition.min_approvals,
             users,
             kind,
             id,
@@ -484,27 +484,27 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           const ruleApprovedBy: Set<string> = new Set()
           const usersPendingApprovals: Set<string> = new Set()
 
-          subConditionsLoop: for (const subCondition of rule.subConditions) {
-            for (const user of subCondition.users ?? []) {
+          subconditionsLoop: for (const subcondition of rule.subconditions) {
+            for (const user of subcondition.users ?? []) {
               if (approvedBy.has(user)) {
                 ruleApprovedBy.add(user)
                 if (ruleApprovedBy.size === rule.min_approvals) {
                   usersPendingApprovals.clear()
-                  break subConditionsLoop
+                  break subconditionsLoop
                 }
               } else {
                 usersPendingApprovals.add(user)
               }
             }
 
-            for (const team of subCondition.teams ?? []) {
+            for (const team of subcondition.teams ?? []) {
               for (const [user, userInfo] of rule.users) {
                 if (userInfo?.teamsHistory?.has(team)) {
                   if (approvedBy.has(user)) {
                     ruleApprovedBy.add(user)
                     if (ruleApprovedBy.size === rule.min_approvals) {
                       usersPendingApprovals.clear()
-                      break subConditionsLoop
+                      break subconditionsLoop
                     }
                   } else {
                     usersPendingApprovals.add(user)
