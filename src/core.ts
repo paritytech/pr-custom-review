@@ -447,7 +447,13 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       { id: number; user: string; isApproval: boolean }
     > = new Map()
     for (const review of reviews) {
-      if (review.user === null || review.user === undefined) {
+      if (
+        // Comments do not affect the approval's status
+        review.state === "COMMENTED" ||
+        // The user might've been deleted
+        review.user === null ||
+        review.user === undefined
+      ) {
         continue
       }
       const prevReview = latestReviews.get(review.user.id)
