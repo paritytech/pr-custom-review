@@ -439,6 +439,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       { id: number; user: string; isApproval: boolean }
     > = new Map()
     for (const review of reviews) {
+      // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
       if (
         // Comments do not affect the approval's status
         review.state === "COMMENTED" ||
