@@ -14,6 +14,7 @@ export interface CommonLoggerInterface {
   info: (...args: any[]) => void
   warn: (...args: any[]) => void
   error: (...args: any[]) => void
+  enableRequestLogging: boolean
 }
 
 export type PR = {

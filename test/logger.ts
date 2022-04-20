@@ -5,6 +5,7 @@ import { ActionLoggerInterface } from "src/github/action/logger"
 export class TestLogger implements ActionLoggerInterface {
   relevantStartingLine = 0
   logHistory: string[]
+  enableRequestLogging = true
 
   constructor(logHistory: string[]) {
     this.logHistory = logHistory

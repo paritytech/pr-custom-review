@@ -19,6 +19,8 @@ enum LoggingLevel {
 type LoggingLevels = keyof typeof LoggingLevel
 
 export class ServerLogger implements CommonLoggerInterface {
+  enableRequestLogging = true
+
   constructor(
     public options: {
       name: string

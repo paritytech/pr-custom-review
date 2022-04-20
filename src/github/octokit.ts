@@ -40,10 +40,12 @@ export const getOctokit = <OctokitInstance extends Octokit>(
   }
 
   octokit.hook.wrap("request", async (request, options) => {
-    logger.info(
-      { request, options },
-      "Preparing to send a request to the GitHub API",
-    )
+    if (logger.enableRequestLogging) {
+      logger.info(
+        { request, options },
+        "Preparing to send a request to the GitHub API",
+      )
+    }
 
     let triesCount = 0
     const result: Ok<OctokitResponse<any>> | Err<any> | undefined =

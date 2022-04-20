@@ -12,6 +12,7 @@ export interface ActionLoggerInterface extends CommonLoggerInterface {
 export class ActionLogger implements ActionLoggerInterface {
   private lineCount = 0
   relevantStartingLine = 1
+  enableRequestLogging = false
 
   /*
      The action log is expected to start like this:
