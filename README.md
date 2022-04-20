@@ -324,13 +324,17 @@ Although the action will work even without any additional [repository settings](
 
 # Server <a name="server"></a>
 
-To work around the limitation imposed by GitHub of not being able to use the
-`token` on pull request from forks, it's possible to execute the checks in a
-server through the `checks-api-url` workflow input. The `checks-api-url`
-should be of the form `http://$SERVER_URL/api/v1/check_reviews`.
+To work around GitHub's imposition of not allowing the use of secrets in pull
+requests from forks
+([as corroborated by a request on GitHub Community](https://github.community/t/make-secrets-available-to-builds-of-forks/16166)),
+it's possible to request the checks from a server through the `checks-api-url`
+workflow input. This option is suitable for both public and private
+repositories, whereas the `token` option is suitable only for private
+repositories due to the aforementioned imposition.
 
-The server's required environment variables are listed in
-[.env.example.cjs](./.env.example.cjs) and a Dockerfile is provided in
+[We provide a server implementation](./src/server) which you can use through the
+`checks-api-url` workflow input. The server's required environment variables are
+listed in [.env.example.cjs](./.env.example.cjs) and a Dockerfile is provided in
 [src/server/Dockerfile](./src/server/Dockerfile). Run the following command
 **from the repository root** in order to build the server's image:
 
