@@ -8,6 +8,14 @@ Array [
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
 }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'subcondition at index 1' => Set(1) { 'userCoworker2' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' }
+  }
+}",
 ]
 `;
 
@@ -117,6 +125,14 @@ Array [
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
 }",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'Team Leads Approvals (team team2)' => Set(1) { 'userCoworker2' },
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
+}",
 ]
 `;
 
@@ -127,6 +143,14 @@ Array [
   "latestReviews [Map Iterator] {
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'Team Leads Approvals (team team2)' => Set(1) { 'userCoworker2' },
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
 }",
 ]
 `;
@@ -139,6 +163,14 @@ Array [
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
 }",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'Team Leads Approvals (team team2)' => Set(1) { 'userCoworker2' },
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
+}",
 ]
 `;
 
@@ -149,6 +181,14 @@ Array [
   "latestReviews [Map Iterator] {
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'Team Leads Approvals (team team2)' => Set(1) { 'userCoworker2' },
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
 }",
 ]
 `;
@@ -448,6 +488,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -571,6 +616,13 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) {
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -583,6 +635,13 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) {
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -595,6 +654,13 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) {
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -607,6 +673,13 @@ Array [
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'Locks touched',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) {
+    'Locks Reviewers Approvals (team team)' => Set(1) { 'userCoworker' }
+  }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"Locks touched\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -697,6 +770,15 @@ Array [
   { id: 1, user: 'userCoworker2', isApproval: true },
   { id: 2, user: 'userCoworker3', isApproval: true }
 }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 3,
+  combinationApprovedByMostPeopleOverall: Map(3) {
+    'subcondition at index 2' => Set(1) { 'userCoworker3' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' },
+    'subcondition at index 1' => Set(1) { 'userCoworker2' }
+  }
+}",
 ]
 `;
 
@@ -709,6 +791,15 @@ Array [
   { id: 1, user: 'userCoworker2', isApproval: true },
   { id: 2, user: 'userCoworker3', isApproval: true }
 }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 3,
+  combinationApprovedByMostPeopleOverall: Map(3) {
+    'subcondition at index 2' => Set(1) { 'userCoworker3' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' },
+    'subcondition at index 1' => Set(1) { 'userCoworker2' }
+  }
+}",
 ]
 `;
 
@@ -719,6 +810,14 @@ Array [
   "latestReviews [Map Iterator] {
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'subcondition at index 1' => Set(1) { 'userCoworker2' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' }
+  }
 }",
 ]
 `;
@@ -731,6 +830,14 @@ Array [
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
 }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'subcondition at index 1' => Set(1) { 'userCoworker2' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' }
+  }
+}",
 ]
 `;
 
@@ -742,6 +849,14 @@ Array [
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
 }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'subcondition at index 1' => Set(1) { 'userCoworker2' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' }
+  }
+}",
 ]
 `;
 
@@ -752,6 +867,14 @@ Array [
   "latestReviews [Map Iterator] {
   { id: 0, user: 'userCoworker', isApproval: true },
   { id: 1, user: 'userCoworker2', isApproval: true }
+}",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 2,
+  combinationApprovedByMostPeopleOverall: Map(2) {
+    'subcondition at index 1' => Set(1) { 'userCoworker2' },
+    'subcondition at index 0' => Set(1) { 'userCoworker' }
+  }
 }",
 ]
 `;
@@ -845,6 +968,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(2) {
   'userCoworker3' => { teams: null },
   'userCoworker2' => { teams: Set(1) { 'team2' } }
@@ -860,6 +988,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(2) {
   'userCoworker3' => { teams: null },
   'userCoworker2' => { teams: Set(1) { 'team2' } }
@@ -875,6 +1008,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -887,6 +1025,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2 (team: team2).",
@@ -899,6 +1042,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2.",
@@ -911,6 +1059,11 @@ Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "{
+  ruleName: 'condition',
+  approvalCountOfBestCombination: 1,
+  combinationApprovedByMostPeopleOverall: Map(1) { 'subcondition at index 0' => Set(1) { 'userCoworker' } }
+}",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition. The following users have not approved yet: userCoworker2.",
