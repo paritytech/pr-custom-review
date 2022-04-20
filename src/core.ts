@@ -558,20 +558,20 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                 j < approvalGroups.length;
                 j++
               ) {
+                const { subcondition, subconditionApprovedBy } =
+                  approvalGroups[j]
+
                 /*
                   Check if the subcondition's min_approvals target has already
                   been filled by the initialization of combinationApprovedBy
                 */
                 if (
                   j === i &&
-                  combinationApprovedBy.get(j)?.size ===
+                  subconditionApprovedBy.size ===
                     referenceSubcondition.min_approvals
                 ) {
                   continue
                 }
-
-                const { subcondition, subconditionApprovedBy } =
-                  approvalGroups[j]
 
                 const usersPermutator = new Permutator(
                   Array.from(subconditionApprovedBy),
