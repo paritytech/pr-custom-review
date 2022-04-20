@@ -278,7 +278,7 @@ name: Assign reviewers           # The PR status will be created with this name.
 
 on:                              # The events which will trigger the action.
   pull_request:                  # A "pull_request" event of selected types will trigger the action.
-    branches:                    # Action will be triggered if a PR is made to following branches.
+    branches:                    # Action will be triggered if a PR targets the following branches.
       - main
       - master
     types:                       # Types of "pull_request" event which will trigger the action.
@@ -298,18 +298,20 @@ jobs:
           # Provide *EITHER* "token" or "checks-reviews-api"
 
           # "token" is suitable only for private repositories because GitHub
-          # does not allow the token to be used for forks' pipelines. Providing
-          # this input makes the check run directly in the action.
-          # The token needs the following scopes:
+          # does not allow the token to be used for forks' pipelines.
+          # Providing this input makes the check run directly in the action. The
+          # token needs the following scopes:
           # - `read:org` for being able to request reviews from teams
           # - `workflow` for being able to request the workflow's job
           #    information; used to track lines in the job's output
           token: ${{ secrets.PRCR_TOKEN }}
 
           # "checks-reviews-api" is suitable for both public and private
-          # repositories. Providing this input makes the check run in the API
-          # and then the output is printed in the action.
-          # See the "Server" section for more details.
+          # repositories.
+          # Providing this input makes the action request the check processing
+          # from an API which responds with the output to be printed in the
+          # action, effectively using the action as a front-end only. See the
+          # "Server" section for more details.
           checks-reviews-api: https://pr-custom-review/api/v1/check_reviews
 ```
 
