@@ -1,15 +1,14 @@
 # PR Custom Review
 
-pr-custom-review is a tool for complex pull request approval scenarios
+pr-custom-review is a GitHub Action for complex pull request approval scenarios
 which are not currently supported by GitHub's
 [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules).
 It might extend or even completely replace the
 [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging)
 setting.
 
-It can be set up either as a [GitHub Action](#github-action) or
-[GitLab Job](#gitlab-job). Check out the [release steps](#deployment) guide for
-more details on this.
+Check out the [Deployment](#deployment) section for using it in your
+repositories.
 
 ## TOC
 
@@ -25,8 +24,7 @@ more details on this.
     - [AND DISTINCT Rule syntax](#and-distinct-rule-syntax)
     - [OR Rule syntax](#or-rule-syntax)
   - [GitHub repository configuration](#github-repository-configuration)
-- [GitHub Action](#github-action)
-  - [Workflow configuration](#workflow-configuration)
+- [Workflow configuration](#workflow-configuration)
 - [Server](#server)
 - [Development](#development)
   - [Build](#build)
@@ -54,13 +52,14 @@ If a given rule is matched and its approval count is not met, then reviews will 
 
 This action has the following non-configurable built-in checks:
 
-- Lines which have a lock emoji (🔒) or any line directly below a lock emoji
-  require:
+- **Locks touched**: Lines which have a lock emoji (🔒) or any line directly
+  below a lock emoji require
   - 1 approval from [locks-review-team](#workflow-configuration)
   - 1 approval from [team-leads-team](#workflow-configuration)
 
-- If the action's files are changed, 1 approval from
-  [action-review-team](#workflow-configuration) is required
+- **Configuration protection**: 1 approval from
+  [action-review-team](#workflow-configuration) is required if the pull request
+  changes any of the following files
   - `.github/pr-custom-review.yml`
 
 Customizable rules should be enabled through [configuration](#action-configuration).
@@ -73,7 +72,7 @@ The configuration file should be placed in `.github/pr-custom-review.yml`
 (related to [built-in checks](#built-in-checks)).
 
 The configuration file is always read from the repository's default branch. For
-this reason it's recommended to commit the configuration file **before** the
+this reason it's necessary to commit the configuration file **before** the
 action's workflow file is added, otherwise the action will fail with
 `RequestError [HttpError]: Not Found` because the configuration does not yet
 exist in the default branch.
@@ -81,13 +80,13 @@ exist in the default branch.
 ### Configuration syntax <a name="configuration-syntax"></a>
 
 ```yaml
-# locks-review-team defines the team which will handle the "locks touched"
-# built-in rule. We recommend protecting this input with "🔒" so that it
-# won't be changed unless someone from locks-review-team approves it.
+# locks-review-team defines the team which will handle the "Locks touched"
+# built-in rule. We recommend protecting this input with "🔒" so that it won't
+# be changed unless someone from locks-review-team approves it.
 # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
 locks-review-team: custom-locks-team
 
-# The second team which will handle the "locks touched" built-in rule.
+# The second team which will handle the "Locks touched" built-in rule.
 team-leads-team: my-custom-leads-team
 
 # The team which will handle the changes to the action's configuration.
@@ -267,9 +266,14 @@ rules:
 Visit [Basic Rule syntax](#basic-rule-syntax) for the full explanation of each
 field.
 
-## GitHub Action <a name="github-action"></a>
+### GitHub repository configuration  <a name="github-repository-configuration"></a>
 
-### Workflow configuration <a name="workflow-configuration"></a>
+Although the action will work even without any additional [repository settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features), for maximum enforcement effectiveness it is recommended to enable
+[Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
+
+![Branch Protection Settings](./img/github-branch-protection.png)
+
+## Workflow configuration <a name="workflow-configuration"></a>
 
 The workflow configuration should be placed in `.github/workflows`.
 
@@ -314,13 +318,6 @@ jobs:
           # "Server" section for more details.
           checks-reviews-api: https://server/api/v1/check_reviews
 ```
-
-### GitHub repository configuration  <a name="github-repository-configuration"></a>
-
-Although the action will work even without any additional [repository settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features), for maximum enforcement effectiveness it is recommended to enable
-[Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
-
-![Branch Protection Settings](./img/github-branch-protection.png)
 
 # Server <a name="server"></a>
 
@@ -456,8 +453,6 @@ installed.
 
 5. Add the [workflow configuration](#workflow-configuration), as demonstrated in
   <https://github.com/paritytech/substrate/pull/10951/files>
-
-    - `token` input should use the Personal Access Token generated on Step 2
 
 6. Trigger one of the events defined in the
   [workflow configuration](#workflow-configuration) or
