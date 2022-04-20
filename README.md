@@ -312,7 +312,7 @@ jobs:
           # from an API which responds with the output to be printed in the
           # action, effectively using the action as a front-end only. See the
           # "Server" section for more details.
-          checks-reviews-api: https://pr-custom-review/api/v1/check_reviews
+          checks-reviews-api: https://server/api/v1/check_reviews
 ```
 
 ### GitHub repository configuration  <a name="github-repository-configuration"></a>
@@ -414,9 +414,8 @@ installed.
 
 1. Create the teams to be used as inputs of the action
 
-    The explanation for each team is available in
-    [Workflow configuration](#workflow-configuration) and
-    [action.yml](./action.yml).
+    The explanation for each team is available in the
+    [Configuration section](#action-configuration).
 
     For public repositories all the used teams should be public,
     otherwise the action will not be able to request their review.
@@ -435,14 +434,19 @@ installed.
 
     ![Token scopes](./img/token-scopes.png)
 
-3. Set up the Personal Access Token as a workflow secret
+3. Prepare the action's inputs
 
-    As of this writing, the secret setup can be done in
+    If going with the `token` input: set up the Personal Access Token as a
+    workflow secret. As of this writing, the secret setup can be done in
     `https://github.com/organizations/${ORG}/settings/secrets/actions`.
     For further context see
     [Creating encrypted secrets for an organization](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-organization)
     and
     [Using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow).
+
+    If going with the `check-reviews-api` input: run the [server](#server) and
+    set `check-reviews-api` according to the form demonstrated in
+    [Workflow configuration](#workflow-configuration).
 
 4. Add the [configuration file](#configuration-file) to the repository's
   default branch, as demonstrated in
