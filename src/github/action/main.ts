@@ -35,7 +35,6 @@ const main = async () => {
   }
 
   const pr = context.payload.pull_request as PR
-  const detailsUrl = `${context.serverUrl}/${pr.base.repo.owner.login}/${pr.base.repo.name}/actions/runs/${context.runId}`
 
   const logger = new ActionLogger((line) => {
     return process.stdout.write(line)
@@ -52,7 +51,7 @@ const main = async () => {
   }
 
   const actionData = {
-    detailsUrl,
+    detailsUrl: `${context.serverUrl}/${pr.base.repo.owner.login}/${pr.base.repo.name}/actions/runs/${context.runId}`,
     jobName,
     pr,
     runId: context.runId,
