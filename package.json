@@ -57,7 +57,7 @@
     "prettier-plugin-compactify": "^0.1.6",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.4",
-    "tsc-files": "^1.1.3",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "@resolritter/tsc-files": "^1.1.4"
   }
 }
