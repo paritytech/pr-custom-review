@@ -1,10 +1,21 @@
-import github from "@actions/github"
-import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
+import githubActions from "@actions/github"
 
-export type CommitState =
-  RestEndpointMethodTypes["repos"]["createCommitStatus"]["parameters"]["state"]
+import { ActionLoggerInterface } from "./github/action/logger"
+import { ExtendedOctokit } from "./github/octokit"
+import { CommitState } from "./github/types"
 
-export type Octokit = ReturnType<typeof github.getOctokit>
+export type Context = {
+  logger: ActionLoggerInterface
+  octokit: ExtendedOctokit<ReturnType<typeof githubActions.getOctokit>>
+  finishProcessReviews: ((state: CommitState) => Promise<void>) | null
+}
+
+export interface CommonLoggerInterface {
+  info: (...args: any[]) => void
+  warn: (...args: any[]) => void
+  error: (...args: any[]) => void
+  enableRequestLogging: boolean
+}
 
 export type PR = {
   number: number
@@ -22,7 +33,6 @@ export type PR = {
   user: {
     login: string
   }
-  html_url: string
 }
 
 export type BaseRule = {
@@ -38,8 +48,8 @@ export type BaseRule = {
 export type RuleCriteria = {
   min_approvals: number
   name?: string
-  users?: Array<string> | null
-  teams?: Array<string> | null
+  users?: string[] | null
+  teams?: string[] | null
 }
 
 export type BasicRule = BaseRule & RuleCriteria

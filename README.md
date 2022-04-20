@@ -1,6 +1,14 @@
 # PR Custom Review
 
-This is a GitHub Action created for complex pull request approval scenarios which are not currently supported by GitHub's [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules). It might extend or even completely replace the [Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging) setting.
+pr-custom-review is a GitHub Action for complex pull request approval scenarios
+which are not currently supported by GitHub's
+[Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules).
+It might extend or even completely replace the
+[Require pull request reviews before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-pull-request-reviews-before-merging)
+setting.
+
+Check out the [Deployment](#deployment) section for using it in your
+repositories.
 
 ## TOC
 
@@ -17,6 +25,7 @@ This is a GitHub Action created for complex pull request approval scenarios whic
     - [OR Rule syntax](#or-rule-syntax)
   - [Workflow configuration](#workflow-configuration)
   - [GitHub repository configuration](#github-repository-configuration)
+- [Server](#server)
 - [Development](#development)
   - [Build](#build)
     - [Build steps](#build-steps)
@@ -43,13 +52,14 @@ If a given rule is matched and its approval count is not met, then reviews will 
 
 This action has the following non-configurable built-in checks:
 
-- Lines which have a lock emoji (🔒) or any line directly below a lock emoji
-  require:
+- **Locks touched**: Lines which have a lock emoji (🔒) or any line directly
+  below a lock emoji require
   - 1 approval from [locks-review-team](#workflow-configuration)
   - 1 approval from [team-leads-team](#workflow-configuration)
 
-- If the action's files are changed, 1 approval from
-  [action-review-team](#workflow-configuration) is required
+- **Configuration protection**: 1 approval from
+  [action-review-team](#workflow-configuration) is required if the pull request
+  changes any of the following files
   - `.github/pr-custom-review.yml`
 
 Customizable rules should be enabled through [configuration](#action-configuration).
@@ -62,7 +72,7 @@ The configuration file should be placed in `.github/pr-custom-review.yml`
 (related to [built-in checks](#built-in-checks)).
 
 The configuration file is always read from the repository's default branch. For
-this reason it's recommended to commit the configuration file **before** the
+this reason it's necessary to commit the configuration file **before** the
 action's workflow file is added, otherwise the action will fail with
 `RequestError [HttpError]: Not Found` because the configuration does not yet
 exist in the default branch.
@@ -70,13 +80,13 @@ exist in the default branch.
 ### Configuration syntax <a name="configuration-syntax"></a>
 
 ```yaml
-# locks-review-team defines the team which will handle the "locks touched"
-# built-in rule. We recommend protecting this input with "🔒" so that it
-# won't be changed unless someone from locks-review-team approves it.
+# locks-review-team defines the team which will handle the "Locks touched"
+# built-in rule. We recommend protecting this input with "🔒" so that it won't
+# be changed unless someone from locks-review-team approves it.
 # 🔒 PROTECTED: Changes to locks-review-team should be approved by custom-locks-team
 locks-review-team: custom-locks-team
 
-# The second team which will handle the "locks touched" built-in rule.
+# The second team which will handle the "Locks touched" built-in rule.
 team-leads-team: my-custom-leads-team
 
 # The team which will handle the changes to the action's configuration.
@@ -261,11 +271,11 @@ field.
 The workflow configuration should be placed in `.github/workflows`.
 
 ```yaml
-name: PR Custom Review Status    # The PR status will be created with this name.
+name: Assign reviewers           # The PR status will be created with this name.
 
 on:                              # The events which will trigger the action.
   pull_request:                  # A "pull_request" event of selected types will trigger the action.
-    branches:                    # Action will be triggered if a PR is made to following branches.
+    branches:                    # Action will be triggered if a PR targets the following branches.
       - main
       - master
     types:                       # Types of "pull_request" event which will trigger the action.
@@ -282,11 +292,24 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@tag           # Pick a release tag and put it after the "@".
         with:
-          # The token needs the following scopes:
+          # Provide *EITHER* "token" or "checks-reviews-api"
+
+          # "token" is suitable only for private repositories because GitHub
+          # does not allow the token to be used for forks' pipelines.
+          # Providing this input makes the check run directly in the action. The
+          # token needs the following scopes:
           # - `read:org` for being able to request reviews from teams
           # - `workflow` for being able to request the workflow's job
           #    information; used to track lines in the job's output
-          token: ${{ secrets.REVIEWS_TOKEN }}
+          token: ${{ secrets.PRCR_TOKEN }}
+
+          # "checks-reviews-api" is suitable for both public and private
+          # repositories.
+          # Providing this input makes the action request the check processing
+          # from an API which responds with the output to be printed in the
+          # action, effectively using the action as a front-end only. See the
+          # "Server" section for more details.
+          checks-reviews-api: https://server/api/v1/check_reviews
 ```
 
 ### GitHub repository configuration  <a name="github-repository-configuration"></a>
@@ -295,6 +318,26 @@ Although the action will work even without any additional [repository settings](
 [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule) according to the screenshot below:
 
 ![Branch Protection Settings](./img/github-branch-protection.png)
+
+# Server <a name="server"></a>
+
+To work around GitHub's imposition of not allowing the use of secrets in pull
+requests from forks
+([as corroborated by a request on GitHub Community](https://github.community/t/make-secrets-available-to-builds-of-forks/16166)),
+it's possible to request the checks from a server through the `checks-api-url`
+workflow input. This option is suitable for both public and private
+repositories, whereas the `token` option is suitable only for private
+repositories due to the aforementioned imposition.
+
+[We provide a server implementation](./src/server) which you can use through the
+`checks-api-url` workflow input. The server's required environment variables are
+listed in [.env.example.cjs](./.env.example.cjs) and a Dockerfile is provided in
+[src/server/Dockerfile](./src/server/Dockerfile). Run the following command
+**from the repository root** in order to build the server's image:
+
+`docker build --build-arg PORT=3000 --file src/server/Dockerfile .`
+
+Feel free to customize `$PORT` for whatever port you want.
 
 ## Development
 
@@ -311,11 +354,11 @@ to download dependencies first.
 #### Build steps <a name="build-steps"></a>
 
 1. Install the dependencies
-    `npm install`
+    `yarn install`
 2. Build
-    `npm run build`
+    `yarn build`
 3. Package
-    `npm run package`
+    `yarn package`
 
 See the next sections for [trying it out](#trial) or [releasing](#release).
 
@@ -368,9 +411,8 @@ installed.
 
 1. Create the teams to be used as inputs of the action
 
-    The explanation for each team is available in
-    [Workflow configuration](#workflow-configuration) and
-    [action.yml](./action.yml).
+    The explanation for each team is available in the
+    [Configuration section](#action-configuration).
 
     For public repositories all the used teams should be public,
     otherwise the action will not be able to request their review.
@@ -389,14 +431,19 @@ installed.
 
     ![Token scopes](./img/token-scopes.png)
 
-3. Set up the Personal Access Token as a workflow secret
+3. Prepare the action's inputs
 
-    As of this writing, the secret setup can be done in
+    If going with the `token` input: set up the Personal Access Token as a
+    workflow secret. As of this writing, the secret setup can be done in
     `https://github.com/organizations/${ORG}/settings/secrets/actions`.
     For further context see
     [Creating encrypted secrets for an organization](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-organization)
     and
     [Using encrypted secrets in a workflow](https://docs.github.com/en/actions/security-guides/encrypted-secrets#using-encrypted-secrets-in-a-workflow).
+
+    If going with the `check-reviews-api` input: run the [server](#server) and
+    set `check-reviews-api` according to the form demonstrated in
+    [Workflow configuration](#workflow-configuration).
 
 4. Add the [configuration file](#configuration-file) to the repository's
   default branch, as demonstrated in
@@ -406,8 +453,6 @@ installed.
 
 5. Add the [workflow configuration](#workflow-configuration), as demonstrated in
   <https://github.com/paritytech/substrate/pull/10951/files>
-
-    - `token` input should use the Personal Access Token generated on Step 2
 
 6. Trigger one of the events defined in the
   [workflow configuration](#workflow-configuration) or
@@ -419,8 +464,8 @@ installed.
 
 ### Testing
 
-Run `npm run test`.
+Run `yarn test`.
 
 Test logging is saved to [snapshots](./test/batch) (`.snap` files). If your
-code changes affect some snapshot then review the modifications and run `npm
-run test -- -u`.
+code changes affect some snapshot then review the modifications and run `yarn
+test -u`.

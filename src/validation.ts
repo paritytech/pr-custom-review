@@ -9,13 +9,13 @@ import {
   RuleCriteria,
 } from "./types"
 
-const ruleCriterion = function ({
+const ruleCriterion = ({
   isMinApprovalsAllowed,
   isNameOptional,
 }: {
   isMinApprovalsAllowed: boolean
   isNameOptional: boolean
-}) {
+}) => {
   let name = Joi.string()
   if (isNameOptional) {
     name = name.optional().allow(null)

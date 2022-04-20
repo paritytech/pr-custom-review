@@ -6,11 +6,17 @@
     "sourceMap": false,
     "declaration": false,
     "module": "commonjs",
-    "outDir": "build",
+    "outDir": "build/prcr",
     "strict": true,
     "esModuleInterop": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "useUnknownInCatchVariables": false
   },
-  "include": ["src"]
+  "ts-node": {
+    "compilerOptions": {
+      "moduleResolution": "node",
+      "module": "esnext"
+    }
+  },
+  "include": ["src", "test"]
 }

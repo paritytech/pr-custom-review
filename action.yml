@@ -6,8 +6,9 @@ branding:
   color: 'green'
 inputs:
   token:
-    required: true
-    description: 'Repository token'
+    description: 'The token to be used for making requests such as requesting reviews'
+  checks-reviews-api:
+    description: 'The API to be used for processing the reviews. This input is only considered if "token" is not given.'
 runs:
   using: 'node16'
-  main: 'dist/index.js'
+  main: 'dist/prcr/index.js'

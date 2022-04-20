@@ -1,4 +1,5 @@
-import { CommitState, RulesConfigurations } from "./types"
+import { CommitState } from "./github/types"
+import { RulesConfigurations } from "./types"
 
 export const configFilePath = ".github/pr-custom-review.yml"
 export const actionReviewTeamFiles = [configFilePath]
