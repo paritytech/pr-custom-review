@@ -10,13 +10,15 @@
     "strict": true,
     "esModuleInterop": true,
     "types": ["node", "jest"],
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "typeRoots": ["./node_modules/@types", "./src/@types"]
   },
   "ts-node": {
     "compilerOptions": {
       "moduleResolution": "node",
       "module": "esnext"
-    }
+    },
+    "files": true // This makes ts-node able to find src/@types
   },
   "include": ["src", "test"]
 }
