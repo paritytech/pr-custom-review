@@ -721,9 +721,9 @@ export const getFinishProcessReviews = (
     // Fallback URL in case we are not able to detect the current job
     if (state === "failure" && jobName !== undefined) {
       /*
-          Fetch the jobs so that we'll be able to detect this step and provide a
-          more accurate logging location
-        */
+        Fetch the jobs so that we'll be able to detect this step and provide a
+        more accurate logging location
+      */
       const {
         data: { jobs },
       } = await octokit.rest.actions.listJobsForWorkflowRun({
