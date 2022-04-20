@@ -188,13 +188,9 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       kind: "AndDistinctRule",
       users,
       id: ++nextMatchedRuleId,
-      min_approvals: subConditions
-        .map(({ min_approvals }) => {
-          return min_approvals
-        })
-        .reduce((acc, val) => {
-          return acc + val
-        }, 0),
+      min_approvals: subConditions.reduce((acc, { min_approvals }) => {
+        return acc + min_approvals
+      }, 0),
       subConditions,
     })
   }
@@ -265,13 +261,9 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           kind,
           id,
           subConditions,
-          min_approvals: subConditions
-            .map(({ min_approvals }) => {
-              return min_approvals
-            })
-            .reduce((acc, val) => {
-              return acc + val
-            }, 0),
+          min_approvals: subConditions.reduce((acc, { min_approvals }) => {
+            return acc + min_approvals
+          }, 0),
         })
         break
       }
