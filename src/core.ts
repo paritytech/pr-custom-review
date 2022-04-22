@@ -545,7 +545,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           let bestApproversArrangement: CombinationApprovedBy = new Map()
 
           for (let i = 0; i < approvalGroups.length; i++) {
-            referenceSubconditionLoop: for (const userStartingCombination of approvalGroups[
+            subconditionCombinationsLoop: for (const userStartingCombination of approvalGroups[
               i
             ].subconditionApprovedBy) {
               /*
@@ -598,7 +598,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
 
                 /*
                   Check if the subcondition's min_approvals target has already
-                  been filled by the initialization of combinationApprovedBy
+                  been fulfilled by the initialization of combinationApprovedBy
                 */
                 if (j === i) {
                   const approversCount = combinationApprovers.get(j)?.size
@@ -673,7 +673,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                         subconditions is found
                       */
                       bestApproversArrangement = combinationApprovers
-                      break referenceSubconditionLoop
+                      break subconditionCombinationsLoop
                     }
 
                     let approvalCountOfBestCombination = 0
