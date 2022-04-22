@@ -124,7 +124,7 @@ export type MatchedRule =
     })
   | (MatchedRuleBase & {
       kind: "AndDistinctRule"
-      subConditions: RuleCriteria[]
+      subconditions: RuleCriteria[]
     })
 
 export class RuleSuccess {
