@@ -47,7 +47,6 @@ export type BaseRule = {
 
 export type RuleCriteria = {
   min_approvals: number
-  name?: string
   users?: string[] | null
   teams?: string[] | null
 }
@@ -108,28 +107,17 @@ export type Configuration = {
 
 export type RuleUserInfo = {
   teams: Set<string> | null
-  teamsHistory?: Set<string>
 }
 
-type MatchedRuleBase = {
+export type MatchedRule = {
   name: string
-  users: Map<string, RuleUserInfo>
-  id: number
   kind: RuleKind
-  min_approvals: number
+  subconditions: (Omit<RuleCriteria, "teams" | "users"> & {
+    name: string
+    usersInfo: Map<string, RuleUserInfo>
+  })[]
 }
-export type MatchedRule =
-  | (MatchedRuleBase & {
-      kind: "AndRule" | "OrRule" | "BasicRule"
-    })
-  | (MatchedRuleBase & {
-      kind: "AndDistinctRule"
-      subconditions: RuleCriteria[]
-    })
 
-export class RuleSuccess {
-  constructor(public rule: MatchedRule) {}
-}
 export class RuleFailure {
   constructor(
     public rule: MatchedRule,

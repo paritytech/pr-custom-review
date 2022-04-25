@@ -21,8 +21,6 @@ import {
   PR,
   RuleCriteria,
   RuleFailure,
-  RuleKind,
-  RuleSuccess,
   RuleUserInfo,
 } from "./types"
 import { configurationSchema } from "./validation"
@@ -36,6 +34,38 @@ const displayUserWithTeams = (
       ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})`
       : ""
   }`
+}
+
+const processSubconditionMissingApprovers = (
+  approvedBy: Set<string>,
+  usersToAskForReview: Map<string, RuleUserInfo>,
+  usersInfo: Map<string, RuleUserInfo>,
+) => {
+  const missingApprovers: Map<string, RuleUserInfo> = new Map()
+
+  for (const [user, userInfo] of usersInfo) {
+    if (approvedBy.has(user)) {
+      continue
+    }
+
+    let userToAskForReview = usersToAskForReview.get(user)
+    if (userToAskForReview === undefined) {
+      userToAskForReview = userInfo
+    } else if (userInfo.teams === null) {
+      userToAskForReview.teams = null
+    } else {
+      userToAskForReview.teams = new Set([
+        ...(userToAskForReview.teams ?? []),
+        ...(userInfo?.teams ?? []),
+      ])
+    }
+
+    usersToAskForReview.set(user, userToAskForReview)
+
+    missingApprovers.set(user, userInfo)
+  }
+
+  return missingApprovers
 }
 
 type TeamsCache = Map<
@@ -78,19 +108,17 @@ const combineUsers = async (
     }
 
     for (const teamMember of teamMembers) {
+      if (pr.user.login === teamMember) {
+        continue
+      }
+
       let userInfo = users.get(teamMember)
       if (userInfo === undefined) {
-        userInfo = { teams: new Set([team]), teamsHistory: new Set([team]) }
+        userInfo = { teams: new Set([team]) }
         users.set(teamMember, userInfo)
-      } else if (userInfo.teamsHistory === undefined) {
-        userInfo.teamsHistory = new Set([team])
-      } else {
-        userInfo.teamsHistory.add(team)
-      }
-      if (
-        pr.user.login != teamMember &&
+      } else if (
         /*
-          We do not want to register a team for this user if their approval is
+          Avoid registering a team for this user if their approval is
           supposed to be requested individually
         */
         userInfo.teams !== null
@@ -155,11 +183,17 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     "prevent-review-request": preventReviewRequest,
   } = configValidationResult.value
 
-  /*
-    Set up a teams cache so that teams used multiple times don't have to be
-    requested more than once
-  */
-  const teamsCache: TeamsCache = new Map()
+  const getUsersInfo = (() => {
+    /*
+      Set up a teams cache so that teams used multiple times don't have to be
+      requested more than once
+    */
+    const teamsCache: TeamsCache = new Map()
+
+    return (users: string[], teams: string[]) => {
+      return combineUsers(ctx, pr, users, teams, teamsCache)
+    }
+  })()
 
   const diffResponse = (await octokit.rest.pulls.get({
     owner: pr.base.repo.owner.login,
@@ -170,19 +204,11 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
   const { data: diff } = diffResponse
 
   const matchedRules: MatchedRule[] = []
-  let nextMatchedRuleId = -1
 
   // Built in condition to search files with changes to locked lines
   const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/
   if (lockExpression.test(diff)) {
     logger.info("Diff has changes to 🔒 lines or lines following 🔒")
-    const users = await combineUsers(
-      ctx,
-      pr,
-      [],
-      [locksReviewTeam, teamLeadsTeam],
-      teamsCache,
-    )
     const subconditions = [
       {
         min_approvals: 1,
@@ -198,12 +224,14 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     matchedRules.push({
       name: "Locks touched",
       kind: "AndDistinctRule",
-      users,
-      id: ++nextMatchedRuleId,
-      min_approvals: subconditions.reduce((acc, { min_approvals }) => {
-        return acc + min_approvals
-      }, 0),
-      subconditions,
+      subconditions: await Promise.all(
+        subconditions.map(async (subcondition) => {
+          return {
+            ...subcondition,
+            usersInfo: await getUsersInfo([], subcondition.teams),
+          }
+        }),
+      ),
     })
   }
 
@@ -226,79 +254,47 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
 
   for (const actionReviewFile of actionReviewTeamFiles) {
     if (changedFiles.has(actionReviewFile)) {
-      const users = await combineUsers(
-        ctx,
-        pr,
-        [],
-        [actionReviewTeam],
-        teamsCache,
-      )
+      const ruleName = "Action files changed"
       matchedRules.push({
-        name: "Action files changed",
-        min_approvals: 1,
+        name: ruleName,
         kind: "BasicRule",
-        users,
-        id: ++nextMatchedRuleId,
+        subconditions: [
+          {
+            name: ruleName,
+            min_approvals: 1,
+            usersInfo: await getUsersInfo([], [actionReviewTeam]),
+          },
+        ],
       })
       break
     }
   }
 
   const processComplexRule = async (
-    id: MatchedRule["id"],
+    kind: "AndDistinctRule" | "OrRule" | "AndRule",
     name: string,
-    kind: RuleKind,
     subconditions: RuleCriteria[],
   ) => {
     switch (kind) {
-      case "AndDistinctRule": {
-        const users = await combineUsers(
-          ctx,
-          pr,
-          subconditions
-            .map(({ users: subconditionUsers }) => {
-              return subconditionUsers ?? []
-            })
-            .flat(),
-          subconditions
-            .map(({ teams }) => {
-              return teams ?? []
-            })
-            .flat(),
-          teamsCache,
-        )
-        matchedRules.push({
-          name: name,
-          users,
-          kind,
-          id,
-          subconditions,
-          min_approvals: subconditions.reduce((acc, { min_approvals }) => {
-            return acc + min_approvals
-          }, 0),
-        })
-        break
-      }
-      case "BasicRule":
+      case "AndDistinctRule":
       case "OrRule":
       case "AndRule": {
-        let conditionIndex = -1
-        for (const subcondition of subconditions) {
-          const users = await combineUsers(
-            ctx,
-            pr,
-            subcondition.users ?? [],
-            subcondition.teams ?? [],
-            teamsCache,
-          )
-          matchedRules.push({
-            name: `${name}[${++conditionIndex}]`,
-            min_approvals: subcondition.min_approvals,
-            users,
-            kind,
-            id,
-          })
-        }
+        matchedRules.push({
+          name: name,
+          kind,
+          subconditions: await Promise.all(
+            subconditions.map(async (subcondition, i) => {
+              return {
+                ...subcondition,
+                name: `${name}[${i}]`,
+                usersInfo: await getUsersInfo(
+                  subcondition?.users ?? [],
+                  subcondition?.teams ?? [],
+                ),
+              }
+            }),
+          ),
+        })
         break
       }
       default: {
@@ -391,42 +387,23 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
         return commitStateFailure
       }
 
-      const users = await combineUsers(
-        ctx,
-        pr,
-        rule.users ?? [],
-        rule.teams ?? [],
-        teamsCache,
-      )
-
       matchedRules.push({
         name: rule.name,
-        min_approvals: rule.min_approvals,
-        users,
+        subconditions: [
+          {
+            name: rule.name,
+            min_approvals: rule.min_approvals,
+            usersInfo: await getUsersInfo(rule.users ?? [], rule.teams ?? []),
+          },
+        ],
         kind: "BasicRule",
-        id: ++nextMatchedRuleId,
       })
     } else if (/* AndRule */ "all" in rule) {
-      await processComplexRule(
-        ++nextMatchedRuleId,
-        rule.name,
-        "AndRule",
-        rule.all,
-      )
+      await processComplexRule("AndRule", rule.name, rule.all)
     } else if (/* OrRule */ "any" in rule) {
-      await processComplexRule(
-        ++nextMatchedRuleId,
-        rule.name,
-        "OrRule",
-        rule.any,
-      )
+      await processComplexRule("OrRule", rule.name, rule.any)
     } else if (/* AndDistinctRule */ "all_distinct" in rule) {
-      await processComplexRule(
-        ++nextMatchedRuleId,
-        rule.name,
-        "AndDistinctRule",
-        rule.all_distinct,
-      )
+      await processComplexRule("AndDistinctRule", rule.name, rule.all_distinct)
     } else {
       const unmatchedRule = rule as BaseRule
       throw new Error(
@@ -476,436 +453,464 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     }
     logger.info("latestReviews", latestReviews.values())
 
-    const rulesOutcomes: Map<MatchedRule["id"], (RuleSuccess | RuleFailure)[]> =
-      new Map()
+    const rulesOutcomes: (RuleFailure | undefined)[] = matchedRules.map(
+      (rule) => {
+        const ruleUserCount = rule.subconditions.reduce(
+          (acc, { usersInfo }) => {
+            return acc + usersInfo.size
+          },
+          0,
+        )
 
-    let highestMinApprovalsRule: MatchedRule | null = null
-    for (const rule of matchedRules) {
-      const outcomes = rulesOutcomes.get(rule.id) ?? []
+        if (ruleUserCount === 0) {
+          const minApprovals = (() => {
+            switch (rule.kind) {
+              case "AndDistinctRule": {
+                return rule.subconditions.reduce((acc, { min_approvals }) => {
+                  return acc + min_approvals
+                }, 0)
+              }
+              case "BasicRule":
+              case "AndRule": {
+                return Math.max(
+                  ...rule.subconditions.map(({ min_approvals }) => {
+                    return min_approvals
+                  }),
+                )
+              }
+              case "OrRule": {
+                return Math.min(
+                  ...rule.subconditions.map(({ min_approvals }) => {
+                    return min_approvals
+                  }),
+                )
+              }
+              default: {
+                const exhaustivenessCheck: never = rule.kind
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                const message = `Rule kind not handled: ${exhaustivenessCheck}`
+                logger.fatal(message)
+                throw new Error(message)
+              }
+            }
+          })()
 
-      if (rule.users.size !== 0) {
-        const approvedBy: Set<string> = new Set()
-
-        for (const review of latestReviews.values()) {
-          if (rule.users.has(review.user) && review.isApproval) {
-            approvedBy.add(review.user)
+          let approvalCount = 0
+          for (const review of latestReviews.values()) {
+            if (review.isApproval && ++approvalCount >= minApprovals) {
+              return
+            }
           }
+
+          return new RuleFailure(
+            rule,
+            `Rule "${rule.name}" requires at least ${minApprovals} approvals, but ${approvalCount} were given.`,
+            new Map(),
+          )
         }
 
-        if (rule.kind === "AndDistinctRule") {
-          const approvalGroups = rule.subconditions.map((subcondition) => {
-            const subconditionApprovedBy: Set<string> = new Set()
+        switch (rule.kind) {
+          case "AndDistinctRule": {
+            const approvedBy: Set<string> = new Set()
 
-            for (const user of subcondition.users ?? []) {
-              if (approvedBy.has(user)) {
-                subconditionApprovedBy.add(user)
+            for (const review of latestReviews.values()) {
+              if (!review.isApproval) {
+                continue
+              }
+
+              if (
+                rule.subconditions.find(({ usersInfo }) => {
+                  return usersInfo.has(review.user)
+                })
+              ) {
+                approvedBy.add(review.user)
               }
             }
 
-            for (const team of subcondition.teams ?? []) {
-              for (const [user, userInfo] of rule.users) {
-                if (userInfo?.teamsHistory?.has(team) && approvedBy.has(user)) {
+            const minApprovals = rule.subconditions.reduce(
+              (acc, { min_approvals }) => {
+                return acc + min_approvals
+              },
+              0,
+            )
+
+            const approvalGroups = rule.subconditions.map((subcondition) => {
+              const subconditionApprovedBy: Set<string> = new Set()
+
+              for (const user of subcondition.usersInfo.keys()) {
+                if (approvedBy.has(user)) {
                   subconditionApprovedBy.add(user)
                 }
               }
-            }
 
-            return { subcondition, subconditionApprovedBy }
-          })
+              return { subcondition, subconditionApprovedBy }
+            })
 
-          /*
-            Test every possible combination of every subcondition for each
-            approval group on each subcondition. This is needed when it would
-            be more favorable to use an approval for a different subcondition
-            other than the one it could be first matched for that approval.
-            Consider the following scenario:
-              - Ana has teams: Team2, Team1
-              - Bob has teams: Team2
-              - Ana and Bob have both approved
-            And suppose that we need 1 distinct approval for Team1 and another
-            for Team2. It might be the case that Ana's approval for Team2 is
-            registered first, which would make Bob's approval useless for a
-            suboptimal outcome.
-            The most favorable combination to clear the requirement is:
-              - Ana's approval is allocated to Team1
-              - Bob's approval is allocated to Team2
-            The case we want to avoid is:
-              - Ana's approval is allocated to Team2
-              - Bob's approval is useless because it can only be allocated to
-                Team1, which was already approved by Ana in this scenario
-            It is possible to avoid the bad case by brute-forcing every
-            available permutation of approvals' orders and picking the best one
-            found, with bailouts for when the overall target approval count is
-            reached.
-          */
-          type CombinationApprovedBy = Map<
-            /* subcondition Index */ number,
-            /* users which approved the subcondition */ Set<string>
-          >
-          let bestApproversArrangement: CombinationApprovedBy = new Map()
+            /*
+              Test every possible combination of every subcondition for each
+              approval group on each subcondition. This is needed when it would
+              be more favorable to use an approval for a different subcondition
+              other than the one it could be first matched for that approval.
+              Consider the following scenario:
+                - Ana has teams: Team2, Team1
+                - Bob has teams: Team2
+                - Ana and Bob have both approved
+              And suppose that we need 1 distinct approval for Team1 and another
+              for Team2. It might be the case that Ana's approval for Team2 is
+              registered first, which would make Bob's approval useless for a
+              suboptimal outcome.
+              The most favorable combination to clear the requirement is:
+                - Ana's approval is allocated to Team1
+                - Bob's approval is allocated to Team2
+              The case we want to avoid is:
+                - Ana's approval is allocated to Team2
+                - Bob's approval is useless because it can only be allocated to
+                  Team1, which was already approved by Ana in this scenario
+              It is possible to avoid the bad case by brute-forcing every
+              available permutation of approvals' orders and picking the best one
+              found, with bailouts for when the overall target approval count is
+              reached.
+            */
+            type CombinationApprovedBy = Map<
+              /* subcondition Index */ number,
+              /* users which approved the subcondition */ Set<string>
+            >
+            let bestApproversArrangement: CombinationApprovedBy = new Map()
 
-          for (let i = 0; i < approvalGroups.length; i++) {
-            subconditionCombinationsLoop: for (const userStartingCombination of approvalGroups[
-              i
-            ].subconditionApprovedBy) {
-              /*
-                The combinations are tried by alternating which user starts the
-                combination on each pass.
+            for (let i = 0; i < approvalGroups.length; i++) {
+              subconditionCombinationsLoop: for (const userStartingCombination of approvalGroups[
+                i
+              ].subconditionApprovedBy) {
+                /*
+                  The combinations are tried by alternating which user starts the
+                  combination on each pass.
 
-                Take for instance the following subconditions:
-                - Subcondition 0 approvers: A
-                - Subcondition 1 approvers: B
+                  Take for instance the following subconditions:
+                  - Subcondition 0 approvers: A
+                  - Subcondition 1 approvers: B
 
-                The whole iteration would work as follows:
-                1: Iterate through all approvers of Subcondition 0
-                  1.1: A starts the combination
-                    1.1.1: Iterate through all approvers of Subcondition 0
-                      - A
-                    1.2.1: Iterate through all approvers of Subcondition 1
-                      - B
-                2. Iterate through all approvers of Subcondition 1
-                  2.1: B starts the combination
-                    2.1.1: Iterate through all approvers of Subcondition 0
-                      - A
-                    2.1.2: Iterate through all approvers of Subcondition 1
-                      - B
+                  The whole iteration would work as follows:
+                  1: Iterate through all approvers of Subcondition 0
+                    1.1: A starts the combination
+                      1.1.1: Iterate through all approvers of Subcondition 0
+                        - A
+                      1.2.1: Iterate through all approvers of Subcondition 1
+                        - B
+                  2: Iterate through all approvers of Subcondition 1
+                    2.1: B starts the combination
+                      2.1.1: Iterate through all approvers of Subcondition 0
+                        - A
+                      2.1.2: Iterate through all approvers of Subcondition 1
+                        - B
 
-                Stop conditions are in place for stopping and skipping the
-                iterations as soon as the clearance requirements for a given
-                scope are fulfilled, thus the algorithm does not actually have
-                to go through every combination every time, only in the worst
-                case.
-              */
-              const combinationApprovers: CombinationApprovedBy = new Map([
-                [i, new Set([userStartingCombination])],
-              ])
-
-              /*
-                The least bad combination is the first one tried, since at least
-                it has one approval
-              */
-              if (bestApproversArrangement.size === 0) {
-                bestApproversArrangement = combinationApprovers
-              }
-
-              subconditionsLoop: for (
-                let j = 0;
-                j < approvalGroups.length;
-                j++
-              ) {
-                const { subcondition, subconditionApprovedBy } =
-                  approvalGroups[j]
+                  Stop conditions are in place for stopping and skipping the
+                  iterations as soon as the clearance requirements for a given
+                  scope are fulfilled, thus the algorithm does not actually have
+                  to go through every combination every time, only in the worst
+                  case.
+                */
+                const combinationApprovers: CombinationApprovedBy = new Map([
+                  [i, new Set([userStartingCombination])],
+                ])
 
                 /*
-                  Check if the subcondition's min_approvals target has already
-                  been fulfilled by the initialization of combinationApprovedBy
+                  The least bad combination is the first one tried, since at least
+                  it has one approval
                 */
-                if (j === i) {
-                  const approversCount = combinationApprovers.get(j)?.size
-                  assert(
-                    approversCount,
-                    "approversCount should be >=0 because combinationApprovers was initialized",
-                  )
-                  if (approversCount === subcondition.min_approvals) {
-                    continue
-                  }
+                if (bestApproversArrangement.size === 0) {
+                  bestApproversArrangement = combinationApprovers
                 }
 
-                let approvalCountAtStartOfPermutation = 0
-                for (const approvers of combinationApprovers.values()) {
-                  approvalCountAtStartOfPermutation += approvers.size
-                }
-
-                const subconditionApproversPermutator = new Permutator(
-                  /*
-                     Permutator mutates the input array, therefore make sure to
-                     *not* pass an array reference to it
-                  */
-                  Array.from(subconditionApprovedBy),
-                )
-                while (subconditionApproversPermutator.hasNext()) {
-                  const usersPermutation =
-                    subconditionApproversPermutator.next()
+                subconditionsLoop: for (
+                  let j = 0;
+                  j < approvalGroups.length;
+                  j++
+                ) {
+                  const { subcondition, subconditionApprovedBy } =
+                    approvalGroups[j]
 
                   /*
-                    Initialize a new Set here so that the effects of this
-                    permutation doesn't affect combinationApprovers until it is
-                    the right time to commit the results
+                    Check if the subcondition's min_approvals target has already
+                    been fulfilled by the initialization of combinationApprovedBy
                   */
-                  const subconditionApprovers = new Set(
-                    combinationApprovers.get(j)?.values(),
-                  )
-
-                  usersPermutationLoop: for (const user of usersPermutation) {
-                    for (const approvers of combinationApprovers.values()) {
-                      if (approvers.has(user)) {
-                        continue usersPermutationLoop
-                      }
-                    }
-
-                    if (subconditionApprovers.has(user)) {
-                      continue usersPermutationLoop
-                    }
-
-                    subconditionApprovers.add(user)
-
-                    /*
-                      We only want to commit subconditionApprovers to
-                      combinationApprovers if the current approval count is
-                      higher than the current best one
-                    */
-                    if (
-                      subconditionApprovers.size <
-                      (combinationApprovers.get(j)?.size ?? 0)
-                    ) {
+                  if (j === i) {
+                    const approversCount = combinationApprovers.get(j)?.size
+                    assert(
+                      approversCount,
+                      "approversCount should be >=0 because combinationApprovers was initialized",
+                    )
+                    if (approversCount === subcondition.min_approvals) {
                       continue
                     }
+                  }
 
-                    combinationApprovers.set(j, subconditionApprovers)
+                  let approvalCountAtStartOfPermutation = 0
+                  for (const approvers of combinationApprovers.values()) {
+                    approvalCountAtStartOfPermutation += approvers.size
+                  }
 
-                    let approvalCountNow = 0
-                    for (const users of combinationApprovers.values()) {
-                      approvalCountNow += users.size
-                    }
-                    if (approvalCountNow === rule.min_approvals) {
+                  const subconditionApproversPermutator = new Permutator(
+                    /*
+                       Permutator mutates the input array, therefore make sure to
+                       *not* pass an array reference to it
+                    */
+                    Array.from(subconditionApprovedBy),
+                  )
+                  while (subconditionApproversPermutator.hasNext()) {
+                    const usersPermutation =
+                      subconditionApproversPermutator.next()
+
+                    /*
+                      Initialize a new Set here so that the effects of this
+                      permutation doesn't affect combinationApprovers until it is
+                      the right time to commit the results
+                    */
+                    const subconditionApprovers = new Set(
+                      combinationApprovers.get(j)?.values(),
+                    )
+
+                    usersPermutationLoop: for (const user of usersPermutation) {
+                      for (const approvers of combinationApprovers.values()) {
+                        if (approvers.has(user)) {
+                          continue usersPermutationLoop
+                        }
+                      }
+
+                      if (subconditionApprovers.has(user)) {
+                        continue usersPermutationLoop
+                      }
+
+                      subconditionApprovers.add(user)
+
                       /*
-                        Bail out when combination which fulfills all
-                        subconditions is found
+                        We only want to commit subconditionApprovers to
+                        combinationApprovers if the current approval count is
+                        higher than the current best one
                       */
-                      bestApproversArrangement = combinationApprovers
-                      break subconditionCombinationsLoop
-                    }
+                      if (
+                        subconditionApprovers.size <
+                        (combinationApprovers.get(j)?.size ?? 0)
+                      ) {
+                        continue
+                      }
 
-                    let approvalCountOfBestCombination = 0
-                    for (const approvers of bestApproversArrangement.values()) {
-                      approvalCountOfBestCombination += approvers.size
-                    }
-                    if (approvalCountNow > approvalCountOfBestCombination) {
-                      bestApproversArrangement = combinationApprovers
-                    }
+                      combinationApprovers.set(j, subconditionApprovers)
 
-                    if (
-                      approvalCountNow - approvalCountAtStartOfPermutation ===
-                      subcondition.min_approvals
-                    ) {
-                      continue subconditionsLoop
+                      let approvalCountNow = 0
+                      for (const users of combinationApprovers.values()) {
+                        approvalCountNow += users.size
+                      }
+                      if (approvalCountNow === minApprovals) {
+                        /*
+                          Bail out when combination which fulfills all
+                          subconditions is found
+                        */
+                        bestApproversArrangement = combinationApprovers
+                        break subconditionCombinationsLoop
+                      }
+
+                      let approvalCountOfBestCombination = 0
+                      for (const approvers of bestApproversArrangement.values()) {
+                        approvalCountOfBestCombination += approvers.size
+                      }
+                      if (approvalCountNow > approvalCountOfBestCombination) {
+                        bestApproversArrangement = combinationApprovers
+                      }
+
+                      if (
+                        approvalCountNow - approvalCountAtStartOfPermutation ===
+                        subcondition.min_approvals
+                      ) {
+                        continue subconditionsLoop
+                      }
                     }
                   }
                 }
               }
             }
-          }
 
-          let approvalCountOfBestApproversArrangement = 0
-          for (const approvers of bestApproversArrangement.values()) {
-            approvalCountOfBestApproversArrangement += approvers.size
-          }
-          assert(
-            approvalCountOfBestApproversArrangement <= rule.min_approvals,
-            "Subconditions should not accumulate more approvals than necessary",
-          )
-
-          // It's only meaningful to log this if some approval was had
-          if (approvalCountOfBestApproversArrangement > 0) {
-            logger.log({
-              ruleName: rule.name,
-              approvalCountOfBestCombination:
-                approvalCountOfBestApproversArrangement,
-              combinationApprovedByMostPeopleOverall: new Map(
-                Array.from(bestApproversArrangement).map(
-                  ([subconditionIndex, approvers]) => {
-                    return [
-                      rule.subconditions[subconditionIndex].name ??
-                        `${rule.name}[${subconditionIndex}]`,
-                      approvers,
-                    ]
-                  },
-                ),
-              ),
-            })
-          }
-
-          if (approvalCountOfBestApproversArrangement === rule.min_approvals) {
-            for (const [
-              subconditionIndex,
-              approvers,
-            ] of bestApproversArrangement) {
-              const subcondition = rule.subconditions[subconditionIndex]
-              assert(
-                approvers.size === subcondition.min_approvals,
-                `Subcondition "${
-                  subcondition.name ?? `${rule.name}[${subconditionIndex}]`
-                }"'s approvers should have exactly ${
-                  rule.subconditions[subconditionIndex].min_approvals
-                } approvals`,
-              )
+            let approvalCountOfBestApproversArrangement = 0
+            for (const approvers of bestApproversArrangement.values()) {
+              approvalCountOfBestApproversArrangement += approvers.size
             }
-            outcomes.push(new RuleSuccess(rule))
-          } else {
-            const unfulfilledSubconditionsErrorMessage = approvalGroups.reduce(
-              (acc, { subcondition }, subconditionIndex) => {
-                const approversCount =
-                  bestApproversArrangement.get(subconditionIndex)?.size ?? 0
+            assert(
+              approvalCountOfBestApproversArrangement <= minApprovals,
+              "Subconditions should not accumulate more approvals than necessary",
+            )
 
-                if (approversCount === subcondition.min_approvals) {
-                  return acc
-                }
+            // It's only meaningful to log this if some approval was had
+            if (approvalCountOfBestApproversArrangement > 0) {
+              logger.log({
+                ruleName: rule.name,
+                approvalCountOfBestCombination:
+                  approvalCountOfBestApproversArrangement,
+                combinationApprovedByMostPeopleOverall: new Map(
+                  Array.from(bestApproversArrangement).map(
+                    ([subconditionIndex, approvers]) => {
+                      return [
+                        rule.subconditions[subconditionIndex].name ??
+                          `${rule.name}[${subconditionIndex}]`,
+                        approvers,
+                      ]
+                    },
+                  ),
+                ),
+              })
+            }
 
+            if (approvalCountOfBestApproversArrangement === minApprovals) {
+              for (const [
+                subconditionIndex,
+                approvers,
+              ] of bestApproversArrangement) {
+                const subcondition = rule.subconditions[subconditionIndex]
                 assert(
-                  approversCount <= subcondition.min_approvals,
-                  "Subconditions should not accumulate more approvals than necessary",
+                  approvers.size === subcondition.min_approvals,
+                  `Subcondition "${
+                    subcondition.name ?? `${rule.name}[${subconditionIndex}]`
+                  }"'s approvers should have exactly ${
+                    rule.subconditions[subconditionIndex].min_approvals
+                  } approvals`,
                 )
+              }
+            } else {
+              const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
 
-                const missingApprovers: Set<string> = new Set()
+              const unfulfilledSubconditionsErrorMessage =
+                approvalGroups.reduce(
+                  (acc, { subcondition }, subconditionIndex) => {
+                    const approversCount =
+                      bestApproversArrangement.get(subconditionIndex)?.size ?? 0
 
-                for (const user of subcondition.users ?? []) {
-                  if (!approvedBy.has(user)) {
-                    missingApprovers.add(user)
-                  }
-                }
-
-                for (const team of subcondition.teams ?? []) {
-                  for (const [user, userInfo] of rule.users) {
-                    if (
-                      userInfo?.teamsHistory?.has(team) &&
-                      !approvedBy.has(user)
-                    ) {
-                      missingApprovers.add(user)
+                    if (approversCount === subcondition.min_approvals) {
+                      return acc
                     }
-                  }
+
+                    assert(
+                      approversCount <= subcondition.min_approvals,
+                      "Subconditions should not accumulate more approvals than necessary",
+                    )
+
+                    const missingApprovers =
+                      processSubconditionMissingApprovers(
+                        approvedBy,
+                        usersToAskForReview,
+                        subcondition.usersInfo,
+                      )
+
+                    return `${acc}\nSubcondition "${
+                      subcondition.name
+                    }" does not have approval from the following users: ${Array.from(
+                      missingApprovers.entries(),
+                    )
+                      .map(([user, { teams }]) => {
+                        return displayUserWithTeams(user, teams)
+                      })
+                      .join(", ")}.`
+                  },
+                  "",
+                )
+
+              const problem = `Rule "${rule.name}" needs in total ${minApprovals} DISTINCT approvals, but ${approvalCountOfBestApproversArrangement} were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.${unfulfilledSubconditionsErrorMessage}`
+
+              return new RuleFailure(rule, problem, usersToAskForReview)
+            }
+            break
+          }
+          case "AndRule":
+          case "BasicRule":
+          case "OrRule": {
+            const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
+            const problems: string[] = []
+
+            for (const subcondition of rule.subconditions) {
+              const approvedBy: Set<string> = new Set()
+
+              for (const review of latestReviews.values()) {
+                if (!review.isApproval) {
+                  continue
                 }
 
-                return `${acc}\nSubcondition "${
-                  subcondition.name ?? `${rule.name}[${subconditionIndex}]`
-                }" does not have approval from the following users: ${Array.from(
-                  rule.users.entries(),
+                if (subcondition.usersInfo.has(review.user)) {
+                  approvedBy.add(review.user)
+                }
+              }
+
+              if (approvedBy.size >= subcondition.min_approvals) {
+                if (rule.kind === "OrRule") {
+                  return
+                } else {
+                  continue
+                }
+              }
+
+              const missingApprovers = processSubconditionMissingApprovers(
+                approvedBy,
+                usersToAskForReview,
+                subcondition.usersInfo,
+              )
+
+              problems.push(
+                `${
+                  rule.subconditions.length === 1
+                    ? `Rule "${rule.name}"`
+                    : `Subcondition "${subcondition.name}"`
+                } needs at least ${subcondition.min_approvals} approvals, but ${
+                  approvedBy.size
+                } were given. The following users have not approved yet: ${Array.from(
+                  missingApprovers.entries(),
                 )
-                  .filter(([username]) => {
-                    return missingApprovers.has(username)
-                  })
                   .map(([user, { teams }]) => {
                     return displayUserWithTeams(user, teams)
                   })
-                  .join(", ")}.`
-              },
-              "",
-            )
+                  .join(", ")}.`,
+              )
+            }
 
-            const problem = `Rule "${rule.name}" needs in total ${rule.min_approvals} DISTINCT approvals, but ${approvalCountOfBestApproversArrangement} were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.${unfulfilledSubconditionsErrorMessage}`
+            if (problems.length) {
+              return new RuleFailure(
+                rule,
+                problems.join("\n"),
+                usersToAskForReview,
+              )
+            }
 
-            const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
-              Array.from(rule.users.entries()).filter(([username]) => {
-                return !approvedBy.has(username)
-              }),
-            )
-
-            outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
+            break
           }
-        } else if (approvedBy.size < rule.min_approvals) {
-          const usersToAskForReview: Map<string, RuleUserInfo> = new Map(
-            Array.from(rule.users.entries()).filter(([username]) => {
-              return !approvedBy.has(username)
-            }),
-          )
-          const problem = `Rule "${rule.name}" needs at least ${
-            rule.min_approvals
-          } approvals, but ${
-            approvedBy.size
-          } were matched. The following users have not approved yet: ${Array.from(
-            usersToAskForReview.entries(),
-          )
-            .map(([user, { teams }]) => {
-              return displayUserWithTeams(user, teams)
-            })
-            .join(", ")}.`
-          outcomes.push(new RuleFailure(rule, problem, usersToAskForReview))
-        } else {
-          outcomes.push(new RuleSuccess(rule))
+          default: {
+            const exhaustivenessCheck: never = rule.kind
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`
+            logger.fatal(failureMessage)
+            throw new Error(failureMessage)
+          }
         }
-
-        rulesOutcomes.set(rule.id, outcomes)
-      } else if (
-        highestMinApprovalsRule === null ||
-        highestMinApprovalsRule.min_approvals < rule.min_approvals
-      ) {
-        highestMinApprovalsRule = rule
-      }
-    }
+      },
+    )
 
     const problems: string[] = []
     const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
 
-    toNextOutcomes: for (const outcomes of rulesOutcomes.values()) {
-      const pendingUsersToAskForReview: Map<string, RuleUserInfo> = new Map()
-      const pendingProblems: string[] = []
-      for (const outcome of outcomes) {
-        if (outcome instanceof RuleSuccess) {
-          switch (outcome.rule.kind) {
-            case "BasicRule":
-            case "OrRule": {
-              continue toNextOutcomes
-            }
-            case "AndRule":
-            case "AndDistinctRule": {
-              // Those rules require the outcomes of other rules to be decided
-              break
-            }
-          }
-        } else if (outcome instanceof RuleFailure) {
-          pendingProblems.push(outcome.problem)
-          for (const [username, userInfo] of outcome.usersToAskForReview) {
-            const prevUser = pendingUsersToAskForReview.get(username)
-            if (
-              prevUser === undefined ||
-              /*
-                If the team is null, this user was not asked as part of a team,
-                but individually. They should always be registered with "team:
-                null" that case to be sure the review will be requested
-                individually, even if they were previously registered as part
-                of a team.
-              */
-              userInfo.teams === null
-            ) {
-              pendingUsersToAskForReview.set(username, {
-                teams: userInfo.teams,
-              })
-            } else if (prevUser.teams) {
-              for (const team of userInfo.teams) {
-                prevUser.teams.add(team)
-              }
-            } else {
-              prevUser.teams = userInfo.teams
-            }
-          }
-        } else {
-          logger.fatal("Unable to process unexpected rule outcome")
-          logger.info(outcome)
-          return commitStateFailure
-        }
+    for (const outcome of rulesOutcomes) {
+      if (outcome === undefined) {
+        continue
       }
-      for (const pendingProblem of pendingProblems) {
-        problems.push(pendingProblem)
-      }
-      for (const [username, userInfo] of pendingUsersToAskForReview) {
-        const prevUser = usersToAskForReview.get(username)
-        if (
-          prevUser === undefined ||
-          /*
-            If the team is null, this user was not asked as part of a team, but
-            individually. They should always be registered with "team: null" in
-            that case to be sure the review will be requested individually,
-            even if they were previously registered as part of a team.
-          */
-          userInfo.teams === null
-        ) {
-          usersToAskForReview.set(username, { teams: userInfo.teams })
-        } else if (prevUser.teams) {
-          for (const team of userInfo.teams) {
-            prevUser.teams.add(team)
-          }
+
+      problems.push(outcome.problem)
+
+      for (const [user, userInfo] of outcome.usersToAskForReview) {
+        let userToAskForReview = usersToAskForReview.get(user)
+        if (userToAskForReview === undefined) {
+          userToAskForReview = userInfo
+        } else if (userInfo.teams === null) {
+          userToAskForReview.teams = null
         } else {
-          prevUser.teams = userInfo.teams
+          userToAskForReview.teams = new Set([
+            ...(userToAskForReview.teams ?? []),
+            ...(userInfo?.teams ?? []),
+          ])
         }
+        usersToAskForReview.set(user, userToAskForReview)
       }
     }
 
@@ -936,20 +941,6 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
             reviewers: Array.from(users),
             team_reviewers: Array.from(teams),
           },
-        )
-      }
-    }
-
-    if (highestMinApprovalsRule !== null) {
-      let approvalCount = 0
-      for (const review of latestReviews.values()) {
-        if (review.isApproval) {
-          approvalCount++
-        }
-      }
-      if (approvalCount < highestMinApprovalsRule.min_approvals) {
-        problems.push(
-          `Rule ${highestMinApprovalsRule.name} requires at least ${highestMinApprovalsRule.min_approvals} approvals, but only ${approvalCount} were given`,
         )
       }
     }
