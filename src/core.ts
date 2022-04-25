@@ -118,8 +118,8 @@ const combineUsers = async (
         users.set(teamMember, userInfo)
       } else if (
         /*
-          Avoid registering a team for this user if their approval is
-          supposed to be requested individually
+          Avoid registering a team for this user if their approval is supposed
+          to be requested individually
         */
         userInfo.teams !== null
       ) {
@@ -551,14 +551,17 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
               approval group on each subcondition. This is needed when it would
               be more favorable to use an approval for a different subcondition
               other than the one it could be first matched for that approval.
+
               Consider the following scenario:
                 - Ana has teams: Team2, Team1
                 - Bob has teams: Team2
                 - Ana and Bob have both approved
+
               And suppose that we need 1 distinct approval for Team1 and another
               for Team2. It might be the case that Ana's approval for Team2 is
               registered first, which would make Bob's approval useless for a
               suboptimal outcome.
+
               The most favorable combination to clear the requirement is:
                 - Ana's approval is allocated to Team1
                 - Bob's approval is allocated to Team2
@@ -566,10 +569,11 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                 - Ana's approval is allocated to Team2
                 - Bob's approval is useless because it can only be allocated to
                   Team1, which was already approved by Ana in this scenario
+
               It is possible to avoid the bad case by brute-forcing every
-              available permutation of approvals' orders and picking the best one
-              found, with bailouts for when the overall target approval count is
-              reached.
+              available permutation of approvals' orders and picking the best
+              one found, with bailouts for when the overall target approval
+              count is reached.
             */
             type CombinationApprovedBy = Map<
               /* subcondition Index */ number,
@@ -582,8 +586,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                 i
               ].subconditionApprovedBy) {
                 /*
-                  The combinations are tried by alternating which user starts the
-                  combination on each pass.
+                  The combinations are tried by alternating which user starts
+                  the combination on each pass.
 
                   Take for instance the following subconditions:
                   - Subcondition 0 approvers: A
@@ -614,8 +618,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                 ])
 
                 /*
-                  The least bad combination is the first one tried, since at least
-                  it has one approval
+                  The least bad combination is the first one tried, since at
+                  least it has one approval
                 */
                 if (bestApproversArrangement.size === 0) {
                   bestApproversArrangement = combinationApprovers
@@ -631,7 +635,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
 
                   /*
                     Check if the subcondition's min_approvals target has already
-                    been fulfilled by the initialization of combinationApprovedBy
+                    been fulfilled by the initialization of
+                    combinationApprovedBy
                   */
                   if (j === i) {
                     const approversCount = combinationApprovers.get(j)?.size
@@ -651,8 +656,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
 
                   const subconditionApproversPermutator = new Permutator(
                     /*
-                       Permutator mutates the input array, therefore make sure to
-                       *not* pass an array reference to it
+                       Permutator mutates the input array, therefore make sure
+                       to *not* pass an array reference to it
                     */
                     Array.from(subconditionApprovedBy),
                   )
@@ -662,8 +667,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
 
                     /*
                       Initialize a new Set here so that the effects of this
-                      permutation doesn't affect combinationApprovers until it is
-                      the right time to commit the results
+                      permutation doesn't affect combinationApprovers until it
+                      is the right time to commit the results
                     */
                     const subconditionApprovers = new Set(
                       combinationApprovers.get(j)?.values(),
