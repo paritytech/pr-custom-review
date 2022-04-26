@@ -112,10 +112,9 @@ const combineUsers = async (
         continue
       }
 
-      let userInfo = users.get(teamMember)
+      const userInfo = users.get(teamMember)
       if (userInfo === undefined) {
-        userInfo = { teams: new Set([team]) }
-        users.set(teamMember, userInfo)
+        users.set(teamMember, { teams: new Set([team]) })
       } else if (
         /*
           Avoid registering a team for this user if their approval is supposed
