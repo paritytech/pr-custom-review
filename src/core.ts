@@ -36,6 +36,35 @@ const displayUserWithTeams = (
   }`
 }
 
+const updateUserToAskForReview = (
+  usersToAskForReview: Map<string, RuleUserInfo>,
+  user: string,
+  userInfo: RuleUserInfo,
+) => {
+  let userToAskForReview = usersToAskForReview.get(user)
+  if (userToAskForReview === undefined) {
+    /*
+      Shallow-copy the userInfo so that further updates don't affect the initial
+      RuleUserInfo
+    */
+    userToAskForReview = { ...userInfo }
+  } else if (userInfo.teams === null) {
+    userToAskForReview.teams = null
+  } else if (
+    /*
+      Avoid registering a team for this user if their approval is supposed
+      to be requested individually
+    */
+    userToAskForReview.teams !== null
+  ) {
+    userToAskForReview.teams = new Set([
+      ...(userToAskForReview.teams ?? []),
+      ...(userInfo?.teams ?? []),
+    ])
+  }
+  usersToAskForReview.set(user, userToAskForReview)
+}
+
 const processSubconditionMissingApprovers = (
   approvedBy: Set<string>,
   usersToAskForReview: Map<string, RuleUserInfo>,
@@ -47,27 +76,7 @@ const processSubconditionMissingApprovers = (
     if (approvedBy.has(user)) {
       continue
     }
-
-    let userToAskForReview = usersToAskForReview.get(user)
-    if (userToAskForReview === undefined) {
-      userToAskForReview = userInfo
-    } else if (userInfo.teams === null) {
-      userToAskForReview.teams = null
-    } else if (
-      /*
-        Avoid registering a team for this user if their approval is supposed
-        to be requested individually
-      */
-      userToAskForReview.teams !== null
-    ) {
-      userToAskForReview.teams = new Set([
-        ...(userToAskForReview.teams ?? []),
-        ...(userInfo?.teams ?? []),
-      ])
-    }
-
-    usersToAskForReview.set(user, userToAskForReview)
-
+    updateUserToAskForReview(usersToAskForReview, user, userInfo)
     missingApprovers.set(user, userInfo)
   }
 
@@ -909,24 +918,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
       problems.push(outcome.problem)
 
       for (const [user, userInfo] of outcome.usersToAskForReview) {
-        let userToAskForReview = usersToAskForReview.get(user)
-        if (userToAskForReview === undefined) {
-          userToAskForReview = userInfo
-        } else if (userInfo.teams === null) {
-          userToAskForReview.teams = null
-        } else if (
-          /*
-            Avoid registering a team for this user if their approval is supposed
-            to be requested individually
-          */
-          userToAskForReview.teams !== null
-        ) {
-          userToAskForReview.teams = new Set([
-            ...(userToAskForReview.teams ?? []),
-            ...(userInfo?.teams ?? []),
-          ])
-        }
-        usersToAskForReview.set(user, userToAskForReview)
+        updateUserToAskForReview(usersToAskForReview, user, userInfo)
       }
     }
 
