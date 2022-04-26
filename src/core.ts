@@ -528,11 +528,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
             const approvedBy: Set<string> = new Set()
 
             for (const review of latestReviews.values()) {
-              if (!review.isApproval) {
-                continue
-              }
-
               if (
+                review.isApproval &&
                 rule.subconditions.find(({ usersInfo }) => {
                   return usersInfo.has(review.user)
                 })
@@ -846,11 +843,10 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
               const approvedBy: Set<string> = new Set()
 
               for (const review of latestReviews.values()) {
-                if (!review.isApproval) {
-                  continue
-                }
-
-                if (subcondition.usersInfo.has(review.user)) {
+                if (
+                  review.isApproval &&
+                  subcondition.usersInfo.has(review.user)
+                ) {
                   approvedBy.add(review.user)
                 }
               }
