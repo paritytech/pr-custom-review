@@ -579,7 +579,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
               /* subcondition Index */ number,
               /* users which approved the subcondition */ Set<string>
             >
-            let bestApproversArrangement: CombinationApprovedBy = new Map()
+            let bestApproversCombination: CombinationApprovedBy = new Map()
 
             for (let i = 0; i < approvalGroups.length; i++) {
               subconditionCombinationsLoop: for (const userStartingCombination of approvalGroups[
@@ -621,8 +621,8 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                   The least bad combination is the first one tried, since at
                   least it has one approval
                 */
-                if (bestApproversArrangement.size === 0) {
-                  bestApproversArrangement = combinationApprovers
+                if (bestApproversCombination.size === 0) {
+                  bestApproversCombination = combinationApprovers
                 }
 
                 subconditionsLoop: for (
@@ -710,16 +710,16 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                           Bail out when combination which fulfills all
                           subconditions is found
                         */
-                        bestApproversArrangement = combinationApprovers
+                        bestApproversCombination = combinationApprovers
                         break subconditionCombinationsLoop
                       }
 
                       let approvalCountOfBestCombination = 0
-                      for (const approvers of bestApproversArrangement.values()) {
+                      for (const approvers of bestApproversCombination.values()) {
                         approvalCountOfBestCombination += approvers.size
                       }
                       if (approvalCountNow > approvalCountOfBestCombination) {
-                        bestApproversArrangement = combinationApprovers
+                        bestApproversCombination = combinationApprovers
                       }
 
                       if (
@@ -735,7 +735,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
             }
 
             let approvalCountOfBestApproversArrangement = 0
-            for (const approvers of bestApproversArrangement.values()) {
+            for (const approvers of bestApproversCombination.values()) {
               approvalCountOfBestApproversArrangement += approvers.size
             }
             assert(
@@ -750,7 +750,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                 approvalCountOfBestCombination:
                   approvalCountOfBestApproversArrangement,
                 combinationApprovedByMostPeopleOverall: new Map(
-                  Array.from(bestApproversArrangement).map(
+                  Array.from(bestApproversCombination).map(
                     ([subconditionIndex, approvers]) => {
                       return [
                         rule.subconditions[subconditionIndex].name ??
@@ -767,7 +767,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
               for (const [
                 subconditionIndex,
                 approvers,
-              ] of bestApproversArrangement) {
+              ] of bestApproversCombination) {
                 const subcondition = rule.subconditions[subconditionIndex]
                 assert(
                   approvers.size === subcondition.min_approvals,
@@ -785,7 +785,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                 approvalGroups.reduce(
                   (acc, { subcondition }, subconditionIndex) => {
                     const approversCount =
-                      bestApproversArrangement.get(subconditionIndex)?.size ?? 0
+                      bestApproversCombination.get(subconditionIndex)?.size ?? 0
 
                     if (approversCount === subcondition.min_approvals) {
                       return acc
