@@ -53,7 +53,7 @@ const processSubconditionMissingApprovers = (
       userToAskForReview = userInfo
     } else if (userInfo.teams === null) {
       userToAskForReview.teams = null
-    } else {
+    } else if (userToAskForReview.teams !== null) {
       userToAskForReview.teams = new Set([
         ...(userToAskForReview.teams ?? []),
         ...(userInfo?.teams ?? []),
@@ -908,7 +908,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           userToAskForReview = userInfo
         } else if (userInfo.teams === null) {
           userToAskForReview.teams = null
-        } else {
+        } else if (userToAskForReview.teams !== null) {
           userToAskForReview.teams = new Set([
             ...(userToAskForReview.teams ?? []),
             ...(userInfo?.teams ?? []),
