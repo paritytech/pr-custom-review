@@ -250,8 +250,8 @@ Array [
 }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 0 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
-Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker (teams: team, team2).
-Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker (teams: team, team2), userCoworker2 (team: team2).",
+Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker (team: team).
+Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker (team: team2), userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -266,7 +266,7 @@ Array [
   'userCoworker' => { teams: Set(1) { 'team' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker2, userCoworker (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 0 were given. The following users have not approved yet: userCoworker2, userCoworker (team: team).",
   "",
 ]
 `;
@@ -281,7 +281,7 @@ Array [
   'userCoworker' => { teams: Set(1) { 'team' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker2, userCoworker (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 0 were given. The following users have not approved yet: userCoworker2, userCoworker (team: team).",
   "",
 ]
 `;
@@ -296,7 +296,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 0 were given. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
   "",
 ]
 `;
@@ -311,7 +311,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 0 were given. The following users have not approved yet: userCoworker (team: team), userCoworker2 (team: team).",
   "",
 ]
 `;
@@ -326,7 +326,7 @@ Array [
   'userCoworker2' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker, userCoworker2.",
+  "Rule \\"condition\\" needs at least 2 approvals, but 0 were given. The following users have not approved yet: userCoworker, userCoworker2.",
   "",
 ]
 `;
@@ -341,7 +341,7 @@ Array [
   'userCoworker2' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 0 were matched. The following users have not approved yet: userCoworker, userCoworker2.",
+  "Rule \\"condition\\" needs at least 2 approvals, but 0 were given. The following users have not approved yet: userCoworker, userCoworker2.",
   "",
 ]
 `;
@@ -352,7 +352,7 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] {  }",
   "ERROR:  The following problems were found:",
-  "Rule condition requires at least 2 approvals, but only 0 were given",
+  "Rule \\"condition\\" requires at least 2 approvals, but 0 were given.",
   "",
 ]
 `;
@@ -363,7 +363,7 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews [Map Iterator] {  }",
   "ERROR:  The following problems were found:",
-  "Rule condition requires at least 2 approvals, but only 0 were given",
+  "Rule \\"condition\\" requires at least 2 approvals, but 0 were given.",
   "",
 ]
 `;
@@ -374,7 +374,7 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team3).",
+  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team3).",
   "",
 ]
 `;
@@ -477,7 +477,7 @@ Array [
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
   "latestReviews [Map Iterator] {  }",
   "ERROR:  The following problems were found:",
-  "Rule Condition include requires at least 2 approvals, but only 0 were given",
+  "Rule \\"Condition include\\" requires at least 2 approvals, but 0 were given.",
   "",
 ]
 `;
@@ -488,7 +488,7 @@ Array [
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
   "latestReviews [Map Iterator] {  }",
   "ERROR:  The following problems were found:",
-  "Rule Condition include requires at least 2 approvals, but only 0 were given",
+  "Rule \\"Condition include\\" requires at least 2 approvals, but 0 were given.",
   "",
 ]
 `;
@@ -521,7 +521,7 @@ Array [
   'userCoworker3' => { teams: Set(1) { 'team' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2, userCoworker3 (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 1 were given. The following users have not approved yet: userCoworker2, userCoworker3 (team: team).",
   "",
 ]
 `;
@@ -536,7 +536,7 @@ Array [
   'userCoworker3' => { teams: Set(1) { 'team' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2, userCoworker3 (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 1 were given. The following users have not approved yet: userCoworker2, userCoworker3 (team: team).",
   "",
 ]
 `;
@@ -548,7 +548,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2 (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 1 were given. The following users have not approved yet: userCoworker2 (team: team).",
   "",
 ]
 `;
@@ -560,7 +560,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2 (team: team).",
+  "Rule \\"condition\\" needs at least 2 approvals, but 1 were given. The following users have not approved yet: userCoworker2 (team: team).",
   "",
 ]
 `;
@@ -572,7 +572,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2.",
+  "Rule \\"condition\\" needs at least 2 approvals, but 1 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -584,7 +584,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" needs at least 2 approvals, but 1 were matched. The following users have not approved yet: userCoworker2.",
+  "Rule \\"condition\\" needs at least 2 approvals, but 1 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -595,7 +595,7 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "ERROR:  The following problems were found:",
-  "Rule condition requires at least 2 approvals, but only 1 were given",
+  "Rule \\"condition\\" requires at least 2 approvals, but 1 were given.",
   "",
 ]
 `;
@@ -606,7 +606,7 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "ERROR:  The following problems were found:",
-  "Rule condition requires at least 2 approvals, but only 1 were given",
+  "Rule \\"condition\\" requires at least 2 approvals, but 1 were given.",
   "",
 ]
 `;
@@ -617,7 +617,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team3).",
+  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team3).",
   "",
 ]
 `;
@@ -732,7 +732,7 @@ Array [
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "ERROR:  The following problems were found:",
-  "Rule Condition include requires at least 2 approvals, but only 1 were given",
+  "Rule \\"Condition include\\" requires at least 2 approvals, but 1 were given.",
   "",
 ]
 `;
@@ -743,7 +743,7 @@ Array [
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "ERROR:  The following problems were found:",
-  "Rule Condition include requires at least 2 approvals, but only 1 were given",
+  "Rule \\"Condition include\\" requires at least 2 approvals, but 1 were given.",
   "",
 ]
 `;
@@ -757,7 +757,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team3' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team3), userCoworker2 (team: team3).",
+  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker (team: team3), userCoworker2 (team: team3).",
   "",
 ]
 `;
@@ -771,7 +771,7 @@ Array [
   'userCoworker2' => { teams: Set(1) { 'team3' } }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker (team: team3), userCoworker2 (team: team3).",
+  "Rule \\"Action files changed\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker (team: team3), userCoworker2 (team: team3).",
   "",
 ]
 `;
@@ -900,13 +900,13 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(2) {
-  'userCoworker3' => { teams: null },
-  'userCoworker2' => { teams: Set(2) { 'team', 'team2' } }
+  'userCoworker2' => { teams: Set(2) { 'team', 'team2' } },
+  'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 3 DISTINCT approvals, but 0 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
-Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).
-Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).
+Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (team: team2).
 Subcondition \\"condition[2]\\" does not have approval from the following users: userCoworker3.",
   "",
 ]
@@ -918,13 +918,13 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(2) {
-  'userCoworker3' => { teams: null },
-  'userCoworker2' => { teams: Set(2) { 'team', 'team2' } }
+  'userCoworker2' => { teams: Set(2) { 'team', 'team2' } },
+  'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 3 DISTINCT approvals, but 0 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
-Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).
-Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).
+Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (team: team2).
 Subcondition \\"condition[2]\\" does not have approval from the following users: userCoworker3.",
   "",
 ]
@@ -938,8 +938,8 @@ Array [
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team', 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 0 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
-Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).
-Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).",
+Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -952,8 +952,8 @@ Array [
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team', 'team2' } } }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 2 DISTINCT approvals, but 0 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
-Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).
-Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (teams: team, team2).",
+Subcondition \\"condition[0]\\" does not have approval from the following users: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" does not have approval from the following users: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1003,8 +1003,8 @@ Array [
   combinationApprovedByMostPeopleOverall: Map(1) { 'condition[0]' => Set(1) { 'userCoworker' } }
 }",
   "usersToAskForReview Map(2) {
-  'userCoworker3' => { teams: null },
-  'userCoworker2' => { teams: Set(1) { 'team2' } }
+  'userCoworker2' => { teams: Set(1) { 'team2' } },
+  'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 3 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
@@ -1025,8 +1025,8 @@ Array [
   combinationApprovedByMostPeopleOverall: Map(1) { 'condition[0]' => Set(1) { 'userCoworker' } }
 }",
   "usersToAskForReview Map(2) {
-  'userCoworker3' => { teams: null },
-  'userCoworker2' => { teams: Set(1) { 'team2' } }
+  'userCoworker2' => { teams: Set(1) { 'team2' } },
+  'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
   "Rule \\"condition\\" needs in total 3 DISTINCT approvals, but 1 were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.
@@ -1186,9 +1186,9 @@ Array [
   'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
-  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).
+Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker3.",
   "",
 ]
 `;
@@ -1203,9 +1203,9 @@ Array [
   'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
-  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).
+Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker3.",
   "",
 ]
 `;
@@ -1217,8 +1217,8 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team', 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1230,8 +1230,8 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team', 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1246,8 +1246,8 @@ Array [
   'userCoworker2' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker.
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -1262,8 +1262,8 @@ Array [
   'userCoworker2' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker.
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -1278,8 +1278,8 @@ Array [
   'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
-  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).
+Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker3.",
   "",
 ]
 `;
@@ -1294,8 +1294,8 @@ Array [
   'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
-  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).
+Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker3.",
   "",
 ]
 `;
@@ -1307,7 +1307,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1319,7 +1319,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1331,7 +1331,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -1343,7 +1343,7 @@ Array [
   "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: null } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -1426,9 +1426,9 @@ Array [
   'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
-  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).
+Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker3.",
   "",
 ]
 `;
@@ -1443,9 +1443,9 @@ Array [
   'userCoworker3' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
-  "Rule \\"condition[2]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker3.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).
+Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker3.",
   "",
 ]
 `;
@@ -1457,8 +1457,8 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team', 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1470,8 +1470,8 @@ Array [
   "latestReviews [Map Iterator] {  }",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(2) { 'team', 'team2' } } }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team).",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2 (team: team2).",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team).
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2 (team: team2).",
   "",
 ]
 `;
@@ -1486,8 +1486,8 @@ Array [
   'userCoworker2' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker.
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
@@ -1502,8 +1502,8 @@ Array [
   'userCoworker2' => { teams: null }
 }",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition[0]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker.",
-  "Rule \\"condition[1]\\" needs at least 1 approvals, but 0 were matched. The following users have not approved yet: userCoworker2.",
+  "Subcondition \\"condition[0]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker.
+Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. The following users have not approved yet: userCoworker2.",
   "",
 ]
 `;
