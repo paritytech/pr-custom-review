@@ -35,11 +35,11 @@ default:
 
 .staging-refs:                     &staging-refs
   rules:
-    - if: $CI_COMMIT_REF_NAME =~ /^stg-v[0-9]+\.[0-9]+.*$/  # e.g. stg-v0.1
+    - if: $CI_COMMIT_TAG =~ /^stg-v[0-9]+\.[0-9]+.*$/  # e.g. stg-v0.1
 
 .production-refs:                  &production-refs
   rules:
-    - if: $CI_COMMIT_REF_NAME =~ /^v[0-9]+\.[0-9]+.*$/      # e.g. v0.1
+    - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+.*$/      # e.g. v0.1
 
 install-deps:
   <<:                              *common-refs

@@ -1,6 +1,6 @@
 common:
   secrets:
-    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/opstooling/pr-custom-review/parity-stg#DB_PASSWORD
+    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/opstooling/pr-custom-review/parity-stg#GITHUB_ACCESS_TOKEN
   ingress:
     enabled: true
     className: ""
