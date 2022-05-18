@@ -1,5 +1,5 @@
 common:
-  fullnameOverride: "pr-cutom-review"
+  fullnameOverride: "pr-custom-review"
   image:
     repository: paritytech/pr-custom-review
   serviceAccount:
