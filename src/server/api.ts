@@ -90,5 +90,14 @@ export const setupApi = ({ octokit, logger }: ServerContext) => {
     },
   })
 
+  server.route({
+    method: "GET",
+    url: "/ping",
+    handler: async (req, reply) => {
+      reply.statusCode = 200
+      return { status: "ok" }
+    },
+  })
+
   return server
 }
