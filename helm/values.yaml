@@ -13,9 +13,6 @@ common:
     LOG_FORMAT: json
     PORT: 3000
     GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/mirrors/pr-custom-review#GITHUB_ACCESS_TOKEN
-  envFrom:
-    - secretRef:
-        name: pr-custom-review
   service:
     type: ClusterIP
     port: 80
