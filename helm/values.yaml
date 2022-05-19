@@ -12,6 +12,8 @@ common:
   env:
     LOG_FORMAT: json
     PORT: 3000
+  secrets:
+    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/mirrors/pr-custom-review#GITHUB_ACCESS_TOKEN
   envFrom:
     - secretRef:
         name: pr-custom-review
