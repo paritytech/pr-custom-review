@@ -30,9 +30,10 @@ default:
 
 .common-refs:                      &common-refs
   rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^93$/
+      when: never
     - if: $CI_COMMIT_REF_NAME == "master"
     - if: $CI_COMMIT_REF_NAME =~ /^[0-9]+$/                 # PRs
-    - if: $CI_COMMIT_REF_NAME !~ /^93$/
 
 .staging-refs:                     &staging-refs
   rules:
