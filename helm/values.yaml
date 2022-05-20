@@ -1,0 +1,35 @@
+common:
+  fullnameOverride: "pr-custom-review"
+  image:
+    repository: paritytech/pr-custom-review
+  serviceAccount:
+    create: false
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+  env:
+    LOG_FORMAT: json
+    PORT: 3000
+    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/mirrors/pr-custom-review#GITHUB_ACCESS_TOKEN
+  service:
+    type: ClusterIP
+    port: 80
+    containerPort: 3000
+  livenessProbe:
+    failureThreshold: 3
+    successThreshold: 1
+    initialDelaySeconds: 0
+    timeoutSeconds: 1
+    httpGet:
+      path: /ping
+    periodSeconds: 10
+  readinessProbe:
+    failureThreshold: 3
+    successThreshold: 1
+    initialDelaySeconds: 0
+    timeoutSeconds: 1
+    httpGet:
+      path: /ping
+    periodSeconds: 10

@@ -74,7 +74,7 @@ const main = async () => {
   const ctx: ServerContext = { logger, octokit }
 
   const server = setup(ctx)
-  await server.listen(serverPort)
+  await server.listen({ host: "0.0.0.0", port: serverPort })
 }
 
 void main()
