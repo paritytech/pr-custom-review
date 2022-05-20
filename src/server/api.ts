@@ -17,10 +17,7 @@ const getApiRoute = (version: ApiVersion, route: string) => {
 const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews")
 
 export const setupApi = ({ octokit, logger }: ServerContext) => {
-  const server = Fastify({
-    logger: logger.getFastifyLogger(),
-    disableRequestLogging: true,
-  })
+  const server = Fastify({ logger: logger.getFastifyLogger() })
 
   server.route({
     method: "POST",
