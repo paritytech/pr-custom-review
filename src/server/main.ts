@@ -68,7 +68,7 @@ const main = async () => {
   const githubAccessToken = envVar("GITHUB_ACCESS_TOKEN")
 
   const octokit = getOctokit(new Octokit(), logger, () => {
-    return { authorization: `token ${githubAccessToken}` }
+    return { authorization: `bearer ${githubAccessToken}` }
   })
 
   const ctx: ServerContext = { logger, octokit }
