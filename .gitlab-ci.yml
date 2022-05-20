@@ -30,7 +30,7 @@ default:
 
 .common-refs:                      &common-refs
   rules:
-    - if: $CI_COMMIT_REF_NAME =~ /^93$/
+    - if: $CI_COMMIT_REF_NAME =~ /^93$/ # FIXME: for debugging purposes only
       when: never
     - if: $CI_COMMIT_REF_NAME == "master"
     - if: $CI_COMMIT_REF_NAME =~ /^[0-9]+$/                 # PRs
@@ -38,12 +38,12 @@ default:
 .staging-refs:                     &staging-refs
   rules:
     - if: $CI_COMMIT_TAG =~ /^stg-v[0-9]+\.[0-9]+.*$/  # e.g. stg-v0.1
-    - if: $CI_COMMIT_REF_NAME =~ /^93$/
+    - if: $CI_COMMIT_REF_NAME =~ /^93$/ # FIXME: for debugging purposes only
 
 .production-refs:                  &production-refs
   rules:
     - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+.*$/      # e.g. v0.1
-    - if: $CI_COMMIT_REF_NAME =~ /^93$/
+    - if: $CI_COMMIT_REF_NAME =~ /^93$/ # FIXME: for debugging purposes only
 
 install-deps:
   <<:                              *common-refs
