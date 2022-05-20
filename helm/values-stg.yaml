@@ -1,4 +1,6 @@
 common:
+  env:
+    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/mirrors/pr-custom-review#GITHUB_ACCESS_TOKEN
   ingress:
     enabled: true
     className: ""
