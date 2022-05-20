@@ -71,7 +71,7 @@ const main = async () => {
   ).toString()
 
   const octokit = getOctokit(new Octokit(), logger, () => {
-    return { authorization: `bearer ${githubAccessToken}` }
+    return { authorization: `token ${githubAccessToken}` }
   })
 
   const ctx: ServerContext = { logger, octokit }
