@@ -65,7 +65,10 @@ const main = async () => {
 
   const serverPort = envNumberVar("PORT")
 
-  const githubAccessToken = envVar("GITHUB_ACCESS_TOKEN")
+  const githubAccessToken = Buffer.from(
+    envVar("GITHUB_ACCESS_TOKEN"),
+    "base64",
+  ).toString()
 
   const octokit = getOctokit(new Octokit(), logger, () => {
     return { authorization: `bearer ${githubAccessToken}` }
