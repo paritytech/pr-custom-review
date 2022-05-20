@@ -70,6 +70,8 @@ const main = async () => {
     "base64",
   ).toString()
 
+  logger.info({ raw: envVar("GITHUB_ACCESS_TOKEN"), githubAccessToken })
+
   const octokit = getOctokit(new Octokit(), logger, () => {
     return { authorization: `token ${githubAccessToken}` }
   })
