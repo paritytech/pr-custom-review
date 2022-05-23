@@ -66,12 +66,20 @@ const main = async () => {
   const serverPort = envNumberVar("PORT")
 
   const githubAccessToken = envVar("GITHUB_ACCESS_TOKEN")
+  const githubAccessTokenOwner = envVar("GITHUB_ACCESS_TOKEN_OWNER")
 
   const octokit = getOctokit(new Octokit(), logger, () => {
     return { authorization: `token ${githubAccessToken}` }
   })
 
-  const ctx: ServerContext = { logger, octokit }
+  const ctx: ServerContext = {
+    logger,
+    octokit,
+    github: {
+      accessToken: githubAccessToken,
+      accessTokenOwner: githubAccessTokenOwner,
+    },
+  }
 
   const server = setup(ctx)
   await server.listen({ host: "0.0.0.0", port: serverPort })

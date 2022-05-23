@@ -16,7 +16,7 @@ const getApiRoute = (version: ApiVersion, route: string) => {
 
 const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews")
 
-export const setupApi = ({ octokit, logger }: ServerContext) => {
+export const setupApi = ({ octokit, logger, github }: ServerContext) => {
   const server = Fastify({ logger: logger.getFastifyLogger() })
 
   server.route({
@@ -71,6 +71,13 @@ export const setupApi = ({ octokit, logger }: ServerContext) => {
     handler: async (req, reply) => {
       const actionData = req.body as ActionData
 
+      if (actionData.pr.base.repo.owner.login !== github.accessTokenOwner) {
+        reply.statusCode = 403
+        return {
+          error: `${actionData.pr.base.repo.owner.login} != ${github.accessTokenOwner}`,
+        }
+      }
+
       const lines: string[] = []
       const actionLogger = new ActionLogger((line) => {
         return lines.push(line)
@@ -86,7 +93,7 @@ export const setupApi = ({ octokit, logger }: ServerContext) => {
       await processReviews(ctx, actionData)
 
       reply.statusCode = 200
-      void reply.send(lines)
+      return lines
     },
   })
 
