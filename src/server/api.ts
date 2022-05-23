@@ -74,7 +74,7 @@ export const setupApi = ({ octokit, logger, github }: ServerContext) => {
       if (actionData.pr.base.repo.owner.login !== github.accessTokenOwner) {
         reply.statusCode = 403
         return {
-          error: `${actionData.pr.base.repo.owner.login} != ${github.accessTokenOwner}`,
+          error: `The API only accepts requests for PRs of ${github.accessTokenOwner}, but got a PR from ${actionData.pr.base.repo.owner.login}`,
         }
       }
 
