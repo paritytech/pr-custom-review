@@ -119,6 +119,7 @@ build-production:
         --set common.containerPort="$APP_PORT"
         --set common.livenessProbe.httpGet.port="$APP_PORT"
         --set common.readinessProbe.httpGet.port="$APP_PORT"
+        --set common.env.GITHUB_ACCESS_TOKEN_OWNER="$GITHUB_ACCESS_TOKEN_OWNER"
         pr-custom-review helm/
 
 deploy-staging:

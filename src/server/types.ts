@@ -7,4 +7,8 @@ import { ServerLogger } from "./logger"
 export type ServerContext = {
   octokit: ExtendedOctokit<Octokit>
   logger: ServerLogger
+  github: {
+    accessToken: string
+    accessTokenOwner: string
+  }
 }

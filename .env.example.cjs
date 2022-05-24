@@ -11,6 +11,9 @@ process.env.PORT ??= 3000
 */
 process.env.GITHUB_ACCESS_TOKEN ??= "placeholder"
 
+// API requests are only processed from GITHUB_ACCESS_TOKEN_OWNER
+process.env.GITHUB_ACCESS_TOKEN_OWNER ??= "placeholder"
+
 /*
   NOT REQUIRED
   Set LOG_FORMAT to "json" for JSON logging
