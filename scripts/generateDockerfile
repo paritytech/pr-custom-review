@@ -1,0 +1,77 @@
+#!/bin/bash
+
+REPOSITORY_PATH="${REPOSITORY_DESTINATION:-.}"
+
+set -eu -o pipefail
+
+dockerfile_start="
+# It's relevant to pin ourselves to a specific Node version to avoid having the
+# ESM loader implementation change without us knowing, since it's an unstable
+# feature
+FROM node:16.14-alpine
+"
+
+print_ci_dockerfile() {
+echo "
+$dockerfile_start
+
+# CI utilities
+RUN apk add bash
+
+# pre-commit relies on those packages at runtime
+RUN apk add git python3
+
+# General pre-commit build dependencies
+RUN apk add --no-cache --virtual .build-deps \
+  python3-dev libffi-dev openssl-dev gcc libc-dev make
+
+# Rust-related pre-commit build dependencies
+RUN apk add --update --no-cache \
+  --virtual .rust-deps \
+  --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+  cargo rust
+
+RUN python3 -m ensurepip && pip3 install --upgrade pip
+RUN pip3 install pre-commit
+
+# This step initializes the environment needed for linting the projects, meaning
+# subsequent runs can use this cached environment and not have to download it
+# again from scratch.
+RUN cd \"$REPOSITORY_PATH\" && yarn --immutable && pre-commit run --color=always --all
+
+# Cleanup
+RUN apk del .build-deps .rust-deps
+"
+}
+
+print_app_dockerfile() {
+echo "
+$dockerfile_start
+
+RUN mkdir /app && chown node:node /app
+COPY --chown=node:node  . /app
+WORKDIR /app
+
+USER node
+RUN yarn install --immutable
+
+ARG PORT
+EXPOSE \$PORT
+ENV PORT=\$PORT
+
+CMD [ \"sh\", \"-c\", \"yarn start\" ]
+"
+}
+
+case "$1" in
+  ci)
+    print_ci_dockerfile
+  ;;
+  app)
+    print_app_dockerfile
+  ;;
+  *)
+    >&2 echo "Invalid argument \"$1\" for image name"
+    exit 1
+  ;;
+esac
