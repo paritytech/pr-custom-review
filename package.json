@@ -28,7 +28,7 @@
     "@actions/github": "^5.0.1",
     "@octokit/rest": "^18.12.0",
     "async-mutex": "^0.3.2",
-    "fastify": "^3.28.0",
+    "fastify": "^3.29.4",
     "iterative-permutation": "^1.0.0",
     "joi": "^17.6.0",
     "node-fetch": "^3.2.3",
