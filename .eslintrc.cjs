@@ -10,12 +10,12 @@ module.exports = {
   ...conf,
   overrides: [
     ...conf.overrides,
+    // SonarJS.
     {
       ...tsConfOverride,
       files: "{*,**,**/*}.{ts,tsx}",
       rules: {
         ...tsConfOverride.rules,
-        // sonarjs
         "sonarjs/no-all-duplicated-branches": "error",
         "sonarjs/no-element-overwrite": "error",
         "sonarjs/no-empty-collection": "error",
@@ -34,17 +34,16 @@ module.exports = {
         "sonarjs/no-redundant-jump": "error",
         "sonarjs/no-unused-collection": "error",
         "sonarjs/prefer-immediate-return": "error",
-        // "@typescript-eslint/no-floating-promises": "off",
-        // "@typescript-eslint/no-unsafe-assignment": "off",
-        // "@typescript-eslint/explicit-module-boundary-types": "off",
-        // "@typescript-eslint/no-unsafe-call": "off",
-        // "@typescript-eslint/no-unsafe-argument": "off",
-        // "@typescript-eslint/restrict-template-expressions": "off",
-        // "@typescript-eslint/no-explicit-any": "off",
-        // "pescript-eslint/explicit-module-boundary-types": "off",
-        // "pescript-eslint/restrict-template-expressions": "off",
-        // "no-restricted-syntax": "off",
-        // "pescript-eslint/no-unsafe-call": "off"
+      },
+    },
+    // Temporary disabled rules.
+    {
+      ...tsConfOverride,
+      files: "{*,**,**/*}.{ts,tsx}",
+      rules: {
+        ...tsConfOverride.rules,
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-explicit-any": "off"
       },
     },
   ],
