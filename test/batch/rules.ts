@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable sonarjs/no-duplicate-string */
 
-import { Octokit } from "@octokit/rest"
-import nock from "nock"
+import { Octokit } from "@octokit/rest";
+import nock from "nock";
 import {
   basePR,
   changedFilesApiPath,
@@ -21,48 +21,45 @@ import {
   team2,
   team3,
   userCoworker3,
-} from "test/constants"
-import { TestLogger } from "test/logger"
-import YAML from "yaml"
+} from "test/constants";
+import { TestLogger } from "test/logger";
+import YAML from "yaml";
 
-import {
-  actionReviewTeamFiles,
-  maxGithubApiTeamMembersPerPage,
-} from "src/constants"
-import { runChecks } from "src/core"
-import { Configuration, Rule } from "src/types"
+import { actionReviewTeamFiles, maxGithubApiTeamMembersPerPage } from "src/constants";
+import { runChecks } from "src/core";
+import { Configuration, Rule } from "src/types";
 
 describe("Rules", () => {
-  let logger: TestLogger
-  let octokit: Octokit
-  let logHistory: string[]
-  let teamMembers: Map<string, string[]>
+  let logger: TestLogger;
+  let octokit: Octokit;
+  let logHistory: string[];
+  let teamMembers: Map<string, string[]>;
 
   beforeEach(() => {
-    nock.disableNetConnect()
-    logHistory = []
-    logger = new TestLogger(logHistory)
-    octokit = new Octokit()
-    teamMembers = new Map()
-  })
+    nock.disableNetConnect();
+    logHistory = [];
+    logger = new TestLogger(logHistory);
+    octokit = new Octokit();
+    teamMembers = new Map();
+  });
 
   const setup = (options: {
-    users?: string[]
-    diff?: string
-    teams?: { name: string; members: string[] }[]
-    changedFiles?: string[]
-    scenario: "Approved" | "Is missing approval" | "Has no approval"
-    preventReviewRequest?: Configuration["prevent-review-request"]
-    rules?: Configuration["rules"]
+    users?: string[];
+    diff?: string;
+    teams?: { name: string; members: string[] }[];
+    changedFiles?: string[];
+    scenario: "Approved" | "Is missing approval" | "Has no approval";
+    preventReviewRequest?: Configuration["prevent-review-request"];
+    rules?: Configuration["rules"];
   }) => {
-    const { scenario, preventReviewRequest } = options
-    let { users, diff, teams, rules, changedFiles } = options
+    const { scenario, preventReviewRequest } = options;
+    let { users, diff, teams, rules, changedFiles } = options;
 
-    users ??= coworkers
-    diff ??= condition
-    teams ??= [{ name: team, members: users }]
-    changedFiles ??= [condition]
-    rules ??= []
+    users ??= coworkers;
+    diff ??= condition;
+    teams ??= [{ name: team, members: users }];
+    changedFiles ??= [condition];
+    rules ??= [];
 
     nock(githubApi)
       .get(reviewsApiPath)
@@ -70,25 +67,23 @@ describe("Rules", () => {
         200,
         scenario === "Approved"
           ? users.map((login, id) => {
-              return { id, user: { id, login }, state: "APPROVED" }
+              return { id, user: { id, login }, state: "APPROVED" };
             })
           : scenario === "Is missing approval"
           ? [{ id: 1, user: { id: 1, login: coworkers[0] }, state: "APPROVED" }]
           : [],
-      )
+      );
 
     for (const { name, members } of teams) {
-      teamMembers.set(name, members)
+      teamMembers.set(name, members);
       nock(githubApi)
-        .get(
-          `/orgs/${org}/teams/${name}/members?per_page=${maxGithubApiTeamMembersPerPage}`,
-        )
+        .get(`/orgs/${org}/teams/${name}/members?per_page=${maxGithubApiTeamMembersPerPage}`)
         .reply(
           200,
           members.map((login, id) => {
-            return { id, login }
+            return { id, login };
           }),
-        )
+        );
     }
 
     nock(githubApi)
@@ -96,33 +91,22 @@ describe("Rules", () => {
       .reply(
         200,
         changedFiles.map((filename) => {
-          return { filename }
+          return { filename };
         }),
-      )
+      );
 
-    nock(githubApi)
-      .get(prApiPath)
-      .matchHeader("accept", "application/vnd.github.v3.diff")
-      .reply(200, diff)
+    nock(githubApi).get(prApiPath).matchHeader("accept", "application/vnd.github.v3.diff").reply(200, diff);
 
     nock(githubApi)
       .get(configFileContentsApiPath)
       .reply(200, {
         content: Buffer.from(
-          YAML.stringify({
-            ...defaultTeamsNames,
-            rules,
-            "prevent-review-request": preventReviewRequest,
-          }),
+          YAML.stringify({ ...defaultTeamsNames, rules, "prevent-review-request": preventReviewRequest }),
         ).toString("base64"),
-      })
-  }
+      });
+  };
 
-  for (const scenario of [
-    "Approved",
-    "Is missing approval",
-    "Has no approval",
-  ] as const) {
+  for (const scenario of ["Approved", "Is missing approval", "Has no approval"] as const) {
     for (const checkType of ["diff", "changed_files"] as const) {
       it(`${scenario} on rule including only users for ${checkType}`, async () => {
         setup({
@@ -136,87 +120,62 @@ describe("Rules", () => {
               users: [coworkers[0], coworkers[1]],
             },
           ],
-        })
+        });
 
         switch (scenario) {
           case "Has no approval": {
             nock(githubApi)
               .post(requestedReviewersApiPath, (body) => {
-                expect(body).toMatchObject({
-                  reviewers: coworkers,
-                  team_reviewers: [],
-                })
-                return true
+                expect(body).toMatchObject({ reviewers: coworkers, team_reviewers: [] });
+                return true;
               })
-              .reply(201)
-            break
+              .reply(201);
+            break;
           }
           case "Is missing approval": {
             nock(githubApi)
               .post(requestedReviewersApiPath, (body) => {
-                expect(body).toMatchObject({
-                  reviewers: [coworkers[1]],
-                  team_reviewers: [],
-                })
-                return true
+                expect(body).toMatchObject({ reviewers: [coworkers[1]], team_reviewers: [] });
+                return true;
               })
-              .reply(201)
-            break
+              .reply(201);
+            break;
           }
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
 
       it(`${scenario} on rule including only teams for ${checkType}`, async () => {
         setup({
           scenario,
           rules: [
-            {
-              name: condition,
-              condition,
-              check_type: checkType,
-              min_approvals: coworkers.length,
-              teams: [team],
-            },
+            { name: condition, condition, check_type: checkType, min_approvals: coworkers.length, teams: [team] },
           ],
-        })
+        });
 
         if (scenario !== "Approved") {
           nock(githubApi)
             .post(requestedReviewersApiPath, (body) => {
-              expect(body).toMatchObject({
-                reviewers: [],
-                team_reviewers: [team],
-              })
-              return true
+              expect(body).toMatchObject({ reviewers: [], team_reviewers: [team] });
+              return true;
             })
-            .reply(201)
+            .reply(201);
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
 
       it(`${scenario} on rule including both teams and users for ${checkType}`, async () => {
-        const userAskedIndividually = coworkers[1]
+        const userAskedIndividually = coworkers[1];
 
         setup({
           scenario,
@@ -230,10 +189,8 @@ describe("Rules", () => {
               teams: [team],
             },
           ],
-          ...(scenario === "Is missing approval"
-            ? { users: coworkers.concat(userCoworker3) }
-            : {}),
-        })
+          ...(scenario === "Is missing approval" ? { users: coworkers.concat(userCoworker3) } : {}),
+        });
 
         if (scenario !== "Approved") {
           nock(githubApi)
@@ -243,71 +200,44 @@ describe("Rules", () => {
                 member of the team because they were specified individually in
                 the "users" configuration
               */
-              expect(
-                teamMembers.get(team)!.find((member) => {
-                  return member === userAskedIndividually
-                }),
-              ).toBe(userAskedIndividually)
-              expect(body).toMatchObject({
-                reviewers: [userAskedIndividually],
-                team_reviewers: [team],
-              })
-              return true
+              expect(teamMembers.get(team)!.find((member) => member === userAskedIndividually)).toBe(
+                userAskedIndividually,
+              );
+              expect(body).toMatchObject({ reviewers: [userAskedIndividually], team_reviewers: [team] });
+              return true;
             })
-            .reply(201)
+            .reply(201);
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
 
       it(`${scenario} on rule not specifying users or teams`, async () => {
         setup({
           scenario,
-          rules: [
-            {
-              name: condition,
-              condition,
-              check_type: checkType,
-              min_approvals: coworkers.length,
-            },
-          ],
-          ...(scenario === "Is missing approval"
-            ? { users: coworkers.concat(userCoworker3) }
-            : {}),
-        })
+          rules: [{ name: condition, condition, check_type: checkType, min_approvals: coworkers.length }],
+          ...(scenario === "Is missing approval" ? { users: coworkers.concat(userCoworker3) } : {}),
+        });
 
         if (scenario !== "Approved") {
           nock(githubApi)
             .post(requestedReviewersApiPath, (body) => {
-              expect(body).toMatchObject({
-                reviewers: coworkers,
-                team_reviewers: [team],
-              })
-              return true
+              expect(body).toMatchObject({ reviewers: coworkers, team_reviewers: [team] });
+              return true;
             })
-            .reply(201)
+            .reply(201);
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
 
       for (const [ruleKind, ruleField] of [
         ["AndRule", "all"],
@@ -328,9 +258,9 @@ describe("Rules", () => {
                 ],
               } as Rule,
             ],
-          })
+          });
 
-          let expected: "success" | "failure"
+          let expected: "success" | "failure";
           switch (ruleKind) {
             case "AndDistinctRule":
             case "AndRule": {
@@ -338,64 +268,45 @@ describe("Rules", () => {
                 nock(githubApi)
                   .post(requestedReviewersApiPath, (body) => {
                     expect(body).toMatchObject({
-                      reviewers:
-                        scenario === "Has no approval"
-                          ? coworkers
-                          : [coworkers[1]],
+                      reviewers: scenario === "Has no approval" ? coworkers : [coworkers[1]],
                       team_reviewers: [],
-                    })
-                    return true
+                    });
+                    return true;
                   })
-                  .reply(201)
+                  .reply(201);
               }
-              expected = scenario === "Approved" ? "success" : "failure"
-              break
+              expected = scenario === "Approved" ? "success" : "failure";
+              break;
             }
             case "OrRule": {
               if (scenario === "Has no approval") {
                 nock(githubApi)
                   .post(requestedReviewersApiPath, (body) => {
-                    expect(body).toMatchObject({
-                      reviewers: coworkers,
-                      team_reviewers: [],
-                    })
-                    return true
+                    expect(body).toMatchObject({ reviewers: coworkers, team_reviewers: [] });
+                    return true;
                   })
-                  .reply(201)
+                  .reply(201);
               }
-              expected = scenario === "Has no approval" ? "failure" : "success"
-              break
+              expected = scenario === "Has no approval" ? "failure" : "success";
+              break;
             }
             default: {
-              const exhaustivenessCheck: never = ruleKind
+              const exhaustivenessCheck: never = ruleKind;
               // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`);
             }
           }
 
-          expect(
-            await runChecks({
-              pr: basePR,
-              octokit,
-              logger,
-              finishProcessReviews: null,
-            }),
-          ).toBe(expected)
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(expected);
 
-          expect(logHistory).toMatchSnapshot()
-        })
+          expect(logHistory).toMatchSnapshot();
+        });
 
         it(`Rule kind ${ruleKind}: ${scenario} specifying only teams for ${checkType}`, async () => {
           setup({
             scenario,
             teams: [
-              {
-                name: team,
-                members:
-                  scenario === "Has no approval"
-                    ? [coworkers[1]]
-                    : [coworkers[0]],
-              },
+              { name: team, members: scenario === "Has no approval" ? [coworkers[1]] : [coworkers[0]] },
               { name: team2, members: [coworkers[1]] },
             ],
             rules: [
@@ -409,9 +320,9 @@ describe("Rules", () => {
                 ],
               } as Rule,
             ],
-          })
+          });
 
-          let expectedCheckOutcome: "success" | "failure"
+          let expectedCheckOutcome: "success" | "failure";
           switch (ruleKind) {
             case "AndDistinctRule":
             case "AndRule": {
@@ -420,18 +331,14 @@ describe("Rules", () => {
                   .post(requestedReviewersApiPath, (body) => {
                     expect(body).toMatchObject({
                       reviewers: [],
-                      team_reviewers:
-                        scenario === "Is missing approval"
-                          ? [team2]
-                          : [team, team2],
-                    })
-                    return true
+                      team_reviewers: scenario === "Is missing approval" ? [team2] : [team, team2],
+                    });
+                    return true;
                   })
-                  .reply(201)
+                  .reply(201);
               }
-              expectedCheckOutcome =
-                scenario === "Approved" ? "success" : "failure"
-              break
+              expectedCheckOutcome = scenario === "Approved" ? "success" : "failure";
+              break;
             }
             case "OrRule": {
               if (scenario !== "Approved") {
@@ -439,50 +346,35 @@ describe("Rules", () => {
                   .post(requestedReviewersApiPath, (body) => {
                     expect(body).toMatchObject({
                       reviewers: [],
-                      team_reviewers:
-                        scenario === "Is missing approval"
-                          ? [team2]
-                          : [team, team2],
-                    })
-                    return true
+                      team_reviewers: scenario === "Is missing approval" ? [team2] : [team, team2],
+                    });
+                    return true;
                   })
-                  .reply(201)
+                  .reply(201);
               }
-              expectedCheckOutcome =
-                scenario === "Has no approval" ? "failure" : "success"
-              break
+              expectedCheckOutcome = scenario === "Has no approval" ? "failure" : "success";
+              break;
             }
             default: {
-              const exhaustivenessCheck: never = ruleKind
+              const exhaustivenessCheck: never = ruleKind;
               // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`);
             }
           }
 
-          expect(
-            await runChecks({
-              pr: basePR,
-              octokit,
-              logger,
-              finishProcessReviews: null,
-            }),
-          ).toBe(expectedCheckOutcome)
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+            expectedCheckOutcome,
+          );
 
-          expect(logHistory).toMatchSnapshot()
-        })
+          expect(logHistory).toMatchSnapshot();
+        });
 
         it(`Rule kind ${ruleKind}: ${scenario} specifying both teams and users for ${checkType}`, async () => {
           setup({
             scenario,
             users: coworkers.concat(userCoworker3),
             teams: [
-              {
-                name: team,
-                members:
-                  scenario === "Has no approval"
-                    ? [coworkers[1]]
-                    : [coworkers[0]],
-              },
+              { name: team, members: scenario === "Has no approval" ? [coworkers[1]] : [coworkers[0]] },
               { name: team2, members: [coworkers[1]] },
             ],
             rules: [
@@ -497,9 +389,9 @@ describe("Rules", () => {
                 ],
               } as Rule,
             ],
-          })
+          });
 
-          let expectedCheckOutcome: "success" | "failure"
+          let expectedCheckOutcome: "success" | "failure";
           switch (ruleKind) {
             case "AndDistinctRule":
             case "AndRule": {
@@ -508,18 +400,14 @@ describe("Rules", () => {
                   .post(requestedReviewersApiPath, (body) => {
                     expect(body).toMatchObject({
                       reviewers: [userCoworker3],
-                      team_reviewers:
-                        scenario === "Is missing approval"
-                          ? [team2]
-                          : [team, team2],
-                    })
-                    return true
+                      team_reviewers: scenario === "Is missing approval" ? [team2] : [team, team2],
+                    });
+                    return true;
                   })
-                  .reply(201)
+                  .reply(201);
               }
-              expectedCheckOutcome =
-                scenario === "Approved" ? "success" : "failure"
-              break
+              expectedCheckOutcome = scenario === "Approved" ? "success" : "failure";
+              break;
             }
             case "OrRule": {
               if (scenario !== "Approved") {
@@ -527,92 +415,64 @@ describe("Rules", () => {
                   .post(requestedReviewersApiPath, (body) => {
                     expect(body).toMatchObject({
                       reviewers: [userCoworker3],
-                      team_reviewers:
-                        scenario === "Is missing approval"
-                          ? [team2]
-                          : [team, team2],
-                    })
-                    return true
+                      team_reviewers: scenario === "Is missing approval" ? [team2] : [team, team2],
+                    });
+                    return true;
                   })
-                  .reply(201)
+                  .reply(201);
               }
-              expectedCheckOutcome =
-                scenario === "Has no approval" ? "failure" : "success"
-              break
+              expectedCheckOutcome = scenario === "Has no approval" ? "failure" : "success";
+              break;
             }
             default: {
-              const exhaustivenessCheck: never = ruleKind
+              const exhaustivenessCheck: never = ruleKind;
               // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`)
+              throw new Error(`Unhandled rule kind ${exhaustivenessCheck}`);
             }
           }
 
-          expect(
-            await runChecks({
-              pr: basePR,
-              octokit,
-              logger,
-              finishProcessReviews: null,
-            }),
-          ).toBe(expectedCheckOutcome)
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+            expectedCheckOutcome,
+          );
 
-          expect(logHistory).toMatchSnapshot()
-        })
+          expect(logHistory).toMatchSnapshot();
+        });
       }
 
       for (const [description, rule] of [
-        [
-          "condition: include",
-          { name: "Condition include", condition: { include: condition } },
-        ],
-        [
-          "condition: exclude",
-          { name: "Condition exclude", condition: { exclude: condition } },
-        ],
+        ["condition: include", { name: "Condition include", condition: { include: condition } }],
+        ["condition: exclude", { name: "Condition exclude", condition: { exclude: condition } }],
         [
           "condition: include & exclude",
-          {
-            name: "Condition include & exclude",
-            condition: { include: condition, exclude: condition },
-          },
+          { name: "Condition include & exclude", condition: { include: condition, exclude: condition } },
         ],
       ] as const) {
         it(`${scenario} with ${description} for ${checkType}`, async () => {
-          setup({
-            scenario,
-            rules: [{ ...rule, min_approvals: 2, check_type: checkType }],
-          })
+          setup({ scenario, rules: [{ ...rule, min_approvals: 2, check_type: checkType }] });
 
           switch (scenario) {
             case "Has no approval":
             case "Is missing approval": {
               nock(githubApi)
                 .post(requestedReviewersApiPath, (body) => {
-                  expect(body).toMatchObject({ reviewers: [coworkers[1]] })
-                  return true
+                  expect(body).toMatchObject({ reviewers: [coworkers[1]] });
+                  return true;
                 })
-                .reply(201)
-              break
+                .reply(201);
+              break;
             }
           }
 
-          expect(
-            await runChecks({
-              pr: basePR,
-              octokit,
-              logger,
-              finishProcessReviews: null,
-            }),
-          ).toBe(
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
             scenario === "Approved" ||
               description === "condition: exclude" ||
               description === "condition: include & exclude"
               ? "success"
               : "failure",
-          )
+          );
 
-          expect(logHistory).toMatchSnapshot()
-        })
+          expect(logHistory).toMatchSnapshot();
+        });
       }
     }
 
@@ -625,7 +485,7 @@ describe("Rules", () => {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
-        })
+        });
 
         switch (scenario) {
           case "Has no approval":
@@ -634,27 +494,21 @@ describe("Rules", () => {
               .post(requestedReviewersApiPath, (body) => {
                 expect(body).toMatchObject({
                   reviewers: [],
-                  team_reviewers:
-                    scenario === "Has no approval" ? [team, team2] : [team2],
-                })
-                return true
+                  team_reviewers: scenario === "Has no approval" ? [team, team2] : [team2],
+                });
+                return true;
               })
-              .reply(201)
-            break
+              .reply(201);
+            break;
           }
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
 
       it(`${scenario} when line after lock is modified (${diffSign})`, async () => {
         setup({
@@ -664,7 +518,7 @@ describe("Rules", () => {
             { name: team, members: [coworkers[0]] },
             { name: team2, members: [coworkers[1]] },
           ],
-        })
+        });
 
         switch (scenario) {
           case "Has no approval":
@@ -673,64 +527,46 @@ describe("Rules", () => {
               .post(requestedReviewersApiPath, (body) => {
                 expect(body).toMatchObject({
                   reviewers: [],
-                  team_reviewers:
-                    scenario === "Has no approval" ? [team, team2] : [team2],
-                })
-                return true
+                  team_reviewers: scenario === "Has no approval" ? [team, team2] : [team2],
+                });
+                return true;
               })
-              .reply(201)
-            break
+              .reply(201);
+            break;
           }
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
     }
 
     for (const actionReviewFile of actionReviewTeamFiles) {
       it(`${scenario} when ${actionReviewFile} is changed`, async () => {
-        setup({
-          scenario,
-          changedFiles: [actionReviewFile],
-          teams: [{ name: team3, members: [coworkers[1]] }],
-        })
+        setup({ scenario, changedFiles: [actionReviewFile], teams: [{ name: team3, members: [coworkers[1]] }] });
 
         switch (scenario) {
           case "Has no approval":
           case "Is missing approval": {
             nock(githubApi)
               .post(requestedReviewersApiPath, (body) => {
-                expect(body).toMatchObject({
-                  reviewers: [],
-                  team_reviewers: [team3],
-                })
-                return true
+                expect(body).toMatchObject({ reviewers: [], team_reviewers: [team3] });
+                return true;
               })
-              .reply(201)
-            break
+              .reply(201);
+            break;
           }
         }
 
-        expect(
-          await runChecks({
-            pr: basePR,
-            octokit,
-            logger,
-            finishProcessReviews: null,
-          }),
-        ).toBe(scenario === "Approved" ? "success" : "failure")
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          scenario === "Approved" ? "success" : "failure",
+        );
 
-        expect(logHistory).toMatchSnapshot()
-      })
+        expect(logHistory).toMatchSnapshot();
+      });
     }
 
     it(`${scenario} for AndDistinctRule when user belongs to multiple teams`, async () => {
@@ -751,7 +587,7 @@ describe("Rules", () => {
           { name: team, members: [coworkers[0]] },
           { name: team2, members: [coworkers[0], coworkers[1]] },
         ],
-      })
+      });
 
       switch (scenario) {
         case "Has no approval":
@@ -760,27 +596,21 @@ describe("Rules", () => {
             .post(requestedReviewersApiPath, (body) => {
               expect(body).toMatchObject({
                 reviewers: [],
-                team_reviewers:
-                  scenario === "Has no approval" ? [team, team2] : [team2],
-              })
-              return true
+                team_reviewers: scenario === "Has no approval" ? [team, team2] : [team2],
+              });
+              return true;
             })
-            .reply(201)
-          break
+            .reply(201);
+          break;
         }
       }
 
-      expect(
-        await runChecks({
-          pr: basePR,
-          octokit,
-          logger,
-          finishProcessReviews: null,
-        }),
-      ).toBe(scenario === "Approved" ? "success" : "failure")
+      expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        scenario === "Approved" ? "success" : "failure",
+      );
 
-      expect(logHistory).toMatchSnapshot()
-    })
+      expect(logHistory).toMatchSnapshot();
+    });
   }
 
   for (const variant of ["user", "team"]) {
@@ -788,30 +618,18 @@ describe("Rules", () => {
       setup({
         scenario: "Has no approval",
         changedFiles: actionReviewTeamFiles,
-        teams: [
-          { name: defaultTeamsNames["action-review-team"], members: coworkers },
-        ],
-        preventReviewRequest: {
-          users: coworkers,
-          teams: Object.values(defaultTeamsNames),
-        },
-      })
+        teams: [{ name: defaultTeamsNames["action-review-team"], members: coworkers }],
+        preventReviewRequest: { users: coworkers, teams: Object.values(defaultTeamsNames) },
+      });
 
-      expect(
-        await runChecks({
-          pr: basePR,
-          octokit,
-          logger,
-          finishProcessReviews: null,
-        }),
-      ).toBe("failure")
+      expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe("failure");
 
-      expect(logHistory).toMatchSnapshot()
-    })
+      expect(logHistory).toMatchSnapshot();
+    });
   }
 
   afterEach(() => {
-    nock.cleanAll()
-    nock.enableNetConnect()
-  })
-})
+    nock.cleanAll();
+    nock.enableNetConnect();
+  });
+});

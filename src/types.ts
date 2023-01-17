@@ -1,122 +1,118 @@
-import githubActions from "@actions/github"
+import githubActions from "@actions/github";
 
-import { ActionLoggerInterface } from "./github/action/logger"
-import { ExtendedOctokit } from "./github/octokit"
-import { CommitState } from "./github/types"
+import { ActionLoggerInterface } from "./github/action/logger";
+import { ExtendedOctokit } from "./github/octokit";
+import { CommitState } from "./github/types";
 
 export type Context = {
-  logger: ActionLoggerInterface
-  octokit: ExtendedOctokit<ReturnType<typeof githubActions.getOctokit>>
-  finishProcessReviews: ((state: CommitState) => Promise<void>) | null
-}
+  logger: ActionLoggerInterface;
+  octokit: ExtendedOctokit<ReturnType<typeof githubActions.getOctokit>>;
+  finishProcessReviews: ((state: CommitState) => Promise<void>) | null;
+};
 
 export interface CommonLoggerInterface {
-  info: (...args: any[]) => void
-  warn: (...args: any[]) => void
-  error: (...args: any[]) => void
-  enableRequestLogging: boolean
+  info: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  enableRequestLogging: boolean;
 }
 
 export type PR = {
-  number: number
+  number: number;
   base: {
     repo: {
-      name: string
+      name: string;
       owner: {
-        login: string
-      }
-    }
-  }
+        login: string;
+      };
+    };
+  };
   head: {
-    sha: string
-  }
+    sha: string;
+  };
   user: {
-    login: string
-  }
-}
+    login: string;
+  };
+};
 
 export type BaseRule = {
-  name: string
-  condition:
-    | string
-    | { include: string }
-    | { exclude: string }
-    | { include: string; exclude: string }
-  check_type: "diff" | "changed_files"
-}
+  name: string;
+  condition: string | { include: string } | { exclude: string } | { include: string; exclude: string };
+  check_type: "diff" | "changed_files";
+};
 
 export type RuleCriteria = {
-  min_approvals: number
-  users?: string[] | null
-  teams?: string[] | null
-}
+  min_approvals: number;
+  users?: string[] | null;
+  teams?: string[] | null;
+};
 
-export type BasicRule = BaseRule & RuleCriteria
+export type BasicRule = BaseRule & RuleCriteria;
 
 export type OrRule = BaseRule & {
-  any: RuleCriteria[]
-}
+  any: RuleCriteria[];
+};
 
 export type AndRule = BaseRule & {
-  all: RuleCriteria[]
-}
+  all: RuleCriteria[];
+};
 
 export type AndDistinctRule = BaseRule & {
-  all_distinct: RuleCriteria[]
-}
+  all_distinct: RuleCriteria[];
+};
 
-export type RuleKind = "BasicRule" | "OrRule" | "AndRule" | "AndDistinctRule"
-export type Rule = BasicRule | OrRule | AndRule | AndDistinctRule
+export type RuleKind = "BasicRule" | "OrRule" | "AndRule" | "AndDistinctRule";
+export type Rule = BasicRule | OrRule | AndRule | AndDistinctRule;
 
 export type RulesConfigurations = {
   basic: {
-    kind: "BasicRule"
-    uniqueFields: ["min_approvals", "teams", "users"]
-    invalidFields: ["any", "all", "all_distinct"]
-  }
+    kind: "BasicRule";
+    uniqueFields: ["min_approvals", "teams", "users"];
+    invalidFields: ["any", "all", "all_distinct"];
+  };
   and: {
-    kind: "AndRule"
-    uniqueFields: ["all"]
-    invalidFields: ["min_approvals", "teams", "users", "any", "all_distinct"]
-  }
+    kind: "AndRule";
+    uniqueFields: ["all"];
+    invalidFields: ["min_approvals", "teams", "users", "any", "all_distinct"];
+  };
   or: {
-    kind: "OrRule"
-    uniqueFields: ["any"]
-    invalidFields: ["min_approvals", "teams", "users", "all", "all_distinct"]
-  }
+    kind: "OrRule";
+    uniqueFields: ["any"];
+    invalidFields: ["min_approvals", "teams", "users", "all", "all_distinct"];
+  };
   and_distinct: {
-    kind: "AndDistinctRule"
-    uniqueFields: ["all_distinct"]
-    invalidFields: ["min_approvals", "teams", "users", "all", "any"]
-  }
-}
+    kind: "AndDistinctRule";
+    uniqueFields: ["all_distinct"];
+    invalidFields: ["min_approvals", "teams", "users", "all", "any"];
+  };
+};
 
 export type Configuration = {
-  rules: Rule[]
-  "locks-review-team": string
-  "team-leads-team": string
-  "action-review-team": string
+  rules: Rule[];
+  "locks-review-team": string;
+  "team-leads-team": string;
+  "action-review-team": string;
   "prevent-review-request":
     | {
-        users: string[]
-        teams: string[]
+        users: string[];
+        teams: string[];
       }
     | undefined
-    | null
-}
+    | null;
+};
 
 export type RuleUserInfo = {
-  teams: Set<string> | null
-}
+  teams: Set<string> | null;
+};
 
 export type MatchedRule = {
-  name: string
-  kind: RuleKind
+  name: string;
+  kind: RuleKind;
   subconditions: (Omit<RuleCriteria, "teams" | "users"> & {
-    name: string
-    usersInfo: Map<string, RuleUserInfo>
-  })[]
-}
+    name: string;
+    usersInfo: Map<string, RuleUserInfo>;
+  })[];
+};
 
 export class RuleFailure {
   constructor(

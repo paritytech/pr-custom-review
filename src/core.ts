@@ -1,7 +1,7 @@
-import { OctokitResponse } from "@octokit/types"
-import assert from "assert"
-import Permutator from "iterative-permutation"
-import YAML from "yaml"
+import { OctokitResponse } from "@octokit/types";
+import assert from "assert";
+import Permutator from "iterative-permutation";
+import YAML from "yaml";
 
 import {
   actionReviewTeamFiles,
@@ -11,45 +11,29 @@ import {
   maxGithubApiFilesPerPage,
   maxGithubApiReviewsPerPage,
   maxGithubApiTeamMembersPerPage,
-} from "./constants"
-import { ActionData } from "./github/action/types"
-import { CommitState } from "./github/types"
-import {
-  BaseRule,
-  Context,
-  MatchedRule,
-  PR,
-  RuleCriteria,
-  RuleFailure,
-  RuleUserInfo,
-} from "./types"
-import { configurationSchema } from "./validation"
+} from "./constants";
+import { ActionData } from "./github/action/types";
+import { CommitState } from "./github/types";
+import { BaseRule, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
+import { configurationSchema } from "./validation";
 
-const displayUserWithTeams = (
-  user: string,
-  teams: Set<string> | undefined | null,
-) => {
-  return `${user}${
-    teams
-      ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})`
-      : ""
-  }`
-}
+const displayUserWithTeams = (user: string, teams: Set<string> | undefined | null) =>
+  `${user}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`;
 
 const updateUserToAskForReview = (
   usersToAskForReview: Map<string, RuleUserInfo>,
   user: string,
   userInfo: RuleUserInfo,
 ) => {
-  let userToAskForReview = usersToAskForReview.get(user)
+  let userToAskForReview = usersToAskForReview.get(user);
   if (userToAskForReview === undefined) {
     /*
       Shallow-copy the userInfo so that further updates don't affect the initial
       RuleUserInfo
     */
-    userToAskForReview = { ...userInfo }
+    userToAskForReview = { ...userInfo };
   } else if (userInfo.teams === null) {
-    userToAskForReview.teams = null
+    userToAskForReview.teams = null;
   } else if (
     /*
       Avoid registering a team for this user if their approval is supposed
@@ -57,36 +41,30 @@ const updateUserToAskForReview = (
     */
     userToAskForReview.teams !== null
   ) {
-    userToAskForReview.teams = new Set([
-      ...(userToAskForReview.teams ?? []),
-      ...(userInfo?.teams ?? []),
-    ])
+    userToAskForReview.teams = new Set([...(userToAskForReview.teams ?? []), ...(userInfo?.teams ?? [])]);
   }
-  usersToAskForReview.set(user, userToAskForReview)
-}
+  usersToAskForReview.set(user, userToAskForReview);
+};
 
 const processSubconditionMissingApprovers = (
   approvedBy: Set<string>,
   usersToAskForReview: Map<string, RuleUserInfo>,
   usersInfo: Map<string, RuleUserInfo>,
 ) => {
-  const missingApprovers: Map<string, RuleUserInfo> = new Map()
+  const missingApprovers: Map<string, RuleUserInfo> = new Map();
 
   for (const [user, userInfo] of usersInfo) {
     if (approvedBy.has(user)) {
-      continue
+      continue;
     }
-    updateUserToAskForReview(usersToAskForReview, user, userInfo)
-    missingApprovers.set(user, userInfo)
+    updateUserToAskForReview(usersToAskForReview, user, userInfo);
+    missingApprovers.set(user, userInfo);
   }
 
-  return missingApprovers
-}
+  return missingApprovers;
+};
 
-type TeamsCache = Map<
-  string /* Team slug */,
-  string[] /* Usernames of team members */
->
+type TeamsCache = Map<string /* Team slug */, string[] /* Usernames of team members */>;
 const combineUsers = async (
   { octokit }: Context,
   pr: PR,
@@ -94,42 +72,34 @@ const combineUsers = async (
   teams: string[],
   teamsCache: TeamsCache,
 ) => {
-  const users: Map<string, RuleUserInfo> = new Map()
+  const users: Map<string, RuleUserInfo> = new Map();
 
   for (const user of presetUsers) {
     if (pr.user.login != user) {
-      users.set(user, { ...users.get(user), teams: null })
+      users.set(user, { ...users.get(user), teams: null });
     }
   }
 
   for (const team of teams) {
-    let teamMembers = teamsCache.get(team)
+    let teamMembers = teamsCache.get(team);
 
     if (teamMembers === undefined) {
       teamMembers = await octokit.paginate(
         octokit.rest.teams.listMembersInOrg,
-        {
-          org: pr.base.repo.owner.login,
-          team_slug: team,
-          per_page: maxGithubApiTeamMembersPerPage,
-        },
-        (response) => {
-          return response.data.map(({ login }) => {
-            return login
-          })
-        },
-      )
-      teamsCache.set(team, teamMembers)
+        { org: pr.base.repo.owner.login, team_slug: team, per_page: maxGithubApiTeamMembersPerPage },
+        (response) => response.data.map(({ login }) => login),
+      );
+      teamsCache.set(team, teamMembers);
     }
 
     for (const teamMember of teamMembers) {
       if (pr.user.login === teamMember) {
-        continue
+        continue;
       }
 
-      const userInfo = users.get(teamMember)
+      const userInfo = users.get(teamMember);
       if (userInfo === undefined) {
-        users.set(teamMember, { teams: new Set([team]) })
+        users.set(teamMember, { teams: new Set([team]) });
       } else if (
         /*
           Avoid registering a team for this user if their approval is supposed
@@ -137,13 +107,13 @@ const combineUsers = async (
         */
         userInfo.teams !== null
       ) {
-        userInfo.teams.add(team)
+        userInfo.teams.add(team);
       }
     }
   }
 
-  return users
-}
+  return users;
+};
 
 /*
   This function should only depend on its inputs so that it can be tested
@@ -151,42 +121,33 @@ const combineUsers = async (
   function argument.
 */
 export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
-  const { octokit, logger } = ctx
+  const { octokit, logger } = ctx;
 
   const configFileResponse = await octokit.rest.repos.getContent({
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,
     path: configFilePath,
-  })
+  });
   if (!("content" in configFileResponse.data)) {
-    logger.fatal(
-      `Did not find "content" key in the response for ${configFilePath}`,
-    )
-    logger.info(configFileResponse.data)
-    return commitStateFailure
+    logger.fatal(`Did not find "content" key in the response for ${configFilePath}`);
+    logger.info(configFileResponse.data);
+    return commitStateFailure;
   }
 
-  const { content: configFileContentsEnconded } = configFileResponse.data
+  const { content: configFileContentsEnconded } = configFileResponse.data;
   if (typeof configFileContentsEnconded !== "string") {
-    logger.fatal(
-      `Content response for ${configFilePath} had unexpected type (expected string)`,
-    )
-    logger.info(configFileResponse.data)
-    return commitStateFailure
+    logger.fatal(`Content response for ${configFilePath} had unexpected type (expected string)`);
+    logger.info(configFileResponse.data);
+    return commitStateFailure;
   }
 
-  const configFileContents = Buffer.from(
-    configFileContentsEnconded,
-    "base64",
-  ).toString("utf-8")
+  const configFileContents = Buffer.from(configFileContentsEnconded, "base64").toString("utf-8");
 
-  const configValidationResult = configurationSchema.validate(
-    YAML.parse(configFileContents),
-  )
+  const configValidationResult = configurationSchema.validate(YAML.parse(configFileContents));
   if (configValidationResult.error) {
-    logger.fatal("Configuration file is invalid")
-    logger.info(configValidationResult.error)
-    return commitStateFailure
+    logger.fatal("Configuration file is invalid");
+    logger.info(configValidationResult.error);
+    return commitStateFailure;
   }
 
   const {
@@ -195,92 +156,68 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     "action-review-team": actionReviewTeam,
     rules,
     "prevent-review-request": preventReviewRequest,
-  } = configValidationResult.value
+  } = configValidationResult.value;
 
   const getUsersInfo = (() => {
     /*
       Set up a teams cache so that teams used multiple times don't have to be
       requested more than once
     */
-    const teamsCache: TeamsCache = new Map()
+    const teamsCache: TeamsCache = new Map();
 
-    return (users: string[], teams: string[]) => {
-      return combineUsers(ctx, pr, users, teams, teamsCache)
-    }
-  })()
+    return (users: string[], teams: string[]) => combineUsers(ctx, pr, users, teams, teamsCache);
+  })();
 
   const diffResponse = (await octokit.rest.pulls.get({
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,
     pull_number: pr.number,
     mediaType: { format: "diff" },
-  })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>
-  const { data: diff } = diffResponse
+  })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>;
+  const { data: diff } = diffResponse;
 
-  const matchedRules: MatchedRule[] = []
+  const matchedRules: MatchedRule[] = [];
 
   // Built in condition to search files with changes to locked lines
-  const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/
+  const lockExpression = /🔒[^\n]*\n[+|-]|(^|\n)[+|-][^\n]*🔒/;
   if (lockExpression.test(diff)) {
-    logger.info("Diff has changes to 🔒 lines or lines following 🔒")
+    logger.info("Diff has changes to 🔒 lines or lines following 🔒");
     const subconditions = [
-      {
-        min_approvals: 1,
-        teams: [locksReviewTeam],
-        name: `Locks Reviewers Approvals (team ${locksReviewTeam})`,
-      },
-      {
-        min_approvals: 1,
-        teams: [teamLeadsTeam],
-        name: `Team Leads Approvals (team ${teamLeadsTeam})`,
-      },
-    ]
+      { min_approvals: 1, teams: [locksReviewTeam], name: `Locks Reviewers Approvals (team ${locksReviewTeam})` },
+      { min_approvals: 1, teams: [teamLeadsTeam], name: `Team Leads Approvals (team ${teamLeadsTeam})` },
+    ];
     matchedRules.push({
       name: "Locks touched",
       kind: "AndDistinctRule",
       subconditions: await Promise.all(
         subconditions.map(async (subcondition) => {
-          return {
-            ...subcondition,
-            usersInfo: await getUsersInfo([], subcondition.teams),
-          }
+          return { ...subcondition, usersInfo: await getUsersInfo([], subcondition.teams) };
         }),
       ),
-    })
+    });
   }
 
   const changedFiles = new Set(
     (
-      await octokit.paginate(
-        "GET /repos/{owner}/{repo}/pulls/{pull_number}/files",
-        {
-          owner: pr.base.repo.owner.login,
-          repo: pr.base.repo.name,
-          pull_number: pr.number,
-          per_page: maxGithubApiFilesPerPage,
-        },
-      )
-    ).map(({ filename }) => {
-      return filename
-    }),
-  )
-  logger.info("Changed files", changedFiles)
+      await octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/files", {
+        owner: pr.base.repo.owner.login,
+        repo: pr.base.repo.name,
+        pull_number: pr.number,
+        per_page: maxGithubApiFilesPerPage,
+      })
+    ).map(({ filename }) => filename),
+  );
+  logger.info("Changed files", changedFiles);
 
   for (const actionReviewFile of actionReviewTeamFiles) {
     if (changedFiles.has(actionReviewFile)) {
-      const ruleName = "Action files changed"
+      const ruleName = "Action files changed";
       matchedRules.push({
         name: ruleName,
         kind: "BasicRule",
-        subconditions: [
-          {
-            name: ruleName,
-            min_approvals: 1,
-            usersInfo: await getUsersInfo([], [actionReviewTeam]),
-          },
-        ],
-      })
-      break
+        subconditions: [{ name: ruleName, min_approvals: 1, usersInfo: await getUsersInfo([], [actionReviewTeam]) }],
+      });
+      break;
     }
   }
 
@@ -301,104 +238,87 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
               return {
                 ...subcondition,
                 name: `${name}[${i}]`,
-                usersInfo: await getUsersInfo(
-                  subcondition?.users ?? [],
-                  subcondition?.teams ?? [],
-                ),
-              }
+                usersInfo: await getUsersInfo(subcondition?.users ?? [], subcondition?.teams ?? []),
+              };
             }),
           ),
-        })
-        break
+        });
+        break;
       }
       default: {
-        const exhaustivenessCheck: never = kind
+        const exhaustivenessCheck: never = kind;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`
-        logger.fatal(failureMessage)
-        throw new Error(failureMessage)
+        const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`;
+        logger.fatal(failureMessage);
+        throw new Error(failureMessage);
       }
     }
-  }
+  };
 
   for (const rule of rules) {
     const includeCondition = (() => {
       switch (typeof rule.condition) {
         case "string": {
-          return new RegExp(rule.condition, "gm")
+          return new RegExp(rule.condition, "gm");
         }
         case "object": {
-          assert(rule.condition)
-          return new RegExp(
-            "include" in rule.condition ? rule.condition.include : ".*",
-            "gm",
-          )
+          assert(rule.condition);
+          return new RegExp("include" in rule.condition ? rule.condition.include : ".*", "gm");
         }
         default: {
-          throw new Error(
-            `Unexpected type "${typeof rule.condition}" for rule "${
-              rule.name
-            }"`,
-          )
+          throw new Error(`Unexpected type "${typeof rule.condition}" for rule "${rule.name}"`);
         }
       }
-    })()
+    })();
 
     const excludeCondition =
-      typeof rule.condition === "object" &&
-      rule.condition !== null &&
-      "exclude" in rule.condition
+      typeof rule.condition === "object" && rule.condition !== null && "exclude" in rule.condition
         ? new RegExp(rule.condition.exclude)
-        : undefined
+        : undefined;
 
-    let isMatched = false
+    let isMatched = false;
     switch (rule.check_type) {
       case "changed_files": {
         changedFilesLoop: for (const file of changedFiles) {
-          isMatched =
-            includeCondition.test(file) && !excludeCondition?.test(file)
+          isMatched = includeCondition.test(file) && !excludeCondition?.test(file);
           if (isMatched) {
             logger.info(
               `Matched expression "${
-                typeof rule.condition === "string"
-                  ? rule.condition
-                  : JSON.stringify(rule.condition)
+                typeof rule.condition === "string" ? rule.condition : JSON.stringify(rule.condition)
               }" of rule "${rule.name}" for the file ${file}`,
-            )
-            break changedFilesLoop
+            );
+            break changedFilesLoop;
           }
         }
-        break
+        break;
       }
       case "diff": {
-        isMatched = includeCondition.test(diff) && !excludeCondition?.test(diff)
+        isMatched = includeCondition.test(diff) && !excludeCondition?.test(diff);
         if (isMatched) {
           logger.info(
             `Matched expression "${
-              typeof rule.condition === "string"
-                ? rule.condition
-                : JSON.stringify(rule.condition)
+              typeof rule.condition === "string" ? rule.condition : JSON.stringify(rule.condition)
             }" of rule "${rule.name}" on diff`,
-          )
+          );
         }
-        break
+        break;
       }
       default: {
-        const exhaustivenessCheck: never = rule.check_type
+        const exhaustivenessCheck: never = rule.check_type;
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        logger.fatal(`Check type is not handled: ${exhaustivenessCheck}`)
-        return commitStateFailure
+        logger.fatal(`Check type is not handled: ${exhaustivenessCheck}`);
+        return commitStateFailure;
       }
     }
     if (!isMatched) {
-      continue
+      continue;
     }
 
     if (/* BasicRule */ "min_approvals" in rule) {
       if (typeof rule.min_approvals !== "number") {
-        logger.fatal(`Rule "${rule.name}" has invalid min_approvals`)
-        logger.info(rule)
-        return commitStateFailure
+        logger.fatal(`Rule "${rule.name}" has invalid min_approvals`);
+        logger.info(rule);
+        return commitStateFailure;
       }
 
       matchedRules.push({
@@ -411,36 +331,28 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           },
         ],
         kind: "BasicRule",
-      })
+      });
     } else if (/* AndRule */ "all" in rule) {
-      await processComplexRule("AndRule", rule.name, rule.all)
+      await processComplexRule("AndRule", rule.name, rule.all);
     } else if (/* OrRule */ "any" in rule) {
-      await processComplexRule("OrRule", rule.name, rule.any)
+      await processComplexRule("OrRule", rule.name, rule.any);
     } else if (/* AndDistinctRule */ "all_distinct" in rule) {
-      await processComplexRule("AndDistinctRule", rule.name, rule.all_distinct)
+      await processComplexRule("AndDistinctRule", rule.name, rule.all_distinct);
     } else {
-      const unmatchedRule = rule as BaseRule
-      throw new Error(
-        `Rule "${unmatchedRule.name}" could not be matched to any known kind`,
-      )
+      const unmatchedRule = rule as BaseRule;
+      throw new Error(`Rule "${unmatchedRule.name}" could not be matched to any known kind`);
     }
   }
 
   if (matchedRules.length !== 0) {
-    const reviews = await octokit.paginate(
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews",
-      {
-        owner: pr.base.repo.owner.login,
-        repo: pr.base.repo.name,
-        pull_number: pr.number,
-        per_page: maxGithubApiReviewsPerPage,
-      },
-    )
+    const reviews = await octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", {
+      owner: pr.base.repo.owner.login,
+      repo: pr.base.repo.name,
+      pull_number: pr.number,
+      per_page: maxGithubApiReviewsPerPage,
+    });
 
-    const latestReviews: Map<
-      number,
-      { id: number; user: string; isApproval: boolean }
-    > = new Map()
+    const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
     for (const review of reviews) {
       // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
       if (
@@ -450,9 +362,9 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
         review.user === null ||
         review.user === undefined
       ) {
-        continue
+        continue;
       }
-      const prevReview = latestReviews.get(review.user.id)
+      const prevReview = latestReviews.get(review.user.id);
       if (
         prevReview === undefined ||
         // The latest review is the one with the highest id
@@ -462,102 +374,76 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
           id: review.id,
           user: review.user.login,
           isApproval: review.state === "APPROVED",
-        })
+        });
       }
     }
-    logger.info("latestReviews", latestReviews.values())
+    logger.info("latestReviews", latestReviews.values());
 
-    const rulesOutcomes: (RuleFailure | undefined)[] = matchedRules.map(
-      (rule) => {
-        const ruleUserCount = rule.subconditions.reduce(
-          (acc, { usersInfo }) => {
-            return acc + usersInfo.size
-          },
-          0,
-        )
+    const rulesOutcomes: (RuleFailure | undefined)[] = matchedRules.map((rule) => {
+      const ruleUserCount = rule.subconditions.reduce((acc, { usersInfo }) => acc + usersInfo.size, 0);
 
-        if (ruleUserCount === 0) {
-          const minApprovals = (() => {
-            switch (rule.kind) {
-              case "AndDistinctRule": {
-                return rule.subconditions.reduce((acc, { min_approvals }) => {
-                  return acc + min_approvals
-                }, 0)
-              }
-              case "BasicRule":
-              case "AndRule": {
-                return Math.max(
-                  ...rule.subconditions.map(({ min_approvals }) => {
-                    return min_approvals
-                  }),
-                )
-              }
-              case "OrRule": {
-                return Math.min(
-                  ...rule.subconditions.map(({ min_approvals }) => {
-                    return min_approvals
-                  }),
-                )
-              }
-              default: {
-                const exhaustivenessCheck: never = rule.kind
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                const message = `Rule kind not handled: ${exhaustivenessCheck}`
-                logger.fatal(message)
-                throw new Error(message)
-              }
+      if (ruleUserCount === 0) {
+        const minApprovals = (() => {
+          switch (rule.kind) {
+            case "AndDistinctRule": {
+              return rule.subconditions.reduce((acc, { min_approvals }) => acc + min_approvals, 0);
             }
-          })()
+            case "BasicRule":
+            case "AndRule": {
+              return Math.max(...rule.subconditions.map(({ min_approvals }) => min_approvals));
+            }
+            case "OrRule": {
+              return Math.min(...rule.subconditions.map(({ min_approvals }) => min_approvals));
+            }
+            default: {
+              const exhaustivenessCheck: never = rule.kind;
+              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+              const message = `Rule kind not handled: ${exhaustivenessCheck}`;
+              logger.fatal(message);
+              throw new Error(message);
+            }
+          }
+        })();
 
-          let approvalCount = 0
+        let approvalCount = 0;
+        for (const review of latestReviews.values()) {
+          if (review.isApproval && ++approvalCount >= minApprovals) {
+            return;
+          }
+        }
+
+        return new RuleFailure(
+          rule,
+          `Rule "${rule.name}" requires at least ${minApprovals} approvals, but ${approvalCount} were given.`,
+          new Map(),
+        );
+      }
+
+      switch (rule.kind) {
+        case "AndDistinctRule": {
+          const approvedBy: Set<string> = new Set();
+
           for (const review of latestReviews.values()) {
-            if (review.isApproval && ++approvalCount >= minApprovals) {
-              return
+            if (review.isApproval && rule.subconditions.find(({ usersInfo }) => usersInfo.has(review.user))) {
+              approvedBy.add(review.user);
             }
           }
 
-          return new RuleFailure(
-            rule,
-            `Rule "${rule.name}" requires at least ${minApprovals} approvals, but ${approvalCount} were given.`,
-            new Map(),
-          )
-        }
+          const minApprovals = rule.subconditions.reduce((acc, { min_approvals }) => acc + min_approvals, 0);
 
-        switch (rule.kind) {
-          case "AndDistinctRule": {
-            const approvedBy: Set<string> = new Set()
+          const approvalGroups = rule.subconditions.map((subcondition) => {
+            const subconditionApprovedBy: Set<string> = new Set();
 
-            for (const review of latestReviews.values()) {
-              if (
-                review.isApproval &&
-                rule.subconditions.find(({ usersInfo }) => {
-                  return usersInfo.has(review.user)
-                })
-              ) {
-                approvedBy.add(review.user)
+            for (const user of subcondition.usersInfo.keys()) {
+              if (approvedBy.has(user)) {
+                subconditionApprovedBy.add(user);
               }
             }
 
-            const minApprovals = rule.subconditions.reduce(
-              (acc, { min_approvals }) => {
-                return acc + min_approvals
-              },
-              0,
-            )
+            return { subcondition, subconditionApprovedBy };
+          });
 
-            const approvalGroups = rule.subconditions.map((subcondition) => {
-              const subconditionApprovedBy: Set<string> = new Set()
-
-              for (const user of subcondition.usersInfo.keys()) {
-                if (approvedBy.has(user)) {
-                  subconditionApprovedBy.add(user)
-                }
-              }
-
-              return { subcondition, subconditionApprovedBy }
-            })
-
-            /*
+          /*
               Test every possible combination of every subcondition for each
               approval group on each subcondition. This is needed when it would
               be more favorable to use an approval for a different subcondition
@@ -586,17 +472,16 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
               one found, with bailouts for when the overall target approval
               count is reached.
             */
-            type CombinationApprovedBy = Map<
-              /* subcondition Index */ number,
-              /* users which approved the subcondition */ Set<string>
-            >
-            let bestApproversCombination: CombinationApprovedBy = new Map()
+          type CombinationApprovedBy = Map<
+            /* subcondition Index */ number,
+            /* users which approved the subcondition */ Set<string>
+          >;
+          let bestApproversCombination: CombinationApprovedBy = new Map();
 
-            for (let i = 0; i < approvalGroups.length; i++) {
-              subconditionCombinationsLoop: for (const userStartingCombination of approvalGroups[
-                i
-              ].subconditionApprovedBy) {
-                /*
+          for (let i = 0; i < approvalGroups.length; i++) {
+            subconditionCombinationsLoop: for (const userStartingCombination of approvalGroups[i]
+              .subconditionApprovedBy) {
+              /*
                   The combinations are tried by alternating which user starts
                   the combination on each pass.
 
@@ -624,349 +509,296 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
                   to go through every combination every time, only in the worst
                   case.
                 */
-                const combinationApprovers: CombinationApprovedBy = new Map([
-                  [i, new Set([userStartingCombination])],
-                ])
+              const combinationApprovers: CombinationApprovedBy = new Map([[i, new Set([userStartingCombination])]]);
 
-                /*
+              /*
                   The least bad combination is the first one tried, since at
                   least it has one approval
                 */
-                if (bestApproversCombination.size === 0) {
-                  bestApproversCombination = combinationApprovers
-                }
+              if (bestApproversCombination.size === 0) {
+                bestApproversCombination = combinationApprovers;
+              }
 
-                subconditionsLoop: for (
-                  let j = 0;
-                  j < approvalGroups.length;
-                  j++
-                ) {
-                  const { subcondition, subconditionApprovedBy } =
-                    approvalGroups[j]
+              subconditionsLoop: for (let j = 0; j < approvalGroups.length; j++) {
+                const { subcondition, subconditionApprovedBy } = approvalGroups[j];
 
-                  /*
+                /*
                     Check if the subcondition's min_approvals target has already
                     been fulfilled by the initialization of
                     combinationApprovedBy
                   */
-                  if (j === i) {
-                    const approversCount = combinationApprovers.get(j)?.size
-                    assert(
-                      approversCount,
-                      "approversCount should be >=0 because combinationApprovers was initialized",
-                    )
-                    if (approversCount === subcondition.min_approvals) {
-                      continue
-                    }
+                if (j === i) {
+                  const approversCount = combinationApprovers.get(j)?.size;
+                  assert(approversCount, "approversCount should be >=0 because combinationApprovers was initialized");
+                  if (approversCount === subcondition.min_approvals) {
+                    continue;
                   }
+                }
 
-                  let approvalCountAtStartOfPermutation = 0
-                  for (const approvers of combinationApprovers.values()) {
-                    approvalCountAtStartOfPermutation += approvers.size
-                  }
+                let approvalCountAtStartOfPermutation = 0;
+                for (const approvers of combinationApprovers.values()) {
+                  approvalCountAtStartOfPermutation += approvers.size;
+                }
 
-                  const subconditionApproversPermutator = new Permutator(
-                    /*
+                const subconditionApproversPermutator = new Permutator(
+                  /*
                        Permutator mutates the input array, therefore make sure
                        to *not* pass an array reference to it
                     */
-                    Array.from(subconditionApprovedBy),
-                  )
-                  while (subconditionApproversPermutator.hasNext()) {
-                    const usersPermutation =
-                      subconditionApproversPermutator.next()
+                  Array.from(subconditionApprovedBy),
+                );
+                while (subconditionApproversPermutator.hasNext()) {
+                  const usersPermutation = subconditionApproversPermutator.next();
 
-                    /*
+                  /*
                       Initialize a new Set here so that the effects of this
                       permutation doesn't affect combinationApprovers until it
                       is the right time to commit the results
                     */
-                    const subconditionApprovers = new Set(
-                      combinationApprovers.get(j)?.values(),
-                    )
+                  const subconditionApprovers = new Set(combinationApprovers.get(j)?.values());
 
-                    usersPermutationLoop: for (const user of usersPermutation) {
-                      for (const approvers of combinationApprovers.values()) {
-                        if (approvers.has(user)) {
-                          continue usersPermutationLoop
-                        }
+                  usersPermutationLoop: for (const user of usersPermutation) {
+                    for (const approvers of combinationApprovers.values()) {
+                      if (approvers.has(user)) {
+                        continue usersPermutationLoop;
                       }
+                    }
 
-                      if (subconditionApprovers.has(user)) {
-                        continue usersPermutationLoop
-                      }
+                    if (subconditionApprovers.has(user)) {
+                      continue usersPermutationLoop;
+                    }
 
-                      subconditionApprovers.add(user)
+                    subconditionApprovers.add(user);
 
-                      /*
+                    /*
                         We only want to commit subconditionApprovers to
                         combinationApprovers if the current approval count is
                         higher than the current best one
                       */
-                      if (
-                        subconditionApprovers.size <
-                        (combinationApprovers.get(j)?.size ?? 0)
-                      ) {
-                        continue
-                      }
+                    if (subconditionApprovers.size < (combinationApprovers.get(j)?.size ?? 0)) {
+                      continue;
+                    }
 
-                      combinationApprovers.set(j, subconditionApprovers)
+                    combinationApprovers.set(j, subconditionApprovers);
 
-                      let approvalCountNow = 0
-                      for (const users of combinationApprovers.values()) {
-                        approvalCountNow += users.size
-                      }
-                      if (approvalCountNow === minApprovals) {
-                        /*
+                    let approvalCountNow = 0;
+                    for (const users of combinationApprovers.values()) {
+                      approvalCountNow += users.size;
+                    }
+                    if (approvalCountNow === minApprovals) {
+                      /*
                           Bail out when combination which fulfills all
                           subconditions is found
                         */
-                        bestApproversCombination = combinationApprovers
-                        break subconditionCombinationsLoop
-                      }
+                      bestApproversCombination = combinationApprovers;
+                      break subconditionCombinationsLoop;
+                    }
 
-                      let approvalCountOfBestCombination = 0
-                      for (const approvers of bestApproversCombination.values()) {
-                        approvalCountOfBestCombination += approvers.size
-                      }
-                      if (approvalCountNow > approvalCountOfBestCombination) {
-                        bestApproversCombination = combinationApprovers
-                      }
+                    let approvalCountOfBestCombination = 0;
+                    for (const approvers of bestApproversCombination.values()) {
+                      approvalCountOfBestCombination += approvers.size;
+                    }
+                    if (approvalCountNow > approvalCountOfBestCombination) {
+                      bestApproversCombination = combinationApprovers;
+                    }
 
-                      if (
-                        approvalCountNow - approvalCountAtStartOfPermutation ===
-                        subcondition.min_approvals
-                      ) {
-                        continue subconditionsLoop
-                      }
+                    if (approvalCountNow - approvalCountAtStartOfPermutation === subcondition.min_approvals) {
+                      continue subconditionsLoop;
                     }
                   }
                 }
               }
             }
+          }
 
-            let approvalCountOfBestApproversArrangement = 0
-            for (const approvers of bestApproversCombination.values()) {
-              approvalCountOfBestApproversArrangement += approvers.size
+          let approvalCountOfBestApproversArrangement = 0;
+          for (const approvers of bestApproversCombination.values()) {
+            approvalCountOfBestApproversArrangement += approvers.size;
+          }
+          assert(
+            approvalCountOfBestApproversArrangement <= minApprovals,
+            "Subconditions should not accumulate more approvals than necessary",
+          );
+
+          // It's only meaningful to log this if some approval was had
+          if (approvalCountOfBestApproversArrangement > 0) {
+            logger.log({
+              ruleName: rule.name,
+              approvalCountOfBestCombination: approvalCountOfBestApproversArrangement,
+              combinationApprovedByMostPeopleOverall: new Map(
+                Array.from(bestApproversCombination).map(([subconditionIndex, approvers]) => [
+                  rule.subconditions[subconditionIndex].name ?? `${rule.name}[${subconditionIndex}]`,
+                  approvers,
+                ]),
+              ),
+            });
+          }
+
+          if (approvalCountOfBestApproversArrangement === minApprovals) {
+            for (const [subconditionIndex, approvers] of bestApproversCombination) {
+              const subcondition = rule.subconditions[subconditionIndex];
+              assert(
+                approvers.size === subcondition.min_approvals,
+                `Subcondition "${
+                  subcondition.name ?? `${rule.name}[${subconditionIndex}]`
+                }"'s approvers should have exactly ${rule.subconditions[subconditionIndex].min_approvals} approvals`,
+              );
             }
-            assert(
-              approvalCountOfBestApproversArrangement <= minApprovals,
-              "Subconditions should not accumulate more approvals than necessary",
-            )
+          } else {
+            const usersToAskForReview: Map<string, RuleUserInfo> = new Map();
 
-            // It's only meaningful to log this if some approval was had
-            if (approvalCountOfBestApproversArrangement > 0) {
-              logger.log({
-                ruleName: rule.name,
-                approvalCountOfBestCombination:
-                  approvalCountOfBestApproversArrangement,
-                combinationApprovedByMostPeopleOverall: new Map(
-                  Array.from(bestApproversCombination).map(
-                    ([subconditionIndex, approvers]) => {
-                      return [
-                        rule.subconditions[subconditionIndex].name ??
-                          `${rule.name}[${subconditionIndex}]`,
-                        approvers,
-                      ]
-                    },
-                  ),
-                ),
-              })
-            }
+            const unfulfilledSubconditionsErrorMessage = approvalGroups.reduce(
+              (acc, { subcondition }, subconditionIndex) => {
+                const approversCount = bestApproversCombination.get(subconditionIndex)?.size ?? 0;
 
-            if (approvalCountOfBestApproversArrangement === minApprovals) {
-              for (const [
-                subconditionIndex,
-                approvers,
-              ] of bestApproversCombination) {
-                const subcondition = rule.subconditions[subconditionIndex]
+                if (approversCount === subcondition.min_approvals) {
+                  return acc;
+                }
+
                 assert(
-                  approvers.size === subcondition.min_approvals,
-                  `Subcondition "${
-                    subcondition.name ?? `${rule.name}[${subconditionIndex}]`
-                  }"'s approvers should have exactly ${
-                    rule.subconditions[subconditionIndex].min_approvals
-                  } approvals`,
-                )
-              }
-            } else {
-              const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
+                  approversCount <= subcondition.min_approvals,
+                  "Subconditions should not accumulate more approvals than necessary",
+                );
 
-              const unfulfilledSubconditionsErrorMessage =
-                approvalGroups.reduce(
-                  (acc, { subcondition }, subconditionIndex) => {
-                    const approversCount =
-                      bestApproversCombination.get(subconditionIndex)?.size ?? 0
+                const missingApprovers = processSubconditionMissingApprovers(
+                  approvedBy,
+                  usersToAskForReview,
+                  subcondition.usersInfo,
+                );
 
-                    if (approversCount === subcondition.min_approvals) {
-                      return acc
-                    }
+                return `${acc}\nSubcondition "${
+                  subcondition.name
+                }" does not have approval from the following users: ${Array.from(missingApprovers.entries())
+                  .map(([user, { teams }]) => displayUserWithTeams(user, teams))
+                  .join(", ")}.`;
+              },
+              "",
+            );
 
-                    assert(
-                      approversCount <= subcondition.min_approvals,
-                      "Subconditions should not accumulate more approvals than necessary",
-                    )
+            const problem = `Rule "${rule.name}" needs in total ${minApprovals} DISTINCT approvals, but ${approvalCountOfBestApproversArrangement} were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.${unfulfilledSubconditionsErrorMessage}`;
 
-                    const missingApprovers =
-                      processSubconditionMissingApprovers(
-                        approvedBy,
-                        usersToAskForReview,
-                        subcondition.usersInfo,
-                      )
-
-                    return `${acc}\nSubcondition "${
-                      subcondition.name
-                    }" does not have approval from the following users: ${Array.from(
-                      missingApprovers.entries(),
-                    )
-                      .map(([user, { teams }]) => {
-                        return displayUserWithTeams(user, teams)
-                      })
-                      .join(", ")}.`
-                  },
-                  "",
-                )
-
-              const problem = `Rule "${rule.name}" needs in total ${minApprovals} DISTINCT approvals, but ${approvalCountOfBestApproversArrangement} were given. Users whose approvals counted towards one criterion are excluded from other criteria. For example: even if a user belongs multiple teams, their approval will only count towards one of them; or even if a user is referenced in multiple subconditions, their approval will only count towards one subcondition.${unfulfilledSubconditionsErrorMessage}`
-
-              return new RuleFailure(rule, problem, usersToAskForReview)
-            }
-            break
+            return new RuleFailure(rule, problem, usersToAskForReview);
           }
-          case "AndRule":
-          case "BasicRule":
-          case "OrRule": {
-            const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
-            const problems: string[] = []
-
-            for (const subcondition of rule.subconditions) {
-              const approvedBy: Set<string> = new Set()
-
-              for (const review of latestReviews.values()) {
-                if (
-                  review.isApproval &&
-                  subcondition.usersInfo.has(review.user)
-                ) {
-                  approvedBy.add(review.user)
-                }
-              }
-
-              if (approvedBy.size >= subcondition.min_approvals) {
-                if (rule.kind === "OrRule") {
-                  return
-                } else {
-                  continue
-                }
-              }
-
-              const missingApprovers = processSubconditionMissingApprovers(
-                approvedBy,
-                usersToAskForReview,
-                subcondition.usersInfo,
-              )
-
-              problems.push(
-                `${
-                  rule.subconditions.length === 1
-                    ? `Rule "${rule.name}"`
-                    : `Subcondition "${subcondition.name}"`
-                } needs at least ${subcondition.min_approvals} approvals, but ${
-                  approvedBy.size
-                } were given. The following users have not approved yet: ${Array.from(
-                  missingApprovers.entries(),
-                )
-                  .map(([user, { teams }]) => {
-                    return displayUserWithTeams(user, teams)
-                  })
-                  .join(", ")}.`,
-              )
-            }
-
-            if (problems.length) {
-              return new RuleFailure(
-                rule,
-                problems.join("\n"),
-                usersToAskForReview,
-              )
-            }
-
-            break
-          }
-          default: {
-            const exhaustivenessCheck: never = rule.kind
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`
-            logger.fatal(failureMessage)
-            throw new Error(failureMessage)
-          }
+          break;
         }
-      },
-    )
+        case "AndRule":
+        case "BasicRule":
+        case "OrRule": {
+          const usersToAskForReview: Map<string, RuleUserInfo> = new Map();
+          const problems: string[] = [];
 
-    const problems: string[] = []
-    const usersToAskForReview: Map<string, RuleUserInfo> = new Map()
+          for (const subcondition of rule.subconditions) {
+            const approvedBy: Set<string> = new Set();
+
+            for (const review of latestReviews.values()) {
+              if (review.isApproval && subcondition.usersInfo.has(review.user)) {
+                approvedBy.add(review.user);
+              }
+            }
+
+            if (approvedBy.size >= subcondition.min_approvals) {
+              if (rule.kind === "OrRule") {
+                return;
+              } else {
+                continue;
+              }
+            }
+
+            const missingApprovers = processSubconditionMissingApprovers(
+              approvedBy,
+              usersToAskForReview,
+              subcondition.usersInfo,
+            );
+
+            problems.push(
+              `${
+                rule.subconditions.length === 1 ? `Rule "${rule.name}"` : `Subcondition "${subcondition.name}"`
+              } needs at least ${subcondition.min_approvals} approvals, but ${
+                approvedBy.size
+              } were given. The following users have not approved yet: ${Array.from(missingApprovers.entries())
+                .map(([user, { teams }]) => displayUserWithTeams(user, teams))
+                .join(", ")}.`,
+            );
+          }
+
+          if (problems.length) {
+            return new RuleFailure(rule, problems.join("\n"), usersToAskForReview);
+          }
+
+          break;
+        }
+        default: {
+          const exhaustivenessCheck: never = rule.kind;
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          const failureMessage = `Rule kind is not handled: ${exhaustivenessCheck}`;
+          logger.fatal(failureMessage);
+          throw new Error(failureMessage);
+        }
+      }
+    });
+
+    const problems: string[] = [];
+    const usersToAskForReview: Map<string, RuleUserInfo> = new Map();
 
     for (const outcome of rulesOutcomes) {
       if (outcome === undefined) {
-        continue
+        continue;
       }
 
-      problems.push(outcome.problem)
+      problems.push(outcome.problem);
 
       for (const [user, userInfo] of outcome.usersToAskForReview) {
-        updateUserToAskForReview(usersToAskForReview, user, userInfo)
+        updateUserToAskForReview(usersToAskForReview, user, userInfo);
       }
     }
 
     if (usersToAskForReview.size !== 0) {
-      logger.info("usersToAskForReview", usersToAskForReview)
-      const teams: Set<string> = new Set()
-      const users: Set<string> = new Set()
+      logger.info("usersToAskForReview", usersToAskForReview);
+      const teams: Set<string> = new Set();
+      const users: Set<string> = new Set();
       for (const [user, userInfo] of usersToAskForReview) {
         if (userInfo.teams === null) {
           if (!preventReviewRequest?.users?.includes(user)) {
-            users.add(user)
+            users.add(user);
           }
         } else {
           for (const team of userInfo.teams) {
             if (!preventReviewRequest?.teams?.includes(team)) {
-              teams.add(team)
+              teams.add(team);
             }
           }
         }
       }
       if (users.size || teams.size) {
-        await octokit.request(
-          "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
-          {
-            owner: pr.base.repo.owner.login,
-            repo: pr.base.repo.name,
-            pull_number: pr.number,
-            reviewers: Array.from(users),
-            team_reviewers: Array.from(teams),
-          },
-        )
+        await octokit.request("POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", {
+          owner: pr.base.repo.owner.login,
+          repo: pr.base.repo.name,
+          pull_number: pr.number,
+          reviewers: Array.from(users),
+          team_reviewers: Array.from(teams),
+        });
       }
     }
 
     if (problems.length !== 0) {
-      logger.fatal("The following problems were found:")
+      logger.fatal("The following problems were found:");
       for (const problem of problems) {
-        logger.info(problem)
+        logger.info(problem);
       }
-      logger.info("")
-      return commitStateFailure
+      logger.info("");
+      return commitStateFailure;
     }
   }
 
-  return commitStateSuccess
-}
+  return commitStateSuccess;
+};
 
-export const getFinishProcessReviews = (
-  { octokit, logger }: Omit<Context, "finishProcessReviews">,
-  { jobName, detailsUrl, pr, runId, actionRepository }: ActionData,
-) => {
-  return async (state: CommitState) => {
+export const getFinishProcessReviews =
+  (
+    { octokit, logger }: Omit<Context, "finishProcessReviews">,
+    { jobName, detailsUrl, pr, runId, actionRepository }: ActionData,
+  ) =>
+  async (state: CommitState) => {
     // Fallback URL in case we are not able to detect the current job
     if (state === "failure" && jobName !== undefined) {
       /*
@@ -979,36 +811,27 @@ export const getFinishProcessReviews = (
         owner: pr.base.repo.owner.login,
         repo: pr.base.repo.name,
         run_id: runId,
-      })
+      });
       for (const job of jobs) {
         if (job.name === jobName) {
-          let stepNumber: number | undefined = undefined
+          let stepNumber: number | undefined = undefined;
           if (actionRepository !== undefined) {
-            const actionRepositoryMatch = actionRepository.match(/[^/]*$/)
+            const actionRepositoryMatch = actionRepository.match(/[^/]*$/);
             if (actionRepositoryMatch === null) {
-              logger.warn(
-                `Action repository name could not be extracted from ${actionRepository}`,
-              )
+              logger.warn(`Action repository name could not be extracted from ${actionRepository}`);
             } else {
-              const actionStep = job.steps?.find(({ name }) => {
-                return name === actionRepositoryMatch[0]
-              })
+              const actionStep = job.steps?.find(({ name }) => name === actionRepositoryMatch[0]);
               if (actionStep === undefined) {
-                logger.warn(
-                  `Failed to find ${actionRepositoryMatch[0]} in the job's steps`,
-                  job.steps,
-                )
+                logger.warn(`Failed to find ${actionRepositoryMatch[0]} in the job's steps`, job.steps);
               } else {
-                stepNumber = actionStep.number
+                stepNumber = actionStep.number;
               }
             }
           }
           detailsUrl = `${job.html_url as string}${
-            stepNumber
-              ? `#step:${stepNumber}:${logger.relevantStartingLine}`
-              : ""
-          }`
-          break
+            stepNumber ? `#step:${stepNumber}:${logger.relevantStartingLine}` : ""
+          }`;
+          break;
         }
       }
     }
@@ -1021,24 +844,23 @@ export const getFinishProcessReviews = (
       context: "Check reviews",
       target_url: detailsUrl,
       description: "Please visit Details for more information",
-    })
+    });
 
-    logger.info(`Final state: ${state}`)
-  }
-}
+    logger.info(`Final state: ${state}`);
+  };
 
 export const processReviews = async (ctx: Context, { pr }: ActionData) => {
-  const { finishProcessReviews, logger } = ctx
-  return runChecks({ ...ctx, pr })
+  const { finishProcessReviews, logger } = ctx;
+  return await runChecks({ ...ctx, pr })
     .then((state) => {
       if (finishProcessReviews) {
-        return finishProcessReviews(state)
+        return finishProcessReviews(state);
       }
     })
     .catch((error) => {
-      logger.fatal(error)
+      logger.fatal(error);
       if (finishProcessReviews) {
-        return finishProcessReviews("failure")
+        return finishProcessReviews("failure");
       }
-    })
-}
+    });
+};

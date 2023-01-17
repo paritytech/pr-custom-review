@@ -1,41 +1,36 @@
-import { Octokit } from "@octokit/rest"
+import { Octokit } from "@octokit/rest";
 
-import { getOctokit } from "src/github/octokit"
-import { envNumberVar, envVar } from "src/utils"
+import { getOctokit } from "src/github/octokit";
+import { envNumberVar, envVar } from "src/utils";
 
-import { ServerLogger } from "./logger"
-import { setup } from "./setup"
-import { ServerContext } from "./types"
+import { ServerLogger } from "./logger";
+import { setup } from "./setup";
+import { ServerContext } from "./types";
 
 const main = async () => {
   const logFormat = (() => {
-    const value = process.env.LOG_FORMAT
+    const value = process.env.LOG_FORMAT;
     switch (value) {
       case undefined: {
-        return null
+        return null;
       }
       case "json": {
-        return value
+        return value;
       }
       default: {
-        throw new Error(`Invalid $LOG_FORMAT: ${value}`)
+        throw new Error(`Invalid $LOG_FORMAT: ${value}`);
       }
     }
-  })()
+  })();
 
-  const logger = new ServerLogger({
-    name: "app",
-    impl: console,
-    logFormat,
-    minLogLevel: "info",
-  })
+  const logger = new ServerLogger({ name: "app", impl: console, logFormat, minLogLevel: "info" });
 
   /*
     Instead of spamming error messages once some uncaught error is found, log
     only the first event as "error" and subsequent ones as "info", then
     immediately exit the application.
   */
-  let isTerminating = false
+  let isTerminating = false;
   for (const event of ["uncaughtException", "unhandledRejection"] as const) {
     /*
       https://nodejs.org/api/process.html#event-uncaughtexception
@@ -43,46 +38,40 @@ const main = async () => {
     */
     process.on(event, (error, origin) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const errorData = { event, error, origin }
+      const errorData = { event, error, origin };
 
       if (isTerminating) {
         logger.info(
           errorData,
           "Caught error event; it will not be logged as an error because the application is being terminated...",
-        )
-        return
+        );
+        return;
       }
-      isTerminating = true
+      isTerminating = true;
 
-      logger.error(
-        errorData,
-        "Caught error event; application will exit with an error exit code",
-      )
+      logger.error(errorData, "Caught error event; application will exit with an error exit code");
 
-      process.exit(1)
-    })
+      process.exit(1);
+    });
   }
 
-  const serverPort = envNumberVar("PORT")
+  const serverPort = envNumberVar("PORT");
 
-  const githubAccessToken = envVar("GITHUB_ACCESS_TOKEN")
-  const githubAccessTokenOwner = envVar("GITHUB_ACCESS_TOKEN_OWNER")
+  const githubAccessToken = envVar("GITHUB_ACCESS_TOKEN");
+  const githubAccessTokenOwner = envVar("GITHUB_ACCESS_TOKEN_OWNER");
 
   const octokit = getOctokit(new Octokit(), logger, () => {
-    return { authorization: `token ${githubAccessToken}` }
-  })
+    return { authorization: `token ${githubAccessToken}` };
+  });
 
   const ctx: ServerContext = {
     logger,
     octokit,
-    github: {
-      accessToken: githubAccessToken,
-      accessTokenOwner: githubAccessTokenOwner,
-    },
-  }
+    github: { accessToken: githubAccessToken, accessTokenOwner: githubAccessTokenOwner },
+  };
 
-  const server = setup(ctx)
-  await server.listen({ host: "0.0.0.0", port: serverPort })
-}
+  const server = setup(ctx);
+  await server.listen({ host: "0.0.0.0", port: serverPort });
+};
 
-void main()
+void main();
