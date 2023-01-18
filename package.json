@@ -43,7 +43,6 @@
     "@types/node-fetch": "^2.6.1",
     "@types/readable-stream": "^2.3.13",
     "@vercel/ncc": "^0.33.3",
-    "eslint-plugin-sonarjs": "^0.13.0",
     "jest": "^27.5.1",
     "nock": "^13.2.4",
     "opstooling-js-style": "https://github.com/paritytech/opstooling-js-style#c298d0f732d93712e4397fd53baa3317a3022c8c",

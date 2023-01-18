@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/switch-exhaustiveness-check */
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable sonarjs/no-duplicate-string */
 
 import { Octokit } from "@octokit/rest";
 import nock from "nock";
