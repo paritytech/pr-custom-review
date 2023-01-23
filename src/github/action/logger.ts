@@ -1,18 +1,18 @@
-import { inspect } from "util"
+import { inspect } from "util";
 
-import { CommonLoggerInterface } from "src/types"
+import { CommonLoggerInterface } from "src/types";
 
 export interface ActionLoggerInterface extends CommonLoggerInterface {
-  relevantStartingLine: number
-  log: (...args: any[]) => void
-  fatal: (...args: any[]) => void
-  markNextLineAsRelevantStartingLine: (delta: number) => void
+  relevantStartingLine: number;
+  log: (...args: any[]) => void;
+  fatal: (...args: any[]) => void;
+  markNextLineAsRelevantStartingLine: (delta: number) => void;
 }
 
 export class ActionLogger implements ActionLoggerInterface {
-  private lineCount = 0
-  relevantStartingLine = 1
-  enableRequestLogging = false
+  private lineCount = 0;
+  relevantStartingLine = 1;
+  enableRequestLogging = false;
 
   /*
      The action log is expected to start like this:
@@ -20,23 +20,19 @@ export class ActionLogger implements ActionLoggerInterface {
      2. with:
      3.  input: something
   */
-  private githubLogsInitialLineCount: number = 3
+  private githubLogsInitialLineCount: number = 3;
 
   constructor(private logFn: (msg: string) => void) {}
 
   log(...args: any[]) {
-    const message = args
-      .map((arg) => {
-        return typeof arg === "string" ? arg : inspect(arg)
-      })
-      .join(" ")
-    this.logFn(`${message}\n`)
-    this.lineCount += (message.match(/\n/g) || "").length + 1
+    const message = args.map((arg) => (typeof arg === "string" ? arg : inspect(arg))).join(" ");
+    this.logFn(`${message}\n`);
+    this.lineCount += (message.match(/\n/g) || "").length + 1;
   }
 
   info(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.log(...args)
+    this.log(...args);
   }
 
   error(...args: any[]) {
@@ -45,12 +41,12 @@ export class ActionLogger implements ActionLoggerInterface {
       https://dustinpfister.github.io/2019/09/19/nodejs-ansi-escape-codes/
     */
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.log("\n\u001b[31;1;4mERROR: ", ...args, "\u001b[39m")
+    this.log("\n\u001b[31;1;4mERROR: ", ...args, "\u001b[39m");
   }
 
   warn(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.log("WARNING: ", ...args)
+    this.log("WARNING: ", ...args);
   }
 
   fatal(...args: any[]) {
@@ -60,13 +56,12 @@ export class ActionLogger implements ActionLoggerInterface {
         the start
       */
       2,
-    )
+    );
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.error(...args)
+    this.error(...args);
   }
 
   markNextLineAsRelevantStartingLine(delta = 1) {
-    this.relevantStartingLine =
-      this.lineCount + this.githubLogsInitialLineCount + delta
+    this.relevantStartingLine = this.lineCount + this.githubLogsInitialLineCount + delta;
   }
 }

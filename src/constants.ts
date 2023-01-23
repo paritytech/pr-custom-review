@@ -1,15 +1,15 @@
-import { CommitState } from "./github/types"
-import { RulesConfigurations } from "./types"
+import { CommitState } from "./github/types";
+import { RulesConfigurations } from "./types";
 
-export const configFilePath = ".github/pr-custom-review.yml"
-export const actionReviewTeamFiles = [configFilePath]
+export const configFilePath = ".github/pr-custom-review.yml";
+export const actionReviewTeamFiles = [configFilePath];
 
-export const commitStateSuccess: CommitState = "success"
-export const commitStateFailure: CommitState = "failure"
+export const commitStateSuccess: CommitState = "success";
+export const commitStateFailure: CommitState = "failure";
 
-export const maxGithubApiFilesPerPage = 100
-export const maxGithubApiTeamMembersPerPage = 100
-export const maxGithubApiReviewsPerPage = 100
+export const maxGithubApiFilesPerPage = 100;
+export const maxGithubApiTeamMembersPerPage = 100;
+export const maxGithubApiReviewsPerPage = 100;
 
 export const rulesConfigurations: RulesConfigurations = {
   basic: {
@@ -32,4 +32,4 @@ export const rulesConfigurations: RulesConfigurations = {
     uniqueFields: ["all_distinct"],
     invalidFields: ["min_approvals", "teams", "users", "all", "any"],
   },
-}
+};

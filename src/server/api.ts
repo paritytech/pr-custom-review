@@ -1,23 +1,21 @@
-import Fastify from "fastify"
+import Fastify from "fastify";
 
-import { getFinishProcessReviews, processReviews } from "src/core"
-import { ActionLogger } from "src/github/action/logger"
-import { ActionData } from "src/github/action/types"
-import { Context } from "src/types"
+import { getFinishProcessReviews, processReviews } from "src/core";
+import { ActionLogger } from "src/github/action/logger";
+import { ActionData } from "src/github/action/types";
+import { Context } from "src/types";
 
-import { ServerContext } from "./types"
+import { ServerContext } from "./types";
 
 enum ApiVersion {
   v1 = "v1",
 }
-const getApiRoute = (version: ApiVersion, route: string) => {
-  return `/api/${version}/${route}`
-}
+const getApiRoute = (version: ApiVersion, route: string) => `/api/${version}/${route}`;
 
-const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews")
+const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews");
 
 export const setupApi = ({ octokit, logger, github }: ServerContext) => {
-  const server = Fastify({ logger: logger.getFastifyLogger() })
+  const server = Fastify({ logger: logger.getFastifyLogger() });
 
   server.route({
     method: "POST",
@@ -40,27 +38,15 @@ export const setupApi = ({ octokit, logger, github }: ServerContext) => {
                     type: "object",
                     properties: {
                       name: { type: "string" },
-                      owner: {
-                        type: "object",
-                        properties: { login: { type: "string" } },
-                        required: ["login"],
-                      },
+                      owner: { type: "object", properties: { login: { type: "string" } }, required: ["login"] },
                     },
                     required: ["name", "owner"],
                   },
                 },
                 required: ["repo"],
               },
-              head: {
-                type: "object",
-                properties: { sha: { type: "string" } },
-                required: ["sha"],
-              },
-              user: {
-                type: "object",
-                properties: { login: { type: "string" } },
-                required: ["login"],
-              },
+              head: { type: "object", properties: { sha: { type: "string" } }, required: ["sha"] },
+              user: { type: "object", properties: { login: { type: "string" } }, required: ["login"] },
             },
             required: ["number", "base", "head", "user"],
           },
@@ -69,42 +55,37 @@ export const setupApi = ({ octokit, logger, github }: ServerContext) => {
       },
     },
     handler: async (req, reply) => {
-      const actionData = req.body as ActionData
+      const actionData = req.body as ActionData;
 
       if (actionData.pr.base.repo.owner.login !== github.accessTokenOwner) {
-        reply.statusCode = 403
+        reply.statusCode = 403;
         return {
           error: `The API only accepts requests for PRs of ${github.accessTokenOwner}, but got a PR from ${actionData.pr.base.repo.owner.login}`,
-        }
+        };
       }
 
-      const lines: string[] = []
-      const actionLogger = new ActionLogger((line) => {
-        return lines.push(line)
-      })
+      const lines: string[] = [];
+      const actionLogger = new ActionLogger((line) => lines.push(line));
 
-      const incompleteContext = { logger: actionLogger, octokit }
-      const finishProcessReviews = getFinishProcessReviews(
-        incompleteContext,
-        actionData,
-      )
-      const ctx: Context = { ...incompleteContext, finishProcessReviews }
+      const incompleteContext = { logger: actionLogger, octokit };
+      const finishProcessReviews = getFinishProcessReviews(incompleteContext, actionData);
+      const ctx: Context = { ...incompleteContext, finishProcessReviews };
 
-      await processReviews(ctx, actionData)
+      await processReviews(ctx, actionData);
 
-      reply.statusCode = 200
-      return lines
+      reply.statusCode = 200;
+      return lines;
     },
-  })
+  });
 
   server.route({
     method: "GET",
     url: "/ping",
     handler: async (req, reply) => {
-      reply.statusCode = 200
-      return { status: "ok" }
+      reply.statusCode = 200;
+      return { status: "ok" };
     },
-  })
+  });
 
-  return server
-}
+  return server;
+};

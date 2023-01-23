@@ -1,9 +1,9 @@
-import { PR } from "src/types"
+import { PR } from "src/types";
 
 export type ActionData = {
-  detailsUrl: string
-  jobName: string | undefined
-  actionRepository: string | undefined
-  pr: PR
-  runId: number
-}
+  detailsUrl: string;
+  jobName: string | undefined;
+  actionRepository: string | undefined;
+  pr: PR;
+  runId: number;
+};
