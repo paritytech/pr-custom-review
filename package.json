@@ -24,7 +24,7 @@
     "watch": "nodemon --watch src --watch .env.cjs -e cjs,ts --exec \"yarn dev\""
   },
   "dependencies": {
-    "@actions/core": "^1.6.0",
+    "@actions/core": "^1.9.1",
     "@actions/github": "^5.0.1",
     "@octokit/rest": "^18.12.0",
     "async-mutex": "^0.3.2",
