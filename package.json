@@ -31,7 +31,7 @@
     "fastify": "^3.29.4",
     "iterative-permutation": "^1.0.0",
     "joi": "^17.6.0",
-    "node-fetch": "^3.2.3",
+    "node-fetch": "^3.2.10",
     "ts-node": "^10.7.0",
     "yaml": "^2.0.0"
   },
