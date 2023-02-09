@@ -1,5 +1,7 @@
 # PR Custom Review
 
+[![GitHub Issue Sync](https://github.com/paritytech/pr-custom-review/actions/workflows/github-issue-sync.yml/badge.svg)](https://github.com/paritytech/pr-custom-review/actions/workflows/github-issue-sync.yml)
+
 pr-custom-review is a GitHub Action for complex pull request approval scenarios
 which are not currently supported by GitHub's
 [Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#about-branch-protection-rules).
