@@ -2,11 +2,17 @@ import { GitHub } from "@actions/github/lib/utils";
 import { OctokitResponse } from "@octokit/types";
 import YAML from "yaml";
 
-import { configFilePath, maxGithubApiFilesPerPage } from "src/constants";
+import { configFilePath, maxGithubApiFilesPerPage, maxGithubApiReviewsPerPage } from "src/constants";
 import { Configuration, Context, PR } from "src/types";
 import { configurationSchema } from "src/validation";
 
 import { ActionLoggerInterface } from "./action/logger";
+
+export interface Review {
+  state: "COMMENTED" | "REQUEST_CHANGES" | "APPROVE" | string;
+  user?: { id: number; login: string } | null;
+  id: number;
+}
 
 export class GitHubApi {
   private readonly octokit: InstanceType<typeof GitHub>;
@@ -65,5 +71,14 @@ export class GitHubApi {
       per_page: maxGithubApiFilesPerPage,
     });
     return data.map(({ filename }) => filename);
+  }
+
+  async fetchReviews(): Promise<Review[]> {
+    return await this.octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", {
+      owner: this.pr.base.repo.owner.login,
+      repo: this.pr.base.repo.name,
+      pull_number: this.pr.number,
+      per_page: maxGithubApiReviewsPerPage,
+    });
   }
 }

@@ -306,12 +306,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
   }
 
   if (matchedRules.length !== 0) {
-    const reviews = await octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", {
-      owner: pr.base.repo.owner.login,
-      repo: pr.base.repo.name,
-      pull_number: pr.number,
-      per_page: maxGithubApiReviewsPerPage,
-    });
+    const reviews = await api.fetchReviews();
 
     const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
     for (const review of reviews) {
