@@ -5,7 +5,6 @@ import {
   actionReviewTeamFiles,
   commitStateFailure,
   commitStateSuccess,
-  maxGithubApiReviewsPerPage,
   maxGithubApiTeamMembersPerPage,
 } from "./constants";
 import { ActionData } from "./github/action/types";
