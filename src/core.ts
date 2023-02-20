@@ -117,7 +117,7 @@ const combineUsers = async (
   function argument.
 */
 export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
-  const { octokit, logger } = ctx;
+  const { logger } = ctx;
 
   const api = new GitHubApi(pr, ctx);
 
@@ -726,13 +726,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
         }
       }
       if (users.size || teams.size) {
-        await octokit.request("POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", {
-          owner: pr.base.repo.owner.login,
-          repo: pr.base.repo.name,
-          pull_number: pr.number,
-          reviewers: Array.from(users),
-          team_reviewers: Array.from(teams),
-        });
+        await api.requestReviewers(Array.from(users), Array.from(teams));
       }
     }
 

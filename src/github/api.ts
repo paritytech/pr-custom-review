@@ -81,4 +81,15 @@ export class GitHubApi {
       per_page: maxGithubApiReviewsPerPage,
     });
   }
+
+  /** Request users/teams to review this PR */
+  async requestReviewers(users: string[], teams: string[]): Promise<void> {
+    await this.octokit.request("POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", {
+      owner: this.pr.base.repo.owner.login,
+      repo: this.pr.base.repo.name,
+      pull_number: this.pr.number,
+      reviewers: users,
+      team_reviewers: teams,
+    });
+  }
 }
