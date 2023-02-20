@@ -1,7 +1,8 @@
 import { GitHub } from "@actions/github/lib/utils";
+import { OctokitResponse } from "@octokit/types";
 import YAML from "yaml";
 
-import { configFilePath } from "src/constants";
+import { configFilePath, maxGithubApiFilesPerPage } from "src/constants";
 import { Configuration, Context, PR } from "src/types";
 import { configurationSchema } from "src/validation";
 
@@ -44,5 +45,25 @@ export class GitHubApi {
     }
 
     return configValidationResult.value;
+  }
+
+  async fetchDiff(): Promise<string> {
+    const diffResponse = (await this.octokit.rest.pulls.get({
+      owner: this.pr.base.repo.owner.login,
+      repo: this.pr.base.repo.name,
+      pull_number: this.pr.number,
+      mediaType: { format: "diff" },
+    })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>;
+    return diffResponse.data;
+  }
+
+  async fetchChangedFiles(): Promise<string[]> {
+    const data = await this.octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/files", {
+      owner: this.pr.base.repo.owner.login,
+      repo: this.pr.base.repo.name,
+      pull_number: this.pr.number,
+      per_page: maxGithubApiFilesPerPage,
+    });
+    return data.map(({ filename }) => filename);
   }
 }

@@ -1,22 +1,17 @@
-import { OctokitResponse } from "@octokit/types";
 import assert from "assert";
 import Permutator from "iterative-permutation";
-import YAML from "yaml";
 
 import {
   actionReviewTeamFiles,
   commitStateFailure,
   commitStateSuccess,
-  configFilePath,
-  maxGithubApiFilesPerPage,
   maxGithubApiReviewsPerPage,
   maxGithubApiTeamMembersPerPage,
 } from "./constants";
 import { ActionData } from "./github/action/types";
 import { GitHubApi } from "./github/api";
 import { CommitState } from "./github/types";
-import { BaseRule, Configuration, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
-import { configurationSchema } from "./validation";
+import { BaseRule, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
 
 const displayUserWithTeams = (user: string, teams: Set<string> | undefined | null) =>
   `${user}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`;
@@ -149,13 +144,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     return (users: string[], teams: string[]) => combineUsers(ctx, pr, users, teams, teamsCache);
   })();
 
-  const diffResponse = (await octokit.rest.pulls.get({
-    owner: pr.base.repo.owner.login,
-    repo: pr.base.repo.name,
-    pull_number: pr.number,
-    mediaType: { format: "diff" },
-  })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>;
-  const { data: diff } = diffResponse;
+  const diff = await api.fetchDiff();
 
   const matchedRules: MatchedRule[] = [];
 
@@ -178,16 +167,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     });
   }
 
-  const changedFiles = new Set(
-    (
-      await octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/files", {
-        owner: pr.base.repo.owner.login,
-        repo: pr.base.repo.name,
-        pull_number: pr.number,
-        per_page: maxGithubApiFilesPerPage,
-      })
-    ).map(({ filename }) => filename),
-  );
+  const changedFiles = new Set(await api.fetchChangedFiles());
   logger.info("Changed files", changedFiles);
 
   for (const actionReviewFile of actionReviewTeamFiles) {
