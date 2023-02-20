@@ -13,6 +13,7 @@ import {
   maxGithubApiTeamMembersPerPage,
 } from "./constants";
 import { ActionData } from "./github/action/types";
+import { GitHubApi } from "./github/api";
 import { CommitState } from "./github/types";
 import { BaseRule, Configuration, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
 import { configurationSchema } from "./validation";
@@ -115,37 +116,6 @@ const combineUsers = async (
   return users;
 };
 
-const fetchConfigFile = async (pr: PR, { octokit, logger }: Context): Promise<Configuration | null> => {
-  const configFileResponse = await octokit.rest.repos.getContent({
-    owner: pr.base.repo.owner.login,
-    repo: pr.base.repo.name,
-    path: configFilePath,
-  });
-  if (!("content" in configFileResponse.data)) {
-    logger.fatal(`Did not find "content" key in the response for ${configFilePath}`);
-    logger.info(configFileResponse.data);
-    return null;
-  }
-
-  const { content: configFileContentsEnconded } = configFileResponse.data;
-  if (typeof configFileContentsEnconded !== "string") {
-    logger.fatal(`Content response for ${configFilePath} had unexpected type (expected string)`);
-    logger.info(configFileResponse.data);
-    return null;
-  }
-
-  const configFileContents = Buffer.from(configFileContentsEnconded, "base64").toString("utf-8");
-
-  const configValidationResult = configurationSchema.validate(YAML.parse(configFileContents));
-  if (configValidationResult.error) {
-    logger.fatal("Configuration file is invalid");
-    logger.info(configValidationResult.error);
-    return null;
-  }
-
-  return configValidationResult.value;
-};
-
 /*
   This function should only depend on its inputs so that it can be tested
   without inconveniences. If you need more external input then pass it as a
@@ -154,7 +124,9 @@ const fetchConfigFile = async (pr: PR, { octokit, logger }: Context): Promise<Co
 export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
   const { octokit, logger } = ctx;
 
-  const config = await fetchConfigFile(pr, ctx);
+  const api = new GitHubApi(pr, ctx);
+
+  const config = await api.fetchConfigFile();
   if (!config) {
     return commitStateFailure;
   }
