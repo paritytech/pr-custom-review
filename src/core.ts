@@ -14,7 +14,7 @@ import {
 } from "./constants";
 import { ActionData } from "./github/action/types";
 import { CommitState } from "./github/types";
-import { BaseRule, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
+import { BaseRule, Configuration, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
 import { configurationSchema } from "./validation";
 
 const displayUserWithTeams = (user: string, teams: Set<string> | undefined | null) =>
@@ -115,14 +115,7 @@ const combineUsers = async (
   return users;
 };
 
-/*
-  This function should only depend on its inputs so that it can be tested
-  without inconveniences. If you need more external input then pass it as a
-  function argument.
-*/
-export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
-  const { octokit, logger } = ctx;
-
+const fetchConfigFile = async (pr: PR, { octokit, logger }: Context): Promise<Configuration | null> => {
   const configFileResponse = await octokit.rest.repos.getContent({
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,
@@ -131,14 +124,14 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
   if (!("content" in configFileResponse.data)) {
     logger.fatal(`Did not find "content" key in the response for ${configFilePath}`);
     logger.info(configFileResponse.data);
-    return commitStateFailure;
+    return null;
   }
 
   const { content: configFileContentsEnconded } = configFileResponse.data;
   if (typeof configFileContentsEnconded !== "string") {
     logger.fatal(`Content response for ${configFilePath} had unexpected type (expected string)`);
     logger.info(configFileResponse.data);
-    return commitStateFailure;
+    return null;
   }
 
   const configFileContents = Buffer.from(configFileContentsEnconded, "base64").toString("utf-8");
@@ -147,6 +140,22 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
   if (configValidationResult.error) {
     logger.fatal("Configuration file is invalid");
     logger.info(configValidationResult.error);
+    return null;
+  }
+
+  return configValidationResult.value;
+};
+
+/*
+  This function should only depend on its inputs so that it can be tested
+  without inconveniences. If you need more external input then pass it as a
+  function argument.
+*/
+export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
+  const { octokit, logger } = ctx;
+
+  const config = await fetchConfigFile(pr, ctx);
+  if (!config) {
     return commitStateFailure;
   }
 
@@ -156,7 +165,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     "action-review-team": actionReviewTeam,
     rules,
     "prevent-review-request": preventReviewRequest,
-  } = configValidationResult.value;
+  } = config;
 
   const getUsersInfo = (() => {
     /*
@@ -802,9 +811,9 @@ export const getFinishProcessReviews =
     // Fallback URL in case we are not able to detect the current job
     if (state === "failure" && jobName !== undefined) {
       /*
-        Fetch the jobs so that we'll be able to detect this step and provide a
-        more accurate logging location
-      */
+          Fetch the jobs so that we'll be able to detect this step and provide a
+          more accurate logging location
+        */
       const {
         data: { jobs },
       } = await octokit.rest.actions.listJobsForWorkflowRun({
