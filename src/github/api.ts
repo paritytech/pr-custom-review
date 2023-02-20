@@ -14,6 +14,7 @@ export interface Review {
   id: number;
 }
 
+/** Class in charge of interacting with GitHub. */
 export class GitHubApi {
   private readonly octokit: InstanceType<typeof GitHub>;
   private readonly logger: ActionLoggerInterface;
@@ -22,6 +23,7 @@ export class GitHubApi {
     this.logger = logger;
   }
 
+  /** Fetches the config file and validates that is the correct type/format */
   async fetchConfigFile(): Promise<Configuration | null> {
     const configFileResponse = await this.octokit.rest.repos.getContent({
       owner: this.pr.base.repo.owner.login,
@@ -53,6 +55,7 @@ export class GitHubApi {
     return configValidationResult.value;
   }
 
+  /** Fetches the diff in the PR */
   async fetchDiff(): Promise<string> {
     const diffResponse = (await this.octokit.rest.pulls.get({
       owner: this.pr.base.repo.owner.login,
@@ -63,6 +66,7 @@ export class GitHubApi {
     return diffResponse.data;
   }
 
+  /** Returns a list of all files that were changed */
   async fetchChangedFiles(): Promise<string[]> {
     const data = await this.octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/files", {
       owner: this.pr.base.repo.owner.login,
@@ -73,6 +77,9 @@ export class GitHubApi {
     return data.map(({ filename }) => filename);
   }
 
+  /** Fetches the list of reviews to a repo
+   * Includes comments and failed reviews
+   */
   async fetchReviews(): Promise<Review[]> {
     return await this.octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", {
       owner: this.pr.base.repo.owner.login,
