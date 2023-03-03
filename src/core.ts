@@ -1,12 +1,7 @@
 import assert from "assert";
 import Permutator from "iterative-permutation";
 
-import {
-  actionReviewTeamFiles,
-  commitStateFailure,
-  commitStateSuccess,
-  maxGithubApiTeamMembersPerPage,
-} from "./constants";
+import { actionReviewTeamFiles, commitStateFailure, commitStateSuccess } from "./constants";
 import { ActionData } from "./github/action/types";
 import { GitHubApi } from "./github/api";
 import { CommitState } from "./github/types";
@@ -60,8 +55,8 @@ const processSubconditionMissingApprovers = (
 };
 
 type TeamsCache = Map<string /* Team slug */, string[] /* Usernames of team members */>;
-const combineUsers = async (
-  { octokit }: Context,
+export const combineUsers = async (
+  api: GitHubApi,
   pr: PR,
   presetUsers: string[],
   teams: string[],
@@ -79,11 +74,7 @@ const combineUsers = async (
     let teamMembers = teamsCache.get(team);
 
     if (teamMembers === undefined) {
-      teamMembers = await octokit.paginate(
-        octokit.rest.teams.listMembersInOrg,
-        { org: pr.base.repo.owner.login, team_slug: team, per_page: maxGithubApiTeamMembersPerPage },
-        (response) => response.data.map(({ login }) => login),
-      );
+      teamMembers = await api.getTeamMembers(team);
       teamsCache.set(team, teamMembers);
     }
 
@@ -140,7 +131,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     */
     const teamsCache: TeamsCache = new Map();
 
-    return (users: string[], teams: string[]) => combineUsers(ctx, pr, users, teams, teamsCache);
+    return (users: string[], teams: string[]) => combineUsers(api, pr, users, teams, teamsCache);
   })();
 
   const diff = await api.fetchDiff();

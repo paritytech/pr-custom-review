@@ -2,11 +2,18 @@ import { GitHub } from "@actions/github/lib/utils";
 import { OctokitResponse } from "@octokit/types";
 import YAML from "yaml";
 
-import { configFilePath, maxGithubApiFilesPerPage, maxGithubApiReviewsPerPage } from "src/constants";
-import { Configuration, Context, PR } from "src/types";
+import {
+  configFilePath,
+  maxGithubApiFilesPerPage,
+  maxGithubApiReviewsPerPage,
+  maxGithubApiTeamMembersPerPage,
+} from "src/constants";
+import { Configuration, Context, PR, RuleUserInfo } from "src/types";
 import { configurationSchema } from "src/validation";
 
 import { ActionLoggerInterface } from "./action/logger";
+
+type TeamsCache = Map<string /* Team slug */, string[] /* Usernames of team members */>;
 
 export interface Review {
   state: "COMMENTED" | "REQUEST_CHANGES" | "APPROVE" | string;
@@ -18,6 +25,9 @@ export interface Review {
 export class GitHubApi {
   private readonly octokit: InstanceType<typeof GitHub>;
   private readonly logger: ActionLoggerInterface;
+
+  /** For the combineUsers method */
+  private readonly teamsCache: TeamsCache = new Map();
   constructor(private readonly pr: PR, { octokit, logger }: Context) {
     this.octokit = octokit;
     this.logger = logger;
@@ -98,5 +108,57 @@ export class GitHubApi {
       reviewers: users,
       team_reviewers: teams,
     });
+  }
+
+  async combineUsers({ octokit }: Context, pr: PR, presetUsers: string[], teams: string[]) {
+    const users: Map<string, RuleUserInfo> = new Map();
+
+    for (const user of presetUsers) {
+      if (pr.user.login != user) {
+        users.set(user, { ...users.get(user), teams: null });
+      }
+    }
+
+    for (const team of teams) {
+      let teamMembers = this.teamsCache.get(team);
+
+      if (teamMembers === undefined) {
+        teamMembers = await octokit.paginate(
+          octokit.rest.teams.listMembersInOrg,
+          { org: pr.base.repo.owner.login, team_slug: team, per_page: maxGithubApiTeamMembersPerPage },
+          (response) => response.data.map(({ login }) => login),
+        );
+        this.teamsCache.set(team, teamMembers);
+      }
+
+      for (const teamMember of teamMembers) {
+        if (pr.user.login === teamMember) {
+          continue;
+        }
+
+        const userInfo = users.get(teamMember);
+        if (userInfo === undefined) {
+          users.set(teamMember, { teams: new Set([team]) });
+        } else if (
+          /*
+          Avoid registering a team for this user if their approval is supposed
+          to be requested individually
+        */
+          userInfo.teams !== null
+        ) {
+          userInfo.teams.add(team);
+        }
+      }
+    }
+
+    return users;
+  }
+
+  async getTeamMembers(team_slug: string): Promise<string[]> {
+    return await this.octokit.paginate(
+      this.octokit.rest.teams.listMembersInOrg,
+      { org: this.pr.base.repo.owner.login, team_slug, per_page: maxGithubApiTeamMembersPerPage },
+      (response) => response.data.map(({ login }) => login),
+    );
   }
 }
