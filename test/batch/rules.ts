@@ -26,6 +26,7 @@ import YAML from "yaml";
 
 import { actionReviewTeamFiles, maxGithubApiTeamMembersPerPage } from "src/constants";
 import { runChecks } from "src/core";
+import { GitHubApi } from "src/github/api";
 import { Configuration, Rule } from "src/types";
 
 describe("Rules", () => {
@@ -142,7 +143,8 @@ describe("Rules", () => {
           }
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -166,7 +168,8 @@ describe("Rules", () => {
             .reply(201);
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -208,7 +211,8 @@ describe("Rules", () => {
             .reply(201);
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -231,7 +235,8 @@ describe("Rules", () => {
             .reply(201);
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -296,7 +301,8 @@ describe("Rules", () => {
             }
           }
 
-          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(expected);
+          const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(expected);
 
           expect(logHistory).toMatchSnapshot();
         });
@@ -361,7 +367,8 @@ describe("Rules", () => {
             }
           }
 
-          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
             expectedCheckOutcome,
           );
 
@@ -430,7 +437,8 @@ describe("Rules", () => {
             }
           }
 
-          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
             expectedCheckOutcome,
           );
 
@@ -462,7 +470,8 @@ describe("Rules", () => {
             }
           }
 
-          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+          const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+          expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
             scenario === "Approved" ||
               description === "condition: exclude" ||
               description === "condition: include & exclude"
@@ -502,7 +511,8 @@ describe("Rules", () => {
           }
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -535,7 +545,8 @@ describe("Rules", () => {
           }
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -560,7 +571,8 @@ describe("Rules", () => {
           }
         }
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
           scenario === "Approved" ? "success" : "failure",
         );
 
@@ -604,7 +616,8 @@ describe("Rules", () => {
         }
       }
 
-      expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe(
+      const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+      expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe(
         scenario === "Approved" ? "success" : "failure",
       );
 
@@ -621,7 +634,8 @@ describe("Rules", () => {
         preventReviewRequest: { users: coworkers, teams: Object.values(defaultTeamsNames) },
       });
 
-      expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe("failure");
+      const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+      expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe("failure");
 
       expect(logHistory).toMatchSnapshot();
     });

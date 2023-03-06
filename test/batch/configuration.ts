@@ -15,6 +15,7 @@ import YAML from "yaml";
 
 import { rulesConfigurations } from "src/constants";
 import { runChecks } from "src/core";
+import { GitHubApi } from "src/github/api";
 
 const setup = ({ rules }: { rules?: Record<string, unknown>[] }) => {
   nock(githubApi)
@@ -69,7 +70,8 @@ describe("Configuration", () => {
 
         setup({ rules: [badRule] });
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe("failure");
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe("failure");
 
         expect(logHistory).toMatchSnapshot();
       });
@@ -99,7 +101,8 @@ describe("Configuration", () => {
           ],
         });
 
-        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null })).toBe("failure");
+        const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+        expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe("failure");
 
         expect(logHistory).toMatchSnapshot();
       });

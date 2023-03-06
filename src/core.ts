@@ -106,11 +106,7 @@ export const combineUsers = async (
   without inconveniences. If you need more external input then pass it as a
   function argument.
 */
-export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
-  const { logger } = ctx;
-
-  const api = new GitHubApi(pr, ctx);
-
+export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHubApi) => {
   const config = await api.fetchConfigFile();
   if (!config) {
     return commitStateFailure;
@@ -791,7 +787,8 @@ export const getFinishProcessReviews =
 
 export const processReviews = async (ctx: Context, { pr }: ActionData) => {
   const { finishProcessReviews, logger } = ctx;
-  return await runChecks({ ...ctx, pr })
+  const githubApi = new GitHubApi(pr, ctx);
+  return await runChecks({ ...ctx, pr }, githubApi)
     .then((state) => {
       if (finishProcessReviews) {
         return finishProcessReviews(state);
