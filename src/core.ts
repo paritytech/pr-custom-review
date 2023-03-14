@@ -1,21 +1,11 @@
-import { OctokitResponse } from "@octokit/types";
 import assert from "assert";
 import Permutator from "iterative-permutation";
-import YAML from "yaml";
 
-import {
-  actionReviewTeamFiles,
-  commitStateFailure,
-  commitStateSuccess,
-  configFilePath,
-  maxGithubApiFilesPerPage,
-  maxGithubApiReviewsPerPage,
-  maxGithubApiTeamMembersPerPage,
-} from "./constants";
+import { actionReviewTeamFiles, commitStateFailure, commitStateSuccess } from "./constants";
 import { ActionData } from "./github/action/types";
+import { GitHubApi } from "./github/api";
 import { CommitState } from "./github/types";
 import { BaseRule, Context, MatchedRule, PR, RuleCriteria, RuleFailure, RuleUserInfo } from "./types";
-import { configurationSchema } from "./validation";
 
 const displayUserWithTeams = (user: string, teams: Set<string> | undefined | null) =>
   `${user}${teams ? ` (team${teams.size === 1 ? "" : "s"}: ${Array.from(teams).join(", ")})` : ""}`;
@@ -65,8 +55,8 @@ const processSubconditionMissingApprovers = (
 };
 
 type TeamsCache = Map<string /* Team slug */, string[] /* Usernames of team members */>;
-const combineUsers = async (
-  { octokit }: Context,
+export const combineUsers = async (
+  api: GitHubApi,
   pr: PR,
   presetUsers: string[],
   teams: string[],
@@ -84,11 +74,7 @@ const combineUsers = async (
     let teamMembers = teamsCache.get(team);
 
     if (teamMembers === undefined) {
-      teamMembers = await octokit.paginate(
-        octokit.rest.teams.listMembersInOrg,
-        { org: pr.base.repo.owner.login, team_slug: team, per_page: maxGithubApiTeamMembersPerPage },
-        (response) => response.data.map(({ login }) => login),
-      );
+      teamMembers = await api.getTeamMembers(team);
       teamsCache.set(team, teamMembers);
     }
 
@@ -120,33 +106,9 @@ const combineUsers = async (
   without inconveniences. If you need more external input then pass it as a
   function argument.
 */
-export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
-  const { octokit, logger } = ctx;
-
-  const configFileResponse = await octokit.rest.repos.getContent({
-    owner: pr.base.repo.owner.login,
-    repo: pr.base.repo.name,
-    path: configFilePath,
-  });
-  if (!("content" in configFileResponse.data)) {
-    logger.fatal(`Did not find "content" key in the response for ${configFilePath}`);
-    logger.info(configFileResponse.data);
-    return commitStateFailure;
-  }
-
-  const { content: configFileContentsEnconded } = configFileResponse.data;
-  if (typeof configFileContentsEnconded !== "string") {
-    logger.fatal(`Content response for ${configFilePath} had unexpected type (expected string)`);
-    logger.info(configFileResponse.data);
-    return commitStateFailure;
-  }
-
-  const configFileContents = Buffer.from(configFileContentsEnconded, "base64").toString("utf-8");
-
-  const configValidationResult = configurationSchema.validate(YAML.parse(configFileContents));
-  if (configValidationResult.error) {
-    logger.fatal("Configuration file is invalid");
-    logger.info(configValidationResult.error);
+export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHubApi) => {
+  const config = await api.fetchConfigFile();
+  if (!config) {
     return commitStateFailure;
   }
 
@@ -156,7 +118,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     "action-review-team": actionReviewTeam,
     rules,
     "prevent-review-request": preventReviewRequest,
-  } = configValidationResult.value;
+  } = config;
 
   const getUsersInfo = (() => {
     /*
@@ -165,16 +127,10 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     */
     const teamsCache: TeamsCache = new Map();
 
-    return (users: string[], teams: string[]) => combineUsers(ctx, pr, users, teams, teamsCache);
+    return (users: string[], teams: string[]) => combineUsers(api, pr, users, teams, teamsCache);
   })();
 
-  const diffResponse = (await octokit.rest.pulls.get({
-    owner: pr.base.repo.owner.login,
-    repo: pr.base.repo.name,
-    pull_number: pr.number,
-    mediaType: { format: "diff" },
-  })) /* Octokit doesn't inform the right return type for mediaType: { format: "diff" } */ as unknown as OctokitResponse<string>;
-  const { data: diff } = diffResponse;
+  const diff = await api.fetchDiff();
 
   const matchedRules: MatchedRule[] = [];
 
@@ -197,16 +153,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
     });
   }
 
-  const changedFiles = new Set(
-    (
-      await octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/files", {
-        owner: pr.base.repo.owner.login,
-        repo: pr.base.repo.name,
-        pull_number: pr.number,
-        per_page: maxGithubApiFilesPerPage,
-      })
-    ).map(({ filename }) => filename),
-  );
+  const changedFiles = new Set(await api.fetchChangedFiles());
   logger.info("Changed files", changedFiles);
 
   for (const actionReviewFile of actionReviewTeamFiles) {
@@ -345,12 +292,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
   }
 
   if (matchedRules.length !== 0) {
-    const reviews = await octokit.paginate("GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews", {
-      owner: pr.base.repo.owner.login,
-      repo: pr.base.repo.name,
-      pull_number: pr.number,
-      per_page: maxGithubApiReviewsPerPage,
-    });
+    const reviews = await api.fetchReviews();
 
     const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
     for (const review of reviews) {
@@ -770,13 +712,7 @@ export const runChecks = async ({ pr, ...ctx }: Context & { pr: PR }) => {
         }
       }
       if (users.size || teams.size) {
-        await octokit.request("POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers", {
-          owner: pr.base.repo.owner.login,
-          repo: pr.base.repo.name,
-          pull_number: pr.number,
-          reviewers: Array.from(users),
-          team_reviewers: Array.from(teams),
-        });
+        await api.requestReviewers(Array.from(users), Array.from(teams));
       }
     }
 
@@ -802,9 +738,9 @@ export const getFinishProcessReviews =
     // Fallback URL in case we are not able to detect the current job
     if (state === "failure" && jobName !== undefined) {
       /*
-        Fetch the jobs so that we'll be able to detect this step and provide a
-        more accurate logging location
-      */
+          Fetch the jobs so that we'll be able to detect this step and provide a
+          more accurate logging location
+        */
       const {
         data: { jobs },
       } = await octokit.rest.actions.listJobsForWorkflowRun({
@@ -851,7 +787,8 @@ export const getFinishProcessReviews =
 
 export const processReviews = async (ctx: Context, { pr }: ActionData) => {
   const { finishProcessReviews, logger } = ctx;
-  return await runChecks({ ...ctx, pr })
+  const githubApi = new GitHubApi(pr, ctx);
+  return await runChecks({ ...ctx, pr }, githubApi)
     .then((state) => {
       if (finishProcessReviews) {
         return finishProcessReviews(state);
