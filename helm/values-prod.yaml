@@ -1,6 +1,6 @@
 common:
   env:
-    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/mirrors/pr-custom-review#GITHUB_ACCESS_TOKEN
+    GITHUB_ACCESS_TOKEN: ref+vault://kv/gitlab/parity/mirrors/cicd-pr-custom-review#GITHUB_ACCESS_TOKEN
   ingress:
     enabled: true
     className: ""
@@ -16,6 +16,6 @@ common:
           - path: /
             pathType: ImplementationSpecific
     tls:
-    - secretName: pcr.parity-prod.parity.io
-      hosts:
-        - pcr.parity-prod.parity.io
+      - secretName: pcr.parity-prod.parity.io
+        hosts:
+          - pcr.parity-prod.parity.io

@@ -5,15 +5,17 @@ stages:
   - build
   - deploy
 
-variables:                         &default-vars
+variables:
   APP_PORT:                        3000
   IMAGE_REPOSITORY:                docker.io/paritytech/pr-custom-review
   CI_IMAGE:                        ${IMAGE_REPOSITORY}:ci
   DEPLOYMENT_TAG:                  $CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
+  BUILDAH_IMAGE:                   "quay.io/buildah/stable:v1.29"
+  BUILDAH_COMMAND:                 "buildah --storage-driver overlay2"
   # Vault Section
   VAULT_ADDR:                      https://vault.parity-mgmt-vault.parity.io
   VAULT_AUTH_PATH:                 gitlab-parity-io-jwt
-  VAULT_AUTH_ROLE:                 cicd_gitlab_parity_${CI_PROJECT_NAME}
+  VAULT_AUTH_ROLE:                 gitlab_${CI_PROJECT_NAME}
   HELM_SECRETS_DRIVER:             vals
 
 default:
@@ -75,12 +77,12 @@ security-scan:
 # template task for building and pushing an image
 .build-push-docker-image:          &build-push-docker-image
   stage:                           build
-  image:                           quay.io/buildah/stable
+  image:                           $BUILDAH_IMAGE
   script:
     - ./scripts/generateDockerfile app > Dockerfile
     - test "$Docker_Hub_User_Parity" -a "$Docker_Hub_Pass_Parity" ||
         ( echo "no docker credentials provided"; exit 1 )
-    - buildah bud
+    - $BUILDAH_COMMAND build
         --format=docker
         --build-arg VCS_REF="$CI_COMMIT_SHA"
         --build-arg BUILD_DATE="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
@@ -90,8 +92,8 @@ security-scan:
         --file Dockerfile .
     - echo "$Docker_Hub_Pass_Parity" |
         buildah login --username "$Docker_Hub_User_Parity" --password-stdin docker.io
-    - buildah info
-    - buildah push --format=v2s2 "$IMAGE_REPOSITORY:$DEPLOYMENT_TAG"
+    - $BUILDAH_COMMAND info
+    - $BUILDAH_COMMAND push --format=v2s2 "$IMAGE_REPOSITORY:$DEPLOYMENT_TAG"
   after_script:
     - buildah logout --all
 
@@ -125,7 +127,6 @@ build-production:
         --set common.containerPort="$APP_PORT"
         --set common.livenessProbe.httpGet.port="$APP_PORT"
         --set common.readinessProbe.httpGet.port="$APP_PORT"
-        --set common.env.GITHUB_ACCESS_TOKEN_OWNER="$GITHUB_ACCESS_TOKEN_OWNER"
         pr-custom-review helm/
 
 deploy-staging:
