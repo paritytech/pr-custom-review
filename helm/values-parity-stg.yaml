@@ -1,21 +1,21 @@
 common:
   env:
-    GITHUB_ACCESS_TOKEN: ref+vault://kv/cicd/gitlab/parity/mirrors/pr-custom-review#GITHUB_ACCESS_TOKEN
+    GITHUB_ACCESS_TOKEN: ref+vault://kv/gitlab/parity/mirrors/pr-custom-review/cicd-parity-stg#GITHUB_ACCESS_TOKEN
   ingress:
     enabled: true
     className: ""
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-http01
-      external-dns.alpha.kubernetes.io/target: traefik-external.parity-prod.parity.io.
+      external-dns.alpha.kubernetes.io/target: traefik-external.parity-stg.parity.io.
       kubernetes.io/ingress.class: traefik-external
       traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
-      - host: pcr.parity-prod.parity.io
+      - host: pcr.parity-stg.parity.io
         paths:
           - path: /
             pathType: ImplementationSpecific
     tls:
-    - secretName: pcr.parity-prod.parity.io
-      hosts:
-        - pcr.parity-prod.parity.io
+      - secretName: pcr.parity-stg.parity.io
+        hosts:
+          - pcr.parity-stg.parity.io
