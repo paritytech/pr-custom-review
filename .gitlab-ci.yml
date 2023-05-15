@@ -133,7 +133,7 @@ deploy-staging:
   <<:                              *staging-refs
   <<:                              *deploy-k8s
   variables:
-    VALUES_FILE:                   values-stg.yaml
+    VALUES_FILE:                   values-parity-stg.yaml
   environment:
     name:                          parity-stg
 
@@ -141,7 +141,7 @@ deploy-production:
   <<:                              *production-refs
   <<:                              *deploy-k8s
   variables:
-    VALUES_FILE:                   values-prod.yaml
+    VALUES_FILE:                   values-parity-prod.yaml
   environment:
     name:                          parity-prod
 
