@@ -294,7 +294,9 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
 
     const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
 
-    latestReviews.set(0, { id: 0, user: pr.user.login, isApproval: true });
+    if (!preventReviewRequest?.users.find((u) => u === pr.user.login)) {
+      latestReviews.set(0, { id: -1, user: pr.user.login, isApproval: true });
+    }
     for (const review of reviews) {
       // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
       if (
@@ -711,8 +713,9 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
           }
         }
       }
-      if (users.size || teams.size) {
-        await api.requestReviewers(Array.from(users), Array.from(teams));
+      const usersToRequest = Array.from(users).filter((u) => u !== pr.user.login);
+      if (usersToRequest.length || teams.size) {
+        await api.requestReviewers(usersToRequest, Array.from(teams));
       }
     }
 
