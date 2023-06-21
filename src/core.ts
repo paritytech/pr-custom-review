@@ -65,9 +65,7 @@ export const combineUsers = async (
   const users: Map<string, RuleUserInfo> = new Map();
 
   for (const user of presetUsers) {
-    if (pr.user.login != user) {
-      users.set(user, { ...users.get(user), teams: null });
-    }
+    users.set(user, { ...users.get(user), teams: null });
   }
 
   for (const team of teams) {
@@ -295,6 +293,8 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
     const reviews = await api.fetchReviews();
 
     const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
+
+    latestReviews.set(0, { id: 0, user: pr.user.login, isApproval: true });
     for (const review of reviews) {
       // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
       if (
