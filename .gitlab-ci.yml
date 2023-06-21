@@ -2,6 +2,7 @@ stages:
   - install_deps
   - lint
   - test
+  - unit_test
   - build
   - deploy
 
@@ -66,6 +67,12 @@ lint:
   stage:                           lint
   script:
     - pre-commit run --all
+
+tests:
+  <<:                              *common-refs
+  stage:                           unit_test
+  script:
+    - yarn test
 
 security-scan:
   <<:                              *common-refs
