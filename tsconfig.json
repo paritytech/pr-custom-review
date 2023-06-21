@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ES2021", // Node.js LTS 16
-    "lib": ["ES2021"], // Node.js LTS 16
+    "lib": ["ES2021", "dom"], // Node.js LTS 16
     "sourceMap": false,
     "declaration": false,
     "module": "commonjs",
