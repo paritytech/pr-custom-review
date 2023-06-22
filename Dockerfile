@@ -12,8 +12,4 @@ RUN yarn run build
 
 RUN yarn run package
 
-FROM node:16-slim
-
-COPY --from=Builder /action/dist/prcr /action
-
-ENTRYPOINT ["node", "/action/index.js"]
+ENTRYPOINT ["node", "/action/dist/prcr/index.js"]
