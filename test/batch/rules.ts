@@ -29,7 +29,6 @@ import { actionReviewTeamFiles, maxGithubApiTeamMembersPerPage } from "src/const
 import { runChecks } from "src/core";
 import { GitHubApi } from "src/github/api";
 import { Configuration, Rule } from "src/types";
-import { ActionLoggerInterface } from "../../src/github/action/logger";
 
 describe("Rules", () => {
   let logger: TestLogger;
@@ -457,7 +456,10 @@ describe("Rules", () => {
         ],
       ] as const) {
         it(`${scenario} with ${description} for ${checkType}`, async () => {
-          setup({ scenario, rules: [{ ...rule, min_approvals: scenario === "Is missing approval" ? 3 : 2, check_type: checkType }] });
+          setup({
+            scenario,
+            rules: [{ ...rule, min_approvals: scenario === "Is missing approval" ? 3 : 2, check_type: checkType }],
+          });
 
           switch (scenario) {
             case "Has no approval":
