@@ -321,7 +321,8 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
         });
       }
     }
-    logger.info("latestReviews", latestReviews.values());
+    const reviewers = Array.from(latestReviews.values());
+    logger.info("latestReviews are", JSON.stringify(reviewers));
 
     const rulesOutcomes: (RuleFailure | undefined)[] = matchedRules.map((rule) => {
       const ruleUserCount = rule.subconditions.reduce((acc, { usersInfo }) => acc + usersInfo.size, 0);
