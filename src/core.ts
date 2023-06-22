@@ -77,10 +77,6 @@ export const combineUsers = async (
     }
 
     for (const teamMember of teamMembers) {
-      if (pr.user.login === teamMember) {
-        continue;
-      }
-
       const userInfo = users.get(teamMember);
       if (userInfo === undefined) {
         users.set(teamMember, { teams: new Set([team]) });
