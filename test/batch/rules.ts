@@ -19,6 +19,7 @@ import {
   team,
   team2,
   team3,
+  user,
   userCoworker3,
 } from "test/constants";
 import { TestLogger } from "test/logger";
@@ -644,5 +645,23 @@ describe("Rules", () => {
   afterEach(() => {
     nock.cleanAll();
     nock.enableNetConnect();
+  });
+
+  it("Counts author as an approved review", async () => {
+    setup({
+      scenario: "Approved",
+      changedFiles: ["readme.md"],
+      rules: [
+        {
+          name: "File changed",
+          condition: ".*",
+          check_type: "changed_files",
+          ["all"]: [{ min_approvals: 1, users: [user] }],
+        } as Rule,
+      ],
+    });
+
+    const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+    expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe("success");
   });
 });
