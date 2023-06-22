@@ -325,7 +325,7 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" requires at least 2 approvals, but 1 were given.",
+  "Rule \\"condition\\" requires at least 3 approvals, but 1 were given.",
   "",
 ]
 `;
@@ -336,7 +336,7 @@ Array [
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" requires at least 2 approvals, but 1 were given.",
+  "Rule \\"condition\\" requires at least 3 approvals, but 1 were given.",
   "",
 ]
 `;
@@ -581,9 +581,9 @@ exports[`Rules Is missing approval on rule not specifying users or teams 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
-  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" requires at least 2 approvals, but 1 were given.",
+  "Rule \\"condition\\" requires at least 3 approvals, but 2 were given.",
   "",
 ]
 `;
@@ -592,9 +592,9 @@ exports[`Rules Is missing approval on rule not specifying users or teams 2`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
-  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
   "ERROR:  The following problems were found:",
-  "Rule \\"condition\\" requires at least 2 approvals, but 1 were given.",
+  "Rule \\"condition\\" requires at least 3 approvals, but 2 were given.",
   "",
 ]
 `;
@@ -727,9 +727,9 @@ exports[`Rules Is missing approval with condition: include for changed_files 1`]
 Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
-  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
   "ERROR:  The following problems were found:",
-  "Rule \\"Condition include\\" requires at least 2 approvals, but 1 were given.",
+  "Rule \\"Condition include\\" requires at least 3 approvals, but 2 were given.",
   "",
 ]
 `;
@@ -738,9 +738,9 @@ exports[`Rules Is missing approval with condition: include for diff 1`] = `
 Array [
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
-  "latestReviews [Map Iterator] { { id: 1, user: 'userCoworker', isApproval: true } }",
+  "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
   "ERROR:  The following problems were found:",
-  "Rule \\"Condition include\\" requires at least 2 approvals, but 1 were given.",
+  "Rule \\"Condition include\\" requires at least 3 approvals, but 2 were given.",
   "",
 ]
 `;
