@@ -294,7 +294,7 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
 
     const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
 
-    if (!preventReviewRequest?.users.find((u) => u === pr.user.login)) {
+    if (!preventReviewRequest?.users?.find((u) => u === pr.user.login)) {
       latestReviews.set(0, { id: -1, user: pr.user.login, isApproval: true });
     }
     for (const review of reviews) {
