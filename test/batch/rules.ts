@@ -457,14 +457,14 @@ describe("Rules", () => {
         ],
       ] as const) {
         it(`${scenario} with ${description} for ${checkType}`, async () => {
-          setup({ scenario, rules: [{ ...rule, min_approvals: 2, users: coworkers, check_type: checkType }] });
+          setup({ scenario, rules: [{ ...rule, min_approvals: scenario === "Is missing approval" ? 3 : 2, check_type: checkType }] });
 
           switch (scenario) {
             case "Has no approval":
             case "Is missing approval": {
               nock(githubApi)
                 .post(requestedReviewersApiPath, (body) => {
-                  expect(body).toMatchObject({ reviewers: [coworkers[1]] });
+                  expect(body).toMatchObject({ reviewers: [coworkers[2]] });
                   return true;
                 })
                 .reply(201);
