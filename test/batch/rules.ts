@@ -29,6 +29,7 @@ import { actionReviewTeamFiles, maxGithubApiTeamMembersPerPage } from "src/const
 import { runChecks } from "src/core";
 import { GitHubApi } from "src/github/api";
 import { Configuration, Rule } from "src/types";
+import { ActionLoggerInterface } from "../../src/github/action/logger";
 
 describe("Rules", () => {
   let logger: TestLogger;
@@ -223,7 +224,7 @@ describe("Rules", () => {
       it(`${scenario} on rule not specifying users or teams`, async () => {
         setup({
           scenario,
-          rules: [{ name: condition, condition, check_type: checkType, min_approvals: coworkers.length }],
+          rules: [{ name: condition, condition, check_type: checkType, min_approvals: coworkers.length + 1 }],
           ...(scenario === "Is missing approval" ? { users: coworkers.concat(userCoworker3) } : {}),
         });
 
@@ -456,7 +457,7 @@ describe("Rules", () => {
         ],
       ] as const) {
         it(`${scenario} with ${description} for ${checkType}`, async () => {
-          setup({ scenario, rules: [{ ...rule, min_approvals: 2, check_type: checkType }] });
+          setup({ scenario, rules: [{ ...rule, min_approvals: 2, users: coworkers, check_type: checkType }] });
 
           switch (scenario) {
             case "Has no approval":
