@@ -48,6 +48,8 @@ print_app_dockerfile() {
 echo "
 $dockerfile_start
 
+RUN apk add git
+
 RUN mkdir /app && chown node:node /app
 COPY --chown=node:node  . /app
 WORKDIR /app
