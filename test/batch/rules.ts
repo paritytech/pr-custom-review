@@ -19,6 +19,7 @@ import {
   team,
   team2,
   team3,
+  user,
   userCoworker3,
 } from "test/constants";
 import { TestLogger } from "test/logger";
@@ -222,7 +223,7 @@ describe("Rules", () => {
       it(`${scenario} on rule not specifying users or teams`, async () => {
         setup({
           scenario,
-          rules: [{ name: condition, condition, check_type: checkType, min_approvals: coworkers.length }],
+          rules: [{ name: condition, condition, check_type: checkType, min_approvals: coworkers.length + 1 }],
           ...(scenario === "Is missing approval" ? { users: coworkers.concat(userCoworker3) } : {}),
         });
 
@@ -455,14 +456,17 @@ describe("Rules", () => {
         ],
       ] as const) {
         it(`${scenario} with ${description} for ${checkType}`, async () => {
-          setup({ scenario, rules: [{ ...rule, min_approvals: 2, check_type: checkType }] });
+          setup({
+            scenario,
+            rules: [{ ...rule, min_approvals: scenario === "Is missing approval" ? 3 : 2, check_type: checkType }],
+          });
 
           switch (scenario) {
             case "Has no approval":
             case "Is missing approval": {
               nock(githubApi)
                 .post(requestedReviewersApiPath, (body) => {
-                  expect(body).toMatchObject({ reviewers: [coworkers[1]] });
+                  expect(body).toMatchObject({ reviewers: [coworkers[2]] });
                   return true;
                 })
                 .reply(201);
@@ -644,5 +648,23 @@ describe("Rules", () => {
   afterEach(() => {
     nock.cleanAll();
     nock.enableNetConnect();
+  });
+
+  it("Counts author as an approved review", async () => {
+    setup({
+      scenario: "Approved",
+      changedFiles: ["readme.md"],
+      rules: [
+        {
+          name: "File changed",
+          condition: ".*",
+          check_type: "changed_files",
+          ["all"]: [{ min_approvals: 1, users: [user] }],
+        } as Rule,
+      ],
+    });
+
+    const api = new GitHubApi(basePR, { logger, finishProcessReviews: null, octokit });
+    expect(await runChecks({ pr: basePR, octokit, logger, finishProcessReviews: null }, api)).toBe("success");
   });
 });

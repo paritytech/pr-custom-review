@@ -65,9 +65,7 @@ export const combineUsers = async (
   const users: Map<string, RuleUserInfo> = new Map();
 
   for (const user of presetUsers) {
-    if (pr.user.login != user) {
-      users.set(user, { ...users.get(user), teams: null });
-    }
+    users.set(user, { ...users.get(user), teams: null });
   }
 
   for (const team of teams) {
@@ -79,10 +77,6 @@ export const combineUsers = async (
     }
 
     for (const teamMember of teamMembers) {
-      if (pr.user.login === teamMember) {
-        continue;
-      }
-
       const userInfo = users.get(teamMember);
       if (userInfo === undefined) {
         users.set(teamMember, { teams: new Set([team]) });
@@ -295,6 +289,10 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
     const reviews = await api.fetchReviews();
 
     const latestReviews: Map<number, { id: number; user: string; isApproval: boolean }> = new Map();
+
+    if (!preventReviewRequest?.users?.find((u) => u === pr.user.login)) {
+      latestReviews.set(-1, { id: -1, user: pr.user.login, isApproval: true });
+    }
     for (const review of reviews) {
       // https://docs.github.com/en/graphql/reference/enums#pullrequestreviewstate
       if (
@@ -319,7 +317,8 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
         });
       }
     }
-    logger.info("latestReviews", latestReviews.values());
+    const reviewers = Array.from(latestReviews.values());
+    logger.info("latestReviews are", JSON.stringify(reviewers));
 
     const rulesOutcomes: (RuleFailure | undefined)[] = matchedRules.map((rule) => {
       const ruleUserCount = rule.subconditions.reduce((acc, { usersInfo }) => acc + usersInfo.size, 0);
@@ -711,8 +710,9 @@ export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHu
           }
         }
       }
-      if (users.size || teams.size) {
-        await api.requestReviewers(Array.from(users), Array.from(teams));
+      const usersToRequest = Array.from(users).filter((u) => u !== pr.user.login);
+      if (usersToRequest.length || teams.size) {
+        await api.requestReviewers(usersToRequest, Array.from(teams));
       }
     }
 

@@ -10,5 +10,5 @@ inputs:
   checks-reviews-api:
     description: 'The API to be used for processing the reviews. This input is only considered if "token" is not given.'
 runs:
-  using: 'node16'
-  main: 'dist/prcr/index.js'
+  using: 'docker'
+  image: 'Dockerfile'

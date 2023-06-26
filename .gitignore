@@ -14,3 +14,5 @@ dist/*
 
 # jest
 coverage
+
+.idea/
