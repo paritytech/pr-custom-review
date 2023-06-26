@@ -143,8 +143,9 @@ deploy-staging:
   stage:                           staging
   variables:
     VALUES_FILE:                   values-parity-stg.yaml
-  environment:
-    name:                          parity-stg
+  tags:
+    - pr-custom-review-stg
+
 
 deploy-production:
   <<:                              *production-refs
@@ -152,8 +153,8 @@ deploy-production:
   stage:                           production
   variables:
     VALUES_FILE:                   values-parity-prod.yaml
-  environment:
-    name:                          parity-prod
+  tags:
+    - pr-custom-review-prod
 
 #### CI image
 
