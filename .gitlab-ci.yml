@@ -43,6 +43,7 @@ default:
   rules:
     - if: $BUILD
       when: never
+    - if: $CI_COMMIT_REF_NAME == "master"
     - if: $CI_COMMIT_TAG =~ /^stg-v[0-9]+\.[0-9]+.*$/  # e.g. stg-v0.1
     - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+.*$/      # e.g. v0.1
 
@@ -143,8 +144,9 @@ deploy-staging:
   stage:                           staging
   variables:
     VALUES_FILE:                   values-parity-stg.yaml
-  environment:
-    name:                          parity-stg
+  tags:
+    - pr-custom-review-stg
+
 
 deploy-production:
   <<:                              *production-refs
@@ -152,8 +154,8 @@ deploy-production:
   stage:                           production
   variables:
     VALUES_FILE:                   values-parity-prod.yaml
-  environment:
-    name:                          parity-prod
+  tags:
+    - pr-custom-review-prod
 
 #### CI image
 
