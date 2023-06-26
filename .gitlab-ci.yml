@@ -40,7 +40,6 @@ default:
     - if: $CI_COMMIT_REF_NAME =~ /^[0-9]+$/                 # PRs
 
 .staging-refs:                     &staging-refs
-  stage:                           staging
   rules:
     - if: $BUILD
       when: never
@@ -48,7 +47,6 @@ default:
     - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+.*$/      # e.g. v0.1
 
 .production-refs:                  &production-refs
-  stage:                           production
   rules:
     - if: $BUILD
       when: never
@@ -142,6 +140,7 @@ build-production:
 deploy-staging:
   <<:                              *staging-refs
   <<:                              *deploy-k8s
+  stage:                           staging
   variables:
     VALUES_FILE:                   values-parity-stg.yaml
   environment:
@@ -150,6 +149,7 @@ deploy-staging:
 deploy-production:
   <<:                              *production-refs
   <<:                              *deploy-k8s
+  stage:                           production
   variables:
     VALUES_FILE:                   values-parity-prod.yaml
   environment:
