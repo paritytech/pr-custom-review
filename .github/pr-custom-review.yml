@@ -13,7 +13,7 @@ rules:
     check_type: changed_files
     condition:
       # dictionary files are excluded
-      include: ^\.gitlab-ci\.yml
+      include: ^\.gitlab-ci\.yml|helm\/.*
     min_approvals: 1
     teams:
       - ci
