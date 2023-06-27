@@ -1,0 +1,19 @@
+action-review-team: opstooling
+
+rules:
+  - name: Core developers
+    check_type: changed_files
+    condition:
+      include: .*
+    min_approvals: 2
+    teams:
+      - opstooling
+
+  - name: CI files
+    check_type: changed_files
+    condition:
+      # dictionary files are excluded
+      include: ^\.gitlab-ci\.yml|helm\/.*
+    min_approvals: 1
+    teams:
+      - ci
