@@ -1,4 +1,4 @@
-import { getInput, setFailed } from "@actions/core";
+import { getInput, setFailed, debug } from "@actions/core";
 import { context, getOctokit as getActionOctokit } from "@actions/github";
 
 import { getFinishProcessReviews, processReviews } from "src/core";
@@ -54,15 +54,20 @@ const main = async () => {
 
   // Otherwise, check it through the API
   const checkReviewsApi = getInput("checks-reviews-api", { required: true });
-  const logLines = (await (
-    await fetch(checkReviewsApi, {
+
+  // cleaned up code into steps
+  try {
+    const externalAction = await fetch(checkReviewsApi, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(actionData),
-    })
-  ).json()) as string[];
-
-  logger.log(logLines.join("").trim());
+    });
+    const logLines = (await externalAction.json()) as string[];
+    debug(JSON.stringify(logLines));
+    logger.log(logLines.join("").trim());
+  } catch (e) {
+    setFailed(e);
+  }
 };
 
 void main();
