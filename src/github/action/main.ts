@@ -62,9 +62,6 @@ const main = async () => {
     })
   ).json()) as string[];
 
-  logger.info(logLines);
-  
-
   logger.log(logLines.join("").trim());
 };
 
