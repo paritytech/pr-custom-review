@@ -23,6 +23,6 @@ jobs:
         if: github.event.pull_request.draft == true
         run: exit 1
       - name: pr-custom-review
-        uses: paritytech/pr-custom-review@master
+        uses: paritytech/pr-custom-review@mak-fix-stg
         with:
-          checks-reviews-api: http://pcr.parity-stg.parity.io/api/v1/check_reviews
+          checks-reviews-api: http://localhost:3000/api/v1/check_reviews

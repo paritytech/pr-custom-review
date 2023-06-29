@@ -63,7 +63,11 @@ const main = async () => {
     })
   ).json()) as string[];
 
-  logger.log(logLines.join("").trim());
+  console.log(logLines);
+
+  if (Array.isArray(logLines)) {
+    logger.log(logLines.join("").trim());
+  }
 };
 
 void main();
