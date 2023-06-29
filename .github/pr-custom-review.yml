@@ -7,7 +7,7 @@ rules:
     check_type: changed_files
     condition:
       include: .*
-    min_approvals: 1 # TODO: update to 2 after deployment to prod latest
+    min_approvals: 2
     teams:
       - opstooling
 

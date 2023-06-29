@@ -1,5 +1,6 @@
 import { getInput, setFailed } from "@actions/core";
 import { context, getOctokit as getActionOctokit } from "@actions/github";
+import fetch from "node-fetch";
 
 import { getFinishProcessReviews, processReviews } from "src/core";
 import { getOctokit } from "src/github/octokit";
