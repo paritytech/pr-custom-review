@@ -23,6 +23,6 @@ jobs:
         if: github.event.pull_request.draft == true
         run: exit 1
       - name: pr-custom-review
-        uses: paritytech/pr-custom-review@yuri/nodejs-upgrade
+        uses: paritytech/pr-custom-review@master
         with:
           checks-reviews-api: https://pcr.parity-prod.parity.io/api/v1/check_reviews
