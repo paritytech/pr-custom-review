@@ -25,4 +25,4 @@ jobs:
       - name: pr-custom-review
         uses: paritytech/pr-custom-review@mak-fix-stg
         with:
-          checks-reviews-api: http://localhost:3000/api/v1/check_reviews
+          checks-reviews-api: http://ea53-193-29-107-163.ngrok-free.app/api/v1/check_reviews
