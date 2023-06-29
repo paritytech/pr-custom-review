@@ -8,7 +8,7 @@ dockerfile_start="
 # It's relevant to pin ourselves to a specific Node version to avoid having the
 # ESM loader implementation change without us knowing, since it's an unstable
 # feature
-FROM node:16.14-alpine
+FROM node:18
 "
 
 print_ci_dockerfile() {
