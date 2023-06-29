@@ -1,4 +1,4 @@
-FROM node:16 as Builder
+FROM node:18 as Builder
 
 WORKDIR /action
 
