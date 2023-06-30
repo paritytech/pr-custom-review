@@ -1,6 +1,6 @@
 {
   "name": "pr-custom-review",
-  "type": "commonjs",
+  "type": "module",
   "version": "0.0.0",
   "description": "GitHub Action for complex pull request approval cases",
   "author": "Parity <admin@parity.io> (https://parity.io)",
@@ -34,7 +34,7 @@
     "fastify": "^3.29.4",
     "iterative-permutation": "^1.0.0",
     "joi": "^17.6.0",
-    "ts-node": "^10.7.0",
+    "ts-node": "^10.9.1",
     "yaml": "^2.2.2"
   },
   "devDependencies": {
