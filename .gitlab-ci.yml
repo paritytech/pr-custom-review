@@ -11,6 +11,7 @@ variables:
   APP_PORT:                        3000
   IMAGE_REPOSITORY:                docker.io/paritytech/pr-custom-review
   CI_IMAGE:                        ${IMAGE_REPOSITORY}:ci
+
   DEPLOYMENT_TAG:                  $CI_COMMIT_SHORT_SHA-$CI_PIPELINE_ID
   BUILDAH_IMAGE:                   "quay.io/buildah/stable:v1.29"
   BUILDAH_COMMAND:                 "buildah --storage-driver overlay2"
@@ -164,7 +165,7 @@ deploy-production:
   variables:
     REPOSITORY_DESTINATION:        /repository
   script:
-    - ./scripts/generateDockerfile ci | buildah bud
+    - ./scripts/generateDockerfile ci | $BUILDAH_COMMAND build
       --format=docker
       --build-arg VCS_REF="$CI_COMMIT_SHA"
       --build-arg BUILD_DATE="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
