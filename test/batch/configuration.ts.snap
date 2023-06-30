@@ -2,6 +2,7 @@
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field all 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -24,6 +25,7 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field any 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -46,6 +48,7 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field min_approvals 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -68,6 +71,7 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -90,6 +94,7 @@ Array [
 
 exports[`Configuration Rule kind AndDistinctRule does not allow invalid field users 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -112,6 +117,7 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field all_distinct 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -134,6 +140,7 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field any 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -156,6 +163,7 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field min_approvals 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -178,6 +186,7 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -200,6 +209,7 @@ Array [
 
 exports[`Configuration Rule kind AndRule does not allow invalid field users 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -222,6 +232,7 @@ Array [
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field all 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -244,6 +255,7 @@ Array [
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field all_distinct 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -266,6 +278,7 @@ Array [
 
 exports[`Configuration Rule kind BasicRule does not allow invalid field any 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -288,6 +301,7 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field all 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -310,6 +324,7 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field all_distinct 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -332,6 +347,7 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field min_approvals 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -354,6 +370,7 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -376,6 +393,7 @@ Array [
 
 exports[`Configuration Rule kind OrRule does not allow invalid field users 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -398,6 +416,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndDistinctRule if it is less than 1 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -420,6 +439,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndDistinctRule if it is null 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -442,6 +462,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndRule if it is less than 1 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -464,6 +485,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for AndRule if it is null 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -486,6 +508,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for BasicRule if it is less than 1 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -508,6 +531,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for BasicRule if it is null 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -530,6 +554,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for OrRule if it is less than 1 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {
@@ -552,6 +577,7 @@ Array [
 
 exports[`Configuration min_approvals is invalid for OrRule if it is null 1`] = `
 Array [
+  "Running checks for repo#1",
   "ERROR:  Configuration file is invalid",
   "[Error [ValidationError]: \\"rules[0]\\" does not match any of the allowed types] {
   _original: {

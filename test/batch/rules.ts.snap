@@ -2,6 +2,7 @@
 
 exports[`Rules Approved for AndDistinctRule when user belongs to multiple teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -18,6 +19,7 @@ Array [
 
 exports[`Rules Approved on rule including both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -26,6 +28,7 @@ Array [
 
 exports[`Rules Approved on rule including both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -34,6 +37,7 @@ Array [
 
 exports[`Rules Approved on rule including only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -42,6 +46,7 @@ Array [
 
 exports[`Rules Approved on rule including only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -50,6 +55,7 @@ Array [
 
 exports[`Rules Approved on rule including only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -58,6 +64,7 @@ Array [
 
 exports[`Rules Approved on rule including only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -66,6 +73,7 @@ Array [
 
 exports[`Rules Approved on rule not specifying users or teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -74,6 +82,7 @@ Array [
 
 exports[`Rules Approved on rule not specifying users or teams 2`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -82,6 +91,7 @@ Array [
 
 exports[`Rules Approved when .github/pr-custom-review.yml is changed 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
 ]
@@ -89,6 +99,7 @@ Array [
 
 exports[`Rules Approved when line after lock is modified (+) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -105,6 +116,7 @@ Array [
 
 exports[`Rules Approved when line after lock is modified (-) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -121,6 +133,7 @@ Array [
 
 exports[`Rules Approved when lock line is modified (+) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -137,6 +150,7 @@ Array [
 
 exports[`Rules Approved when lock line is modified (-) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -153,30 +167,35 @@ Array [
 
 exports[`Rules Approved with condition: exclude for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Approved with condition: exclude for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Approved with condition: include & exclude for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Approved with condition: include & exclude for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Approved with condition: include for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -185,6 +204,7 @@ Array [
 
 exports[`Rules Approved with condition: include for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -193,6 +213,7 @@ Array [
 
 exports[`Rules Has no approval for AndDistinctRule when user belongs to multiple teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -210,6 +231,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Has no approval on rule including both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -225,6 +247,7 @@ Array [
 
 exports[`Rules Has no approval on rule including both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -240,6 +263,7 @@ Array [
 
 exports[`Rules Has no approval on rule including only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -255,6 +279,7 @@ Array [
 
 exports[`Rules Has no approval on rule including only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -270,6 +295,7 @@ Array [
 
 exports[`Rules Has no approval on rule including only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -285,6 +311,7 @@ Array [
 
 exports[`Rules Has no approval on rule including only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -300,6 +327,7 @@ Array [
 
 exports[`Rules Has no approval on rule not specifying users or teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -311,6 +339,7 @@ Array [
 
 exports[`Rules Has no approval on rule not specifying users or teams 2`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -322,6 +351,7 @@ Array [
 
 exports[`Rules Has no approval when .github/pr-custom-review.yml is changed 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
@@ -333,6 +363,7 @@ Array [
 
 exports[`Rules Has no approval when line after lock is modified (+) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -350,6 +381,7 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Has no approval when line after lock is modified (-) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -367,6 +399,7 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Has no approval when lock line is modified (+) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -384,6 +417,7 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Has no approval when lock line is modified (-) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -401,30 +435,35 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Has no approval with condition: exclude for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Has no approval with condition: exclude for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Has no approval with condition: include & exclude for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Has no approval with condition: include & exclude for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Has no approval with condition: include for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -436,6 +475,7 @@ Array [
 
 exports[`Rules Has no approval with condition: include for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -447,6 +487,7 @@ Array [
 
 exports[`Rules Is missing approval for AndDistinctRule when user belongs to multiple teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -465,6 +506,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Is missing approval on rule including both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -480,6 +522,7 @@ Array [
 
 exports[`Rules Is missing approval on rule including both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -495,6 +538,7 @@ Array [
 
 exports[`Rules Is missing approval on rule including only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -507,6 +551,7 @@ Array [
 
 exports[`Rules Is missing approval on rule including only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -519,6 +564,7 @@ Array [
 
 exports[`Rules Is missing approval on rule including only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -531,6 +577,7 @@ Array [
 
 exports[`Rules Is missing approval on rule including only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -543,6 +590,7 @@ Array [
 
 exports[`Rules Is missing approval on rule not specifying users or teams 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -554,6 +602,7 @@ Array [
 
 exports[`Rules Is missing approval on rule not specifying users or teams 2`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -565,6 +614,7 @@ Array [
 
 exports[`Rules Is missing approval when .github/pr-custom-review.yml is changed 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
   "usersToAskForReview Map(1) { 'userCoworker2' => { teams: Set(1) { 'team3' } } }",
@@ -576,6 +626,7 @@ Array [
 
 exports[`Rules Is missing approval when line after lock is modified (+) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -596,6 +647,7 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Is missing approval when line after lock is modified (-) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -616,6 +668,7 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Is missing approval when lock line is modified (+) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -636,6 +689,7 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Is missing approval when lock line is modified (-) 1`] = `
 Array [
+  "Running checks for repo#1",
   "Diff has changes to 🔒 lines or lines following 🔒",
   "Changed files Set(1) { 'condition' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -656,30 +710,35 @@ Subcondition \\"Team Leads Approvals (team team2)\\" does not have approval from
 
 exports[`Rules Is missing approval with condition: exclude for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Is missing approval with condition: exclude for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Is missing approval with condition: include & exclude for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Is missing approval with condition: include & exclude for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
 ]
 `;
 
 exports[`Rules Is missing approval with condition: include for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -691,6 +750,7 @@ Array [
 
 exports[`Rules Is missing approval with condition: include for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"{\\"include\\":\\"condition\\"}\\" of rule \\"Condition include\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -702,6 +762,7 @@ Array [
 
 exports[`Rules Reviews are not requested if prevent_review_requests is set for team 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
   "usersToAskForReview Map(2) {
@@ -716,6 +777,7 @@ Array [
 
 exports[`Rules Reviews are not requested if prevent_review_requests is set for user 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { '.github/pr-custom-review.yml' }",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
   "usersToAskForReview Map(2) {
@@ -730,6 +792,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Approved specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true},{\\"id\\":2,\\"user\\":\\"userCoworker3\\",\\"isApproval\\":true}]",
@@ -747,6 +810,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Approved specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true},{\\"id\\":2,\\"user\\":\\"userCoworker3\\",\\"isApproval\\":true}]",
@@ -764,6 +828,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Approved specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -780,6 +845,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Approved specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -796,6 +862,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Approved specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -812,6 +879,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Approved specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -828,6 +896,7 @@ Array [
 
 exports[`Rules Rule kind AndDistinctRule: Has no approval specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -846,6 +915,7 @@ Subcondition \\"condition[2]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Has no approval specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -864,6 +934,7 @@ Subcondition \\"condition[2]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -878,6 +949,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -892,6 +964,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -909,6 +982,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Has no approval specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -926,6 +1000,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -948,6 +1023,7 @@ Subcondition \\"condition[2]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -970,6 +1046,7 @@ Subcondition \\"condition[2]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -988,6 +1065,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1006,6 +1084,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1024,6 +1103,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndDistinctRule: Is missing approval specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1042,6 +1122,7 @@ Subcondition \\"condition[1]\\" does not have approval from the following users:
 
 exports[`Rules Rule kind AndRule: Approved specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true},{\\"id\\":2,\\"user\\":\\"userCoworker3\\",\\"isApproval\\":true}]",
@@ -1050,6 +1131,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Approved specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true},{\\"id\\":2,\\"user\\":\\"userCoworker3\\",\\"isApproval\\":true}]",
@@ -1058,6 +1140,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Approved specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1066,6 +1149,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Approved specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1074,6 +1158,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Approved specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1082,6 +1167,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Approved specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1090,6 +1176,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Has no approval specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1107,6 +1194,7 @@ Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Has no approval specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1124,6 +1212,7 @@ Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Has no approval specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1137,6 +1226,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Has no approval specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1150,6 +1240,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Has no approval specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1166,6 +1257,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Has no approval specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1182,6 +1274,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Is missing approval specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1198,6 +1291,7 @@ Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Is missing approval specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1214,6 +1308,7 @@ Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind AndRule: Is missing approval specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1226,6 +1321,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Is missing approval specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1238,6 +1334,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Is missing approval specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1250,6 +1347,7 @@ Array [
 
 exports[`Rules Rule kind AndRule: Is missing approval specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1262,6 +1360,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Approved specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true},{\\"id\\":2,\\"user\\":\\"userCoworker3\\",\\"isApproval\\":true}]",
@@ -1270,6 +1369,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Approved specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true},{\\"id\\":2,\\"user\\":\\"userCoworker3\\",\\"isApproval\\":true}]",
@@ -1278,6 +1378,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Approved specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1286,6 +1387,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Approved specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1294,6 +1396,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Approved specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1302,6 +1405,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Approved specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":0,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker2\\",\\"isApproval\\":true}]",
@@ -1310,6 +1414,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Has no approval specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1327,6 +1432,7 @@ Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind OrRule: Has no approval specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1344,6 +1450,7 @@ Subcondition \\"condition[2]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind OrRule: Has no approval specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1357,6 +1464,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind OrRule: Has no approval specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1370,6 +1478,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind OrRule: Has no approval specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1386,6 +1495,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind OrRule: Has no approval specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true}]",
@@ -1402,6 +1512,7 @@ Subcondition \\"condition[1]\\" needs at least 1 approvals, but 0 were given. Th
 
 exports[`Rules Rule kind OrRule: Is missing approval specifying both teams and users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1410,6 +1521,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Is missing approval specifying both teams and users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1418,6 +1530,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Is missing approval specifying only teams for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1426,6 +1539,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Is missing approval specifying only teams for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1434,6 +1548,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Is missing approval specifying only users for changed_files 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" for the file condition",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
@@ -1442,6 +1557,7 @@ Array [
 
 exports[`Rules Rule kind OrRule: Is missing approval specifying only users for diff 1`] = `
 Array [
+  "Running checks for repo#1",
   "Changed files Set(1) { 'condition' }",
   "Matched expression \\"condition\\" of rule \\"condition\\" on diff",
   "latestReviews are [{\\"id\\":-1,\\"user\\":\\"user\\",\\"isApproval\\":true},{\\"id\\":1,\\"user\\":\\"userCoworker\\",\\"isApproval\\":true}]",
