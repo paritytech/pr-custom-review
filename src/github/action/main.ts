@@ -1,4 +1,4 @@
-import { getInput, setFailed, debug } from "@actions/core";
+import { debug, getInput, setFailed } from "@actions/core";
 import { context, getOctokit as getActionOctokit } from "@actions/github";
 
 import { getFinishProcessReviews, processReviews } from "src/core";
@@ -65,8 +65,8 @@ const main = async () => {
     const logLines = (await externalAction.json()) as string[];
     debug(JSON.stringify(logLines));
     logger.log(logLines.join("").trim());
-  } catch (e) {
-    setFailed(e);
+  } catch (e: unknown) {
+    setFailed(e as Error);
   }
 };
 
