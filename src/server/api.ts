@@ -10,12 +10,13 @@ import { ServerContext } from "./types";
 enum ApiVersion {
   v1 = "v1",
 }
+
 const getApiRoute = (version: ApiVersion, route: string) => `/api/${version}/${route}`;
 
 const checkReviewsV1Route = getApiRoute(ApiVersion.v1, "check_reviews");
 
 export const setupApi = ({ octokit, logger, github }: ServerContext) => {
-  const server = Fastify({ logger: logger.getFastifyLogger() });
+  const server = Fastify({ logger: logger.getFastifyLogger(), disableRequestLogging: true });
 
   server.route({
     method: "POST",

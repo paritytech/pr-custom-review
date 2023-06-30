@@ -101,6 +101,7 @@ export const combineUsers = async (
   function argument.
 */
 export const runChecks = async ({ pr, logger }: Context & { pr: PR }, api: GitHubApi) => {
+  logger.info(`Running checks for ${pr.base.repo.name}#${pr.number}`);
   const config = await api.fetchConfigFile();
   if (!config) {
     return commitStateFailure;
