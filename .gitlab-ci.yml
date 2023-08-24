@@ -20,6 +20,16 @@ variables:
   VAULT_AUTH_PATH:                 gitlab-parity-io-jwt
   VAULT_AUTH_ROLE:                 gitlab_${CI_PROJECT_NAME}
   HELM_SECRETS_DRIVER:             vals
+  # Improve gitlab cache performance
+  CACHE_COMPRESSION_LEVEL: "fastest"
+  FF_USE_FASTZIP: "true"
+
+cache:
+  - key:
+      files:
+        - yarn.lock
+  - paths:
+    - ./node_modules
 
 default:
   retry:
@@ -59,12 +69,6 @@ install-deps:
   stage:                           install_deps
   script:
     - yarn
-  artifacts:
-    name:                          install-deps_$CI_PIPELINE_ID
-    when:                          on_success
-    expire_in:                     1 hour
-    paths:
-      - ./node_modules
 
 lint:
   <<:                              *common-refs
